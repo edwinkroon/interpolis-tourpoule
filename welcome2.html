@@ -6,6 +6,7 @@
   <title>Interpolis Tourspel - Welkom</title>
   <link rel="stylesheet" href="styles/grid.css">
   <link rel="stylesheet" href="styles/style.css">
+  <script src="auth0-spa-js.production.js"></script>
   <script src="auth-config.js"></script>
 </head>
 <body>
@@ -39,6 +40,10 @@
         </button>
         <button class="action-button">
           <span>Statistieken</span>
+          <img src="assets/arrow.svg" alt="" class="action-arrow">
+        </button>
+        <button class="action-button" id="logout-button">
+          <span>Uitloggen</span>
           <img src="assets/arrow.svg" alt="" class="action-arrow">
         </button>
       </div>
@@ -118,13 +123,54 @@
   </main>
 
   <script>
+    let auth0Client;
+
+    async function initAuth() {
+      if (typeof auth0 === 'undefined') {
+        return;
+      }
+
+      try {
+        auth0Client = await auth0.createAuth0Client({
+          domain: AUTH0_CONFIG.domain,
+          clientId: AUTH0_CONFIG.clientId,
+          authorizationParams: {
+            redirect_uri: AUTH0_CONFIG.redirectUri
+          }
+        });
+      } catch (error) {
+        console.error('Fout bij initialiseren van Auth0:', error);
+      }
+    }
+
+    async function logout() {
+      if (!auth0Client) {
+        console.error('Auth0 client niet geïnitialiseerd');
+        return;
+      }
+
+      try {
+        await auth0Client.logout({
+          logoutParams: {
+            returnTo: window.location.origin + '/login.html'
+          }
+        });
+      } catch (error) {
+        console.error('Fout bij uitloggen:', error);
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
       const prevButton = document.getElementById('prev-button');
       const nextButton = document.getElementById('next-button');
+      const logoutButton = document.getElementById('logout-button');
       const teamnameInput = document.getElementById('teamname');
       const emailInput = document.getElementById('email');
       const teamnameError = document.getElementById('teamname-error');
       const emailError = document.getElementById('email-error');
+
+      // Initialize Auth0
+      setTimeout(initAuth, 100);
 
       // Handle previous button click
       prevButton.addEventListener('click', function(e) {
@@ -218,6 +264,12 @@
           };
           reader.readAsDataURL(file);
         }
+      });
+
+      // Handle logout button click
+      logoutButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        logout();
       });
     });
   </script>

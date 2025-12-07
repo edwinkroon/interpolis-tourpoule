@@ -1,46 +1,105 @@
 <!DOCTYPE html>
-
 <html lang="nl">
-
 <head>
-
   <meta charset="UTF-8">
-
-  <title>🏁 Tour Poule Interpolis TEST</title>
-
-  <style>
-
-    body { font-family: system-ui; max-width: 800px; margin: 0 auto; padding: 2rem; }
-
-    h1 { color: #0066cc; }
-
-    .status { background: #f0f8ff; padding: 1rem; border-radius: 8px; }
-
-  </style>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interpolis Tourspel - Welkom</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <h1 class="header-title">Interpolis tourspel</h1>
+      <div class="header-welcome-section">
+        <h2 class="welcome-heading">Welkom</h2>
+        <div class="header-illustration">
+          <img src="assets/headerillustration.svg" alt="Fiets illustratie" class="illustration-svg">
+        </div>
+      </div>
+    </div>
+  </header>
 
-  <h1>🚴‍♂️ Tour de France 2026 Poule</h1>
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="content-wrapper">
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button class="action-button">
+          <span>Spelregels</span>
+          <img src="assets/arrow.svg" alt="" class="action-arrow">
+        </button>
+        <button class="action-button">
+          <span>Statistieken</span>
+          <img src="assets/arrow.svg" alt="" class="action-arrow">
+        </button>
+      </div>
 
-  <div class="status">
+      <!-- Form Card -->
+      <div class="form-card">
+      <h3 class="form-title">Wie ben je?</h3>
+      <p class="form-description">
+        Geef hier de teamnaam op waarmee jouw team zichtbaar is binnen het tourspel. Daarnaast kan 
+        je nog een avatar uploaden en je emailadres opgeven zodat we je updates kunnen sturen. De 
+        avatar en het emailadres zijn niet verplicht
+      </p>
 
-    <p><strong>✅ TEST LIVE!</strong> Interpolis collega's: deadline 5 juli 12:00</p>
+      <!-- Team Name Field -->
+      <div class="form-group">
+        <label for="teamname" class="form-label">Teamnaam</label>
+        <input 
+          type="text" 
+          id="teamname" 
+          name="teamname" 
+          class="form-input" 
+          placeholder="Koning Kroon"
+        >
+      </div>
 
-    <p>Aantal deelnemers: <span id="count">0</span></p>
+      <!-- Email Field -->
+      <div class="form-group">
+        <label for="email" class="form-label">Emailadres</label>
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          class="form-input" 
+          placeholder="edwin.kroon@outlook.com"
+        >
+      </div>
 
-  </div>
+      <!-- Avatar Upload -->
+      <div class="avatar-section">
+        <div class="avatar-circle">
+          <div class="avatar-placeholder">
+            <span class="avatar-icon">+</span>
+          </div>
+        </div>
+        <div class="avatar-info">
+          <a href="#" class="avatar-link">Avatar toevoegen</a>
+          <p class="avatar-tip">Tip: Met een vierkante afbeelding heb je een beter resultaat</p>
+        </div>
+      </div>
 
-  <a href="#" style="background:#0066cc;color:white;padding:12px 24px;text-decoration:none;border-radius:6px;display:inline-block;margin-top:1rem;">Team samenstellen →</a>
+      <!-- Checkbox -->
+      <div class="checkbox-group">
+        <input type="checkbox" id="newsletter" name="newsletter" class="checkbox-input" checked>
+        <label for="newsletter" class="checkbox-label">Ik wil op de hoogte blijven</label>
+      </div>
 
-  <script>
-
-    console.log("Tour Poule TEST live!");
-
-  </script>
-
+      <!-- Navigation Buttons -->
+      <div class="navigation-buttons">
+        <button class="nav-button nav-button-prev">
+          <img src="assets/arrow.svg" alt="" class="nav-arrow nav-arrow-left">
+          <span>vorige</span>
+        </button>
+        <button class="nav-button nav-button-next">
+          <span>volgende</span>
+          <img src="assets/arrow.svg" alt="" class="nav-arrow nav-arrow-right">
+        </button>
+      </div>
+    </div>
+    </div>
+  </main>
 </body>
-
 </html>
-

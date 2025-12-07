@@ -22,9 +22,17 @@ exports.handler = async function(event) {
     // Check if database URL is set
     if (!process.env.NEON_DATABASE_URL) {
       console.error('NEON_DATABASE_URL environment variable is not set');
+      console.error('Please set NEON_DATABASE_URL in Netlify: Site settings → Environment variables');
       return {
         statusCode: 500,
-        body: JSON.stringify({ ok: false, error: 'Database configuration missing' })
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          ok: false, 
+          error: 'Database configuration missing',
+          message: 'NEON_DATABASE_URL environment variable is not set. Please configure it in Netlify site settings.'
+        })
       };
     }
 

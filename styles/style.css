@@ -465,6 +465,11 @@ h2 {
     padding-bottom: 1.5rem;
   }
 
+  .header-avatar-img {
+    width: 40px;
+    height: 40px;
+  }
+
   .welcome-heading {
     font-size: 20px;
   }

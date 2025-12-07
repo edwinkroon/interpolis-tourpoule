@@ -55,9 +55,9 @@ async function loadUserData() {
       const avatarContainer = document.getElementById('header-avatar-container');
       const avatarImg = document.getElementById('header-avatar');
       
-      // Update welcome heading with team name
+      // Update welcome heading with team name (without "Welkom" prefix)
       if (participant.team_name && welcomeHeading) {
-        welcomeHeading.textContent = `Welkom ${participant.team_name}`;
+        welcomeHeading.textContent = participant.team_name;
       }
       
       // Show avatar if available

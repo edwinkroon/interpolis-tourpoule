@@ -13,6 +13,11 @@ body {
   line-height: 1.5;
 }
 
+h1 {
+  font-size: 40px;
+  font-weight: bold;
+}
+
 /* Header */
 .header {
   background-color: #00cac6;
@@ -29,8 +34,8 @@ body {
 
 .header-title {
   color: #fff;
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 40px;
+  font-weight: bold;
   text-align: right;
   margin-bottom: 1rem;
 }
@@ -44,8 +49,8 @@ body {
 }
 
 .welcome-heading {
-  font-size: 32px;
-  font-weight: 700;
+  font-size: 40px;
+  font-weight: bold;
   color: #00334e;
   position: relative;
   z-index: 2;

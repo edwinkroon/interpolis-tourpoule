@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       userId: userId,
       teamName: sanitizeInput(teamnameInput.value.trim()),
       email: emailInput.value.trim() ? sanitizeInput(emailInput.value.trim()) : '',
-      avatarUrl: document.getElementById('avatar').value || '',
+      avatarUrl: document.getElementById('avatar').value || null, // Use null instead of empty string
       newsletter: document.getElementById('newsletter').checked
     };
 

@@ -26,8 +26,20 @@ exports.handler = async function(event) {
         };
       }
     }
-    if (avatarUrl) {
-      avatarUrl = avatarUrl.substring(0, 10000); // Limit avatar URL length
+    // Handle avatar URL - data URLs can be very long (base64 encoded images)
+    // A 5MB image encoded as base64 is ~6.67MB, so we allow up to 10MB for safety
+    if (avatarUrl && avatarUrl.trim() && avatarUrl !== 'null') {
+      // Data URLs start with "data:image/", allow up to 10MB for base64 encoded images
+      if (avatarUrl.length > 10485760) { // 10MB limit
+        return {
+          statusCode: 400,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ok: false, error: 'Avatar afbeelding is te groot (max 10MB)' })
+        };
+      }
+      avatarUrl = avatarUrl.trim();
+    } else {
+      avatarUrl = null; // Convert empty string or 'null' string to null
     }
 
     if (!teamName || !email) {

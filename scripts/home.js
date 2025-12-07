@@ -23,10 +23,17 @@ async function loadUserData() {
       }
       
       // Show avatar if available
-      if (participant.avatar_url && avatarContainer && avatarImg) {
+      if (participant.avatar_url && participant.avatar_url.trim() && avatarContainer && avatarImg) {
         avatarImg.src = participant.avatar_url;
         avatarImg.alt = `Avatar van ${sanitizeInput(participant.team_name || 'gebruiker')}`;
         avatarContainer.style.display = 'block';
+        
+        // Handle image load errors
+        avatarImg.onerror = function() {
+          avatarContainer.style.display = 'none';
+        };
+      } else {
+        avatarContainer.style.display = 'none';
       }
     }
   } catch (error) {

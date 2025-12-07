@@ -264,6 +264,14 @@ body {
   margin-top: 2rem;
 }
 
+.navigation-buttons .nav-button-next:only-child {
+  margin-left: auto;
+}
+
+.navigation-buttons .nav-button-prev:only-child {
+  margin-right: auto;
+}
+
 .nav-button {
   display: flex;
   align-items: center;

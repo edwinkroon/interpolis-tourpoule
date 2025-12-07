@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Terug van login...</title>
+</head>
+<body>
+  <p>Bezig met inloggen...</p>
+
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.5/auth0-spa-js.production.js"></script>
+  <script src="auth-config.js"></script>
+  <script>
+    (async () => {
+      const auth0Client = await createAuth0Client({
+        domain: AUTH0_CONFIG.domain,
+        clientId: AUTH0_CONFIG.clientId,
+        authorizationParams: {
+          redirect_uri: AUTH0_CONFIG.redirectUri
+        }
+      });
+
+      // Verwerk het antwoord van Auth0
+      await auth0Client.handleRedirectCallback();
+
+      const user = await auth0Client.getUser();
+
+      // TODO: hier straks call naar get-team backend
+      // Voor nu: altijd naar index.html
+      window.location.href = '/index.html';
+    })();
+  </script>
+</body>
+</html>

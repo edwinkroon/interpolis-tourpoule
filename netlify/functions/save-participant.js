@@ -10,8 +10,20 @@ exports.handler = async function(event) {
 
   let client;
   try {
-    const { userId, teamName, email, avatarUrl, newsletter } = JSON.parse(event.body || '{}');
-    console.log('Received data:', { userId, teamName, email, hasAvatarUrl: !!avatarUrl, newsletter });
+    const body = JSON.parse(event.body || '{}');
+    const { userId, teamName, email, avatarUrl, newsletter } = body;
+    
+    console.log('=== save-participant CALLED ===');
+    console.log('Full body:', JSON.stringify(body, null, 2));
+    console.log('Received data:', { 
+      userId: userId || 'NULL/EMPTY', 
+      userIdType: typeof userId,
+      userIdLength: userId ? userId.length : 0,
+      teamName, 
+      email, 
+      hasAvatarUrl: !!avatarUrl, 
+      newsletter 
+    });
 
     if (!teamName || !email) {
       return { 

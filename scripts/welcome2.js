@@ -98,29 +98,55 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Get user ID from Auth0 (optioneel - niet verplicht)
     let userId = null;
     
+    // Probeer Auth0 client te initialiseren als het nog niet is gebeurd
+    if (!auth0Initialized && typeof auth0 !== 'undefined') {
+      console.log('Auth0 nog niet geïnitialiseerd, proberen te initialiseren...');
+      await initAuth();
+    }
+    
     // Wacht even als Auth0 nog aan het initialiseren is
     if (!auth0Initialized && typeof auth0 !== 'undefined') {
       console.log('Wachten op Auth0 initialisatie...');
-      await new Promise(resolve => setTimeout(resolve, 500));
+      for (let i = 0; i < 10; i++) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        if (auth0Initialized) break;
+      }
     }
     
     if (auth0Client && auth0Initialized) {
       try {
-        const user = await auth0Client.getUser();
-        console.log('User object:', user);
-        if (user && user.sub) {
-          userId = user.sub;
-          console.log('User ID opgehaald:', userId);
+        // Check eerst of de user is ingelogd
+        const isAuthenticated = await auth0Client.isAuthenticated();
+        console.log('Is authenticated:', isAuthenticated);
+        
+        if (isAuthenticated) {
+          console.log('Ophalen van user via auth0Client...');
+          const user = await auth0Client.getUser();
+          console.log('User object:', user);
+          console.log('User.sub:', user?.sub);
+          
+          if (user && user.sub) {
+            userId = user.sub;
+            console.log('✅ User ID opgehaald:', userId);
+          } else {
+            console.warn('⚠️ Geen user of user.sub gevonden');
+            console.warn('User object:', JSON.stringify(user, null, 2));
+          }
         } else {
-          console.log('Geen user of user.sub gevonden - formulier kan zonder user ID worden opgeslagen');
+          console.warn('⚠️ User is niet ingelogd (isAuthenticated = false)');
         }
       } catch (error) {
-        console.error('Fout bij ophalen van user:', error);
+        console.error('❌ Fout bij ophalen van user:', error);
+        console.error('Error details:', error.message, error.stack);
         // Doorgaan zonder userId
       }
     } else {
-      console.log('Auth0 client niet beschikbaar - formulier kan zonder user ID worden opgeslagen');
+      console.warn('⚠️ Auth0 client niet beschikbaar');
+      console.warn('auth0Client:', auth0Client);
+      console.warn('auth0Initialized:', auth0Initialized);
     }
+    
+    console.log('Final userId voor submit:', userId);
 
     const data = {
       userId: userId,
@@ -129,6 +155,12 @@ document.addEventListener('DOMContentLoaded', async function() {
       avatarUrl: e.target.avatar.value,
       newsletter: e.target.newsletter.checked
     };
+    
+    console.log('=== FORM DATA VOOR SUBMIT ===');
+    console.log('Data object:', JSON.stringify(data, null, 2));
+    console.log('userId in data:', data.userId);
+    console.log('userId type:', typeof data.userId);
+    console.log('userId truthy?', !!data.userId);
 
     console.log('data die we naar Netlify sturen:', data);
 

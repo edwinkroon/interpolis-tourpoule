@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
-    // Get user ID from Auth0
+    // Get user ID from Auth0 (optioneel - niet verplicht)
     let userId = null;
     if (auth0Client) {
       try {
@@ -101,19 +101,14 @@ document.addEventListener('DOMContentLoaded', function() {
           userId = user.sub;
           console.log('User ID opgehaald:', userId);
         } else {
-          console.error('Geen user of user.sub gevonden');
-          alert('Je moet ingelogd zijn om je gegevens op te slaan. Log opnieuw in.');
-          return;
+          console.log('Geen user gevonden - formulier kan zonder user ID worden opgeslagen');
         }
       } catch (error) {
-        console.error('Fout bij ophalen van user:', error);
-        alert('Fout bij ophalen van gebruikersgegevens. Probeer het opnieuw.');
-        return;
+        console.log('Fout bij ophalen van user (niet kritiek):', error);
+        // Doorgaan zonder userId
       }
     } else {
-      console.error('Auth0 client niet geïnitialiseerd');
-      alert('Authenticatie niet geladen. Ververs de pagina en probeer het opnieuw.');
-      return;
+      console.log('Auth0 client niet geïnitialiseerd - formulier kan zonder user ID worden opgeslagen');
     }
 
     const data = {

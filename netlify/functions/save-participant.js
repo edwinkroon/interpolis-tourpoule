@@ -12,14 +12,6 @@ exports.handler = async function(event) {
   try {
     const { userId, teamName, email, avatarUrl, newsletter } = JSON.parse(event.body || '{}');
 
-    if (!userId) {
-      return { 
-        statusCode: 400, 
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ok: false, error: 'userId is verplicht' }) 
-      };
-    }
-
     if (!teamName || !email) {
       return { 
         statusCode: 400, 
@@ -54,18 +46,32 @@ exports.handler = async function(event) {
     await client.connect();
     console.log('Database connected');
 
-    const query = `
-      INSERT INTO participants (user_id, team_name, email, avatar_url, newsletter)
-      VALUES ($1, $2, $3, $4, $5)
-      ON CONFLICT (user_id) 
-      DO UPDATE SET 
-        team_name = EXCLUDED.team_name,
-        email = EXCLUDED.email,
-        avatar_url = EXCLUDED.avatar_url,
-        newsletter = EXCLUDED.newsletter
-      RETURNING id
-    `;
-    const values = [userId, teamName, email, avatarUrl || null, !!newsletter];
+    let query;
+    let values;
+    
+    if (userId) {
+      // Als userId aanwezig is, gebruik ON CONFLICT voor updates
+      query = `
+        INSERT INTO participants (user_id, team_name, email, avatar_url, newsletter)
+        VALUES ($1, $2, $3, $4, $5)
+        ON CONFLICT (user_id) 
+        DO UPDATE SET 
+          team_name = EXCLUDED.team_name,
+          email = EXCLUDED.email,
+          avatar_url = EXCLUDED.avatar_url,
+          newsletter = EXCLUDED.newsletter
+        RETURNING id
+      `;
+      values = [userId, teamName, email, avatarUrl || null, !!newsletter];
+    } else {
+      // Als userId niet aanwezig is, gewoon INSERT
+      query = `
+        INSERT INTO participants (team_name, email, avatar_url, newsletter)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id
+      `;
+      values = [teamName, email, avatarUrl || null, !!newsletter];
+    }
 
     console.log('Executing query with values:', values);
     const { rows } = await client.query(query, values);

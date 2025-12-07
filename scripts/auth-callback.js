@@ -40,6 +40,10 @@
       return;
     }
 
+    // Sla user ID op in sessionStorage voor later gebruik
+    sessionStorage.setItem('auth0_user_id', user.sub);
+    console.log('User ID opgeslagen in sessionStorage:', user.sub);
+
     // Check of gebruiker al bestaat in database
     try {
       const response = await fetch(`/.netlify/functions/get-user?userId=${encodeURIComponent(user.sub)}`);

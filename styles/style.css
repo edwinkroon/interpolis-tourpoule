@@ -18,6 +18,11 @@ h1 {
   font-weight: bold;
 }
 
+h2 {
+  font-size: 28px;
+  font-weight: 500;
+}
+
 /* Header */
 .header {
   background-color: #00cac6;
@@ -92,8 +97,8 @@ h1 {
 }
 
 .form-title {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 28px;
+  font-weight: 500;
   color: #00334e;
   margin-bottom: 1rem;
 }

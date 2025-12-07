@@ -16,7 +16,6 @@
       return;
     }
 
-    console.log('Initialiseren Auth0 client...');
     const auth0Client = await auth0.createAuth0Client({
       domain: AUTH0_CONFIG.domain,
       clientId: AUTH0_CONFIG.clientId,
@@ -24,15 +23,10 @@
         redirect_uri: AUTH0_CONFIG.redirectUri
       }
     });
-    console.log('Auth0 client geïnitialiseerd');
 
     // Verwerk het antwoord van Auth0
-    console.log('Verwerken redirect callback...');
     await auth0Client.handleRedirectCallback();
-    console.log('Redirect callback verwerkt');
-
     const user = await auth0Client.getUser();
-    console.log('Gebruiker ingelogd:', user);
 
     if (!user || !user.sub) {
       console.error('Geen user of user.sub gevonden');
@@ -42,22 +36,17 @@
 
     // Sla user ID op in sessionStorage voor later gebruik
     sessionStorage.setItem('auth0_user_id', user.sub);
-    console.log('User ID opgeslagen in sessionStorage:', user.sub);
 
     // Check of gebruiker al bestaat in database
     try {
       const response = await fetch(`/.netlify/functions/get-user?userId=${encodeURIComponent(user.sub)}`);
       const result = await response.json();
       
-      console.log('User check result:', result);
-      
       if (result.ok && result.exists) {
         // Gebruiker bestaat al, redirect naar home
-        console.log('Gebruiker bestaat al, redirecten naar home.html...');
         window.location.href = 'home.html';
       } else {
         // Gebruiker bestaat nog niet, redirect naar index (welcome flow)
-        console.log('Gebruiker bestaat nog niet, redirecten naar index.html...');
         window.location.href = 'index.html';
       }
     } catch (error) {

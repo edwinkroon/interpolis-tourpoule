@@ -1,9 +1,6 @@
 const { Client } = require('pg');
 
 exports.handler = async function(event) {
-  console.log('save-participant CALLED, method =', event.httpMethod);
-  console.log('body =', event.body);
-
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
   }
@@ -13,17 +10,7 @@ exports.handler = async function(event) {
     const body = JSON.parse(event.body || '{}');
     const { userId, teamName, email, avatarUrl, newsletter } = body;
     
-    console.log('=== save-participant CALLED ===');
-    console.log('Full body:', JSON.stringify(body, null, 2));
-    console.log('Received data:', { 
-      userId: userId || 'NULL/EMPTY', 
-      userIdType: typeof userId,
-      userIdLength: userId ? userId.length : 0,
-      teamName, 
-      email, 
-      hasAvatarUrl: !!avatarUrl, 
-      newsletter 
-    });
+    console.log('Saving participant:', { userId: userId || 'none', teamName, email });
 
     if (!teamName || !email) {
       return { 
@@ -64,7 +51,6 @@ exports.handler = async function(event) {
     
     if (userId && userId.trim() !== '') {
       // Als userId aanwezig is, gebruik ON CONFLICT voor updates
-      console.log('Using userId in query:', userId);
       query = `
         INSERT INTO participants (user_id, team_name, email, avatar_url, newsletter)
         VALUES ($1, $2, $3, $4, $5)
@@ -79,7 +65,6 @@ exports.handler = async function(event) {
       values = [userId, teamName, email, avatarUrl || null, !!newsletter];
     } else {
       // Als userId niet aanwezig is, gewoon INSERT (zonder user_id)
-      console.log('No userId provided, inserting without user_id');
       query = `
         INSERT INTO participants (team_name, email, avatar_url, newsletter)
         VALUES ($1, $2, $3, $4)
@@ -88,13 +73,8 @@ exports.handler = async function(event) {
       values = [teamName, email, avatarUrl || null, !!newsletter];
     }
 
-    console.log('Executing query with values:', values);
     const { rows } = await client.query(query, values);
-    console.log('Query successful, result:', rows[0]);
-    console.log('Inserted/updated id:', rows[0].id);
-    if (rows[0].user_id) {
-      console.log('User_id in database:', rows[0].user_id);
-    }
+    console.log('Participant saved:', { id: rows[0].id, userId: rows[0].user_id || 'none' });
 
     await client.end();
 

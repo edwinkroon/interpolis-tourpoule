@@ -21,7 +21,6 @@ async function initAuth() {
 async function logout() {
   // Wis sessionStorage
   sessionStorage.removeItem('auth0_user_id');
-  console.log('User ID verwijderd uit sessionStorage');
   
   if (!auth0Client) {
     console.error('Auth0 client niet geïnitialiseerd');

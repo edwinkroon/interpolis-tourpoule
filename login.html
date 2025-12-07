@@ -1,27 +1,42 @@
-<button onclick="login()">Log in met Auth0</button>
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Login – Interpolis Tourpoule</title>
+</head>
+<body>
+  <h1>Login Interpolis Tourpoule</h1>
 
-<script src="https://cdn.auth0.com/js/auth0-spa-js/2/auth0-spa-js.production.min.js"></script>
-<script src="auth-config.js"></script>
-<script>
-  let auth0Client;
+  <button onclick="login()">Log in met Auth0</button>
 
-  async function initAuth() {
-    auth0Client = await createAuth0Client({
-      domain: AUTH0_CONFIG.domain,
-      clientId: AUTH0_CONFIG.clientId,
-      authorizationParams: {
-        redirect_uri: AUTH0_CONFIG.redirectUri
-      }
-    });
-  }
+  <!-- Lokale Auth0 SPA SDK -->
+  <script src="auth0-spa-js.production.js"></script>
+  <!-- Jouw config met domain/clientId/redirectUri -->
+  <script src="auth-config.js"></script>
 
-  async function login() {
-    if (!auth0Client) {
-      console.error('Auth0 client nog niet klaar');
-      return;
+  <script>
+    let auth0Client;
+
+    async function initAuth() {
+      auth0Client = await createAuth0Client({
+        domain: AUTH0_CONFIG.domain,
+        clientId: AUTH0_CONFIG.clientId,
+        authorizationParams: {
+          redirect_uri: AUTH0_CONFIG.redirectUri
+        }
+      });
     }
-    await auth0Client.loginWithRedirect();
-  }
 
-  initAuth();
-</script>
+    async function login() {
+      if (!auth0Client) {
+        console.error('Auth0 client nog niet klaar');
+        return;
+      }
+      await auth0Client.loginWithRedirect();
+    }
+
+    // start direct bij laden van de pagina
+    initAuth();
+  </script>
+</body>
+</html>

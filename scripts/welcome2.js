@@ -88,6 +88,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     if (!validateForm()) {
+        console.log('validateForm() faalt, geen fetch');
       return;
     }
 
@@ -97,6 +98,8 @@ document.addEventListener('DOMContentLoaded', function() {
       avatarUrl: e.target.avatar.value,
       newsletter: e.target.newsletter.checked
     };
+
+    console.log('data die we naar Netlify sturen:', data);
 
     try {
       const res = await fetch('/.netlify/functions/save-participant', {

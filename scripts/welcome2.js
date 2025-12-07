@@ -92,7 +92,32 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
+    // Get user ID from Auth0
+    let userId = null;
+    if (auth0Client) {
+      try {
+        const user = await auth0Client.getUser();
+        if (user && user.sub) {
+          userId = user.sub;
+          console.log('User ID opgehaald:', userId);
+        } else {
+          console.error('Geen user of user.sub gevonden');
+          alert('Je moet ingelogd zijn om je gegevens op te slaan. Log opnieuw in.');
+          return;
+        }
+      } catch (error) {
+        console.error('Fout bij ophalen van user:', error);
+        alert('Fout bij ophalen van gebruikersgegevens. Probeer het opnieuw.');
+        return;
+      }
+    } else {
+      console.error('Auth0 client niet geïnitialiseerd');
+      alert('Authenticatie niet geladen. Ververs de pagina en probeer het opnieuw.');
+      return;
+    }
+
     const data = {
+      userId: userId,
       teamName: e.target.teamName.value,
       email: e.target.email.value,
       avatarUrl: e.target.avatar.value,

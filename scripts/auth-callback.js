@@ -34,10 +34,33 @@
     const user = await auth0Client.getUser();
     console.log('Gebruiker ingelogd:', user);
 
-    // TODO: hier straks call naar get-team backend
-    // Voor nu: altijd naar index.html
-    console.log('Redirecten naar index.html...');
-    window.location.href = 'index.html';
+    if (!user || !user.sub) {
+      console.error('Geen user of user.sub gevonden');
+      window.location.href = 'index.html';
+      return;
+    }
+
+    // Check of gebruiker al bestaat in database
+    try {
+      const response = await fetch(`/.netlify/functions/get-user?userId=${encodeURIComponent(user.sub)}`);
+      const result = await response.json();
+      
+      console.log('User check result:', result);
+      
+      if (result.ok && result.exists) {
+        // Gebruiker bestaat al, redirect naar home
+        console.log('Gebruiker bestaat al, redirecten naar home.html...');
+        window.location.href = 'home.html';
+      } else {
+        // Gebruiker bestaat nog niet, redirect naar index (welcome flow)
+        console.log('Gebruiker bestaat nog niet, redirecten naar index.html...');
+        window.location.href = 'index.html';
+      }
+    } catch (error) {
+      console.error('Fout bij checken van gebruiker:', error);
+      // Bij error, gewoon naar index redirecten
+      window.location.href = 'index.html';
+    }
   } catch (error) {
     console.error('Fout bij verwerken van callback:', error);
     document.body.innerHTML = `<p>Fout bij inloggen: ${error.message || error}. <a href="login.html">Probeer opnieuw</a></p>`;

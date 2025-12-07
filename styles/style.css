@@ -385,7 +385,7 @@ h2 {
 /* Responsive Design */
 @media (max-width: 768px) {
   .main-content {
-    padding: 1rem 0;
+    padding: 1rem 10px;
   }
 
   .header {

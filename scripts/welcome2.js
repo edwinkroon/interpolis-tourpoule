@@ -84,6 +84,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const teamForm = document.getElementById('team-form');
   teamForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    console.log('submit handler gestart');
+
 
     if (!validateForm()) {
       return;

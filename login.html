@@ -1,3 +1,5 @@
+<button onclick="login()">Log in met Auth0</button>
+
 <script src="https://cdn.auth0.com/js/auth0-spa-js/2.5/auth0-spa-js.production.js"></script>
 <script src="auth-config.js"></script>
 <script>
@@ -14,10 +16,12 @@
   }
 
   async function login() {
+    if (!auth0Client) {
+      console.error('Auth0 client nog niet klaar');
+      return;
+    }
     await auth0Client.loginWithRedirect();
   }
 
   initAuth();
 </script>
-
-<button onclick="login()">Log in met Auth0</button>

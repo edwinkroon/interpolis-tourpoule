@@ -11,6 +11,7 @@ exports.handler = async function(event) {
   let client;
   try {
     const { userId, teamName, email, avatarUrl, newsletter } = JSON.parse(event.body || '{}');
+    console.log('Received data:', { userId, teamName, email, hasAvatarUrl: !!avatarUrl, newsletter });
 
     if (!teamName || !email) {
       return { 
@@ -49,8 +50,9 @@ exports.handler = async function(event) {
     let query;
     let values;
     
-    if (userId) {
+    if (userId && userId.trim() !== '') {
       // Als userId aanwezig is, gebruik ON CONFLICT voor updates
+      console.log('Using userId in query:', userId);
       query = `
         INSERT INTO participants (user_id, team_name, email, avatar_url, newsletter)
         VALUES ($1, $2, $3, $4, $5)
@@ -60,11 +62,12 @@ exports.handler = async function(event) {
           email = EXCLUDED.email,
           avatar_url = EXCLUDED.avatar_url,
           newsletter = EXCLUDED.newsletter
-        RETURNING id
+        RETURNING id, user_id
       `;
       values = [userId, teamName, email, avatarUrl || null, !!newsletter];
     } else {
-      // Als userId niet aanwezig is, gewoon INSERT
+      // Als userId niet aanwezig is, gewoon INSERT (zonder user_id)
+      console.log('No userId provided, inserting without user_id');
       query = `
         INSERT INTO participants (team_name, email, avatar_url, newsletter)
         VALUES ($1, $2, $3, $4)
@@ -75,7 +78,11 @@ exports.handler = async function(event) {
 
     console.log('Executing query with values:', values);
     const { rows } = await client.query(query, values);
-    console.log('Query successful, inserted id:', rows[0].id);
+    console.log('Query successful, result:', rows[0]);
+    console.log('Inserted/updated id:', rows[0].id);
+    if (rows[0].user_id) {
+      console.log('User_id in database:', rows[0].user_id);
+    }
 
     await client.end();
 

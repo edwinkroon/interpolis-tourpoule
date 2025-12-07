@@ -1,4 +1,5 @@
 let auth0Client;
+let auth0Initialized = false;
 
 async function initAuth() {
   if (typeof auth0 === 'undefined') {
@@ -13,6 +14,8 @@ async function initAuth() {
         redirect_uri: AUTH0_CONFIG.redirectUri
       }
     });
+    auth0Initialized = true;
+    console.log('Auth0 client geïnitialiseerd in welcome2');
   } catch (error) {
     console.error('Fout bij initialiseren van Auth0:', error);
   }
@@ -36,7 +39,7 @@ async function logout() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
   const prevButton = document.getElementById('prev-button');
   const nextButton = document.getElementById('next-button');
   const logoutButton = document.getElementById('logout-button');
@@ -45,8 +48,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const teamnameError = document.getElementById('teamname-error');
   const emailError = document.getElementById('email-error');
 
-  // Initialize Auth0
-  setTimeout(initAuth, 100);
+  // Initialize Auth0 - wacht tot het klaar is
+  await initAuth();
 
   // Handle previous button click
   prevButton.addEventListener('click', function(e) {
@@ -94,21 +97,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Get user ID from Auth0 (optioneel - niet verplicht)
     let userId = null;
-    if (auth0Client) {
+    
+    // Wacht even als Auth0 nog aan het initialiseren is
+    if (!auth0Initialized && typeof auth0 !== 'undefined') {
+      console.log('Wachten op Auth0 initialisatie...');
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    
+    if (auth0Client && auth0Initialized) {
       try {
         const user = await auth0Client.getUser();
+        console.log('User object:', user);
         if (user && user.sub) {
           userId = user.sub;
           console.log('User ID opgehaald:', userId);
         } else {
-          console.log('Geen user gevonden - formulier kan zonder user ID worden opgeslagen');
+          console.log('Geen user of user.sub gevonden - formulier kan zonder user ID worden opgeslagen');
         }
       } catch (error) {
-        console.log('Fout bij ophalen van user (niet kritiek):', error);
+        console.error('Fout bij ophalen van user:', error);
         // Doorgaan zonder userId
       }
     } else {
-      console.log('Auth0 client niet geïnitialiseerd - formulier kan zonder user ID worden opgeslagen');
+      console.log('Auth0 client niet beschikbaar - formulier kan zonder user ID worden opgeslagen');
     }
 
     const data = {

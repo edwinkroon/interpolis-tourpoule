@@ -38,11 +38,47 @@ async function logout() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+async function loadUserData() {
+  const userId = sessionStorage.getItem('auth0_user_id');
+  
+  if (!userId) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/.netlify/functions/get-user?userId=${encodeURIComponent(userId)}`);
+    const result = await response.json();
+    
+    if (result.ok && result.exists && result.participant) {
+      const participant = result.participant;
+      const welcomeHeading = document.getElementById('welcome-heading');
+      const avatarContainer = document.getElementById('header-avatar-container');
+      const avatarImg = document.getElementById('header-avatar');
+      
+      // Update welcome heading with team name
+      if (participant.team_name && welcomeHeading) {
+        welcomeHeading.textContent = `Welkom ${participant.team_name}`;
+      }
+      
+      // Show avatar if available
+      if (participant.avatar_url && avatarContainer && avatarImg) {
+        avatarImg.src = participant.avatar_url;
+        avatarContainer.style.display = 'block';
+      }
+    }
+  } catch (error) {
+    // Silent fail on data load error
+  }
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
   const logoutButton = document.getElementById('logout-button');
 
   // Initialize Auth0
-  setTimeout(initAuth, 100);
+  await initAuth();
+  
+  // Load user data from database
+  await loadUserData();
 
   // Handle logout button click
   logoutButton.addEventListener('click', function(e) {

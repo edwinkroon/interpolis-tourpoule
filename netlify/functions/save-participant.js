@@ -8,7 +8,27 @@ exports.handler = async function(event) {
   let client;
   try {
     const body = JSON.parse(event.body || '{}');
-    const { userId, teamName, email, avatarUrl, newsletter } = body;
+    let { userId, teamName, email, avatarUrl, newsletter } = body;
+
+    // Sanitize inputs
+    if (teamName) {
+      teamName = teamName.trim().substring(0, 100); // Max 100 characters
+    }
+    if (email) {
+      email = email.trim().toLowerCase().substring(0, 255); // Max 255 characters, lowercase
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return {
+          statusCode: 400,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ok: false, error: 'Ongeldig emailadres' })
+        };
+      }
+    }
+    if (avatarUrl) {
+      avatarUrl = avatarUrl.substring(0, 10000); // Limit avatar URL length
+    }
 
     if (!teamName || !email) {
       return { 

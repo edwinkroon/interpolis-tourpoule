@@ -1,69 +1,23 @@
-let auth0Client;
-let auth0Initialized = false;
-
-async function initAuth() {
-  if (typeof auth0 === 'undefined') {
-    return;
-  }
-
-  try {
-    auth0Client = await auth0.createAuth0Client({
-      domain: AUTH0_CONFIG.domain,
-      clientId: AUTH0_CONFIG.clientId,
-      authorizationParams: {
-        redirect_uri: AUTH0_CONFIG.redirectUri
-      }
-    });
-    auth0Initialized = true;
-  } catch (error) {
-    // Silent fail on Auth0 initialization error
-  }
-}
-
-async function logout() {
-  // Wis sessionStorage
-  sessionStorage.removeItem('auth0_user_id');
-  
-  if (!auth0Client) {
-    return;
-  }
-
-  try {
-    await auth0Client.logout({
-      logoutParams: {
-        returnTo: window.location.origin + '/logout.html',
-        federated: true
-      }
-    });
-  } catch (error) {
-    // Silent fail on logout error
-  }
-}
+// Load shared Auth0 utilities and utils
 
 document.addEventListener('DOMContentLoaded', async function() {
   const prevButton = document.getElementById('prev-button');
   const nextButton = document.getElementById('next-button');
   const logoutButton = document.getElementById('logout-button');
+  const teamForm = document.getElementById('team-form');
   const teamnameInput = document.getElementById('teamname');
   const emailInput = document.getElementById('email');
   const teamnameError = document.getElementById('teamname-error');
   const emailError = document.getElementById('email-error');
 
-  // Initialize Auth0 - wacht tot het klaar is
+  // Initialize Auth0
   await initAuth();
   
-  // Probeer user ID op te halen en op te slaan in sessionStorage als het er nog niet is
-  if (!sessionStorage.getItem('auth0_user_id') && auth0Client && auth0Initialized) {
-    try {
-      const isAuthenticated = await auth0Client.isAuthenticated();
-      if (isAuthenticated) {
-        const user = await auth0Client.getUser();
-        if (user && user.sub) {
-          sessionStorage.setItem('auth0_user_id', user.sub);
-        }
-      }
-    } catch (error) {
-      // Silent fail - user ID niet kritiek bij pagina load
+  // Try to get user ID and store in sessionStorage if not already there
+  if (!sessionStorage.getItem('auth0_user_id')) {
+    const userId = await getUserId();
+    if (userId) {
+      sessionStorage.setItem('auth0_user_id', userId);
     }
   }
 
@@ -77,62 +31,62 @@ document.addEventListener('DOMContentLoaded', async function() {
     let isValid = true;
     
     // Reset errors
-    teamnameError.textContent = '';
-    emailError.textContent = '';
+    hideError(teamnameError);
+    hideError(emailError);
     teamnameInput.classList.remove('error');
     emailInput.classList.remove('error');
 
     // Validate teamname
-    if (!teamnameInput.value.trim()) {
-      teamnameError.textContent = 'Vul een teamnaam in om door te gaan';
+    const teamNameValue = teamnameInput.value.trim();
+    if (!isValidTeamName(teamNameValue)) {
+      showError(teamnameError, 'Vul een teamnaam in om door te gaan');
       teamnameInput.classList.add('error');
+      teamnameInput.setAttribute('aria-invalid', 'true');
       isValid = false;
+    } else {
+      teamnameInput.setAttribute('aria-invalid', 'false');
     }
 
-    // Validate email
-    if (!emailInput.value.trim()) {
-      emailError.textContent = 'Vul een emailadres in om door te gaan';
+    // Validate email (if provided)
+    const emailValue = emailInput.value.trim();
+    if (emailValue && !isValidEmail(emailValue)) {
+      showError(emailError, 'Vul een geldig emailadres in');
       emailInput.classList.add('error');
+      emailInput.setAttribute('aria-invalid', 'true');
       isValid = false;
+    } else {
+      emailInput.setAttribute('aria-invalid', 'false');
     }
 
     return isValid;
   }
 
   // Handle form submit
-  const teamForm = document.getElementById('team-form');
   teamForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     if (!validateForm()) {
+      // Focus first error field
+      const firstError = teamForm.querySelector('.error');
+      if (firstError) {
+        firstError.focus();
+      }
       return;
     }
 
-    // Get user ID from sessionStorage (opgeslagen bij login) of Auth0 (fallback)
-    let userId = sessionStorage.getItem('auth0_user_id');
-    
-    // Fallback: probeer via Auth0 als niet in sessionStorage
-    if (!userId && auth0Client && auth0Initialized) {
-      try {
-        const isAuthenticated = await auth0Client.isAuthenticated();
-        if (isAuthenticated) {
-          const user = await auth0Client.getUser();
-          if (user && user.sub) {
-            userId = user.sub;
-            sessionStorage.setItem('auth0_user_id', user.sub);
-          }
-        }
-      } catch (error) {
-        // Silent fail on user retrieval error
-      }
-    }
+    // Set loading state
+    setLoadingState(nextButton, 'Opslaan...');
 
+    // Get user ID
+    const userId = await getUserId();
+
+    // Sanitize inputs
     const data = {
       userId: userId,
-      teamName: e.target.teamName.value,
-      email: e.target.email.value,
-      avatarUrl: e.target.avatar.value,
-      newsletter: e.target.newsletter.checked
+      teamName: sanitizeInput(teamnameInput.value.trim()),
+      email: emailInput.value.trim() ? sanitizeInput(emailInput.value.trim()) : '',
+      avatarUrl: document.getElementById('avatar').value || '',
+      newsletter: document.getElementById('newsletter').checked
     };
 
     try {
@@ -145,12 +99,25 @@ document.addEventListener('DOMContentLoaded', async function() {
       const result = await res.json();
 
       if (res.ok && result.ok) {
-        window.location.href = 'welcome3.html';
+        // Show success message
+        showSuccessMessage(teamForm, 'Gegevens opgeslagen!');
+        
+        // Redirect after short delay
+        setTimeout(() => {
+          window.location.href = 'welcome3.html';
+        }, 500);
       } else {
-        alert('Er is een fout opgetreden bij het opslaan. Probeer het opnieuw.');
+        removeLoadingState(nextButton);
+        const errorMsg = result.error || 'Er is een fout opgetreden bij het opslaan. Probeer het opnieuw.';
+        showError(teamnameError, errorMsg);
+        teamnameInput.classList.add('error');
+        teamnameInput.focus();
       }
     } catch (error) {
-      alert('Er is een fout opgetreden bij het opslaan. Probeer het opnieuw.');
+      removeLoadingState(nextButton);
+      showError(teamnameError, 'Er is een fout opgetreden bij het opslaan. Controleer je internetverbinding en probeer het opnieuw.');
+      teamnameInput.classList.add('error');
+      teamnameInput.focus();
     }
   });
 
@@ -158,14 +125,31 @@ document.addEventListener('DOMContentLoaded', async function() {
   teamnameInput.addEventListener('input', function() {
     if (this.value.trim()) {
       this.classList.remove('error');
-      teamnameError.textContent = '';
+      hideError(teamnameError);
+      this.setAttribute('aria-invalid', 'false');
     }
   });
 
   emailInput.addEventListener('input', function() {
     if (this.value.trim()) {
       this.classList.remove('error');
-      emailError.textContent = '';
+      hideError(emailError);
+      this.setAttribute('aria-invalid', 'false');
+    }
+  });
+
+  // Keyboard navigation support
+  teamnameInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      emailInput.focus();
+    }
+  });
+
+  emailInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      teamForm.dispatchEvent(new Event('submit'));
     }
   });
 
@@ -190,9 +174,16 @@ document.addEventListener('DOMContentLoaded', async function() {
   avatarInput.addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (file) {
-      // Check if file is an image
+      // Check file type
       if (!file.type.startsWith('image/')) {
         alert('Selecteer een geldige afbeelding');
+        return;
+      }
+
+      // Check file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        alert('Afbeelding is te groot. Maximum grootte is 5MB.');
         return;
       }
 
@@ -217,4 +208,3 @@ document.addEventListener('DOMContentLoaded', async function() {
     logout();
   });
 });
-

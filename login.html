@@ -7,12 +7,13 @@
 <body>
   <h1>Login Interpolis Tourpoule</h1>
 
-  <button id="login-button" disabled>Log in met Auth0</button>
+  <button id="login-button" disabled aria-label="Log in met Auth0">Log in met Auth0</button>
 
   <!-- Lokale Auth0 SPA SDK -->
   <script src="scripts/auth0-spa-js.production.js"></script>
-  <!-- Jouw config met domain/clientId/redirectUri -->
   <script src="scripts/auth-config.js"></script>
+  <script src="scripts/auth.js"></script>
+  <script src="scripts/utils.js"></script>
   <script src="scripts/login.js"></script>
 </body>
 </html>

@@ -172,11 +172,29 @@ h2 {
 }
 
 .error-message {
-  display: block;
+  display: none;
   color: #d32f2f;
   font-size: 12px;
   margin-top: 0.5rem;
   min-height: 1.5rem;
+}
+
+.success-message {
+  display: block;
+  color: #00aa2e;
+  font-size: 14px;
+  padding: 0.75rem 1rem;
+  background-color: #f0f9f4;
+  border: 1px solid #00aa2e;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+button:disabled,
+button[aria-busy="true"] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 /* Avatar Section */

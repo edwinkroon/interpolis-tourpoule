@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="styles/style.css">
   <script src="scripts/auth0-spa-js.production.js"></script>
   <script src="scripts/auth-config.js"></script>
+  <script src="scripts/auth.js"></script>
+  <script src="scripts/utils.js"></script>
   <script src="scripts/welcome3.js"></script>
 </head>
 <body>
@@ -35,17 +37,17 @@
     <div class="grid">
       <!-- Action Buttons -->
       <div class="action-buttons col-3">
-        <button class="action-button">
+        <button class="action-button" aria-label="Bekijk spelregels">
           <span>Spelregels</span>
-          <img src="assets/arrow.svg" alt="" class="action-arrow">
+          <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
         </button>
-        <button class="action-button">
+        <button class="action-button" aria-label="Bekijk statistieken">
           <span>Statistieken</span>
-          <img src="assets/arrow.svg" alt="" class="action-arrow">
+          <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
         </button>
-        <button class="action-button" id="logout-button">
+        <button class="action-button" id="logout-button" aria-label="Uitloggen">
           <span>Uitloggen</span>
-          <img src="assets/arrow.svg" alt="" class="action-arrow">
+          <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
         </button>
       </div>
 
@@ -63,13 +65,13 @@
 
       <!-- Navigation Buttons -->
       <div class="navigation-buttons">
-        <button type="button" class="nav-button nav-button-prev" id="prev-button">
-          <img src="assets/arrow.svg" alt="" class="nav-arrow nav-arrow-left">
+        <button type="button" class="nav-button nav-button-prev" id="prev-button" aria-label="Ga naar vorige stap">
+          <img src="assets/arrow.svg" alt="" class="nav-arrow nav-arrow-left" aria-hidden="true">
           <span>vorige</span>
         </button>
-        <button type="button" class="nav-button nav-button-next" id="next-button">
+        <button type="button" class="nav-button nav-button-next" id="next-button" aria-label="Ga naar volgende stap">
           <span>volgende</span>
-          <img src="assets/arrow.svg" alt="" class="nav-arrow nav-arrow-right">
+          <img src="assets/arrow.svg" alt="" class="nav-arrow nav-arrow-right" aria-hidden="true">
         </button>
       </div>
     </div>

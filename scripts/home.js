@@ -1,45 +1,7 @@
-let auth0Client;
-
-async function initAuth() {
-  if (typeof auth0 === 'undefined') {
-    return;
-  }
-
-  try {
-    auth0Client = await auth0.createAuth0Client({
-      domain: AUTH0_CONFIG.domain,
-      clientId: AUTH0_CONFIG.clientId,
-      authorizationParams: {
-        redirect_uri: AUTH0_CONFIG.redirectUri
-      }
-    });
-  } catch (error) {
-    // Silent fail on Auth0 initialization error
-  }
-}
-
-async function logout() {
-  // Wis sessionStorage
-  sessionStorage.removeItem('auth0_user_id');
-  
-  if (!auth0Client) {
-    return;
-  }
-
-  try {
-    await auth0Client.logout({
-      logoutParams: {
-        returnTo: window.location.origin + '/logout.html',
-        federated: true
-      }
-    });
-  } catch (error) {
-    // Silent fail on logout error
-  }
-}
+// Load shared Auth0 utilities and utils
 
 async function loadUserData() {
-  const userId = sessionStorage.getItem('auth0_user_id');
+  const userId = await getUserId();
   
   if (!userId) {
     return;
@@ -57,12 +19,13 @@ async function loadUserData() {
       
       // Update welcome heading with team name (without "Welkom" prefix)
       if (participant.team_name && welcomeHeading) {
-        welcomeHeading.textContent = participant.team_name;
+        welcomeHeading.textContent = sanitizeInput(participant.team_name);
       }
       
       // Show avatar if available
       if (participant.avatar_url && avatarContainer && avatarImg) {
         avatarImg.src = participant.avatar_url;
+        avatarImg.alt = `Avatar van ${sanitizeInput(participant.team_name || 'gebruiker')}`;
         avatarContainer.style.display = 'block';
       }
     }
@@ -86,4 +49,3 @@ document.addEventListener('DOMContentLoaded', async function() {
     logout();
   });
 });
-

@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="styles/style.css">
   <script src="scripts/auth0-spa-js.production.js"></script>
   <script src="scripts/auth-config.js"></script>
+  <script src="scripts/auth.js"></script>
+  <script src="scripts/utils.js"></script>
   <script src="scripts/welcome2.js"></script>
 </head>
 <body>
@@ -35,17 +37,17 @@
     <div class="grid">
       <!-- Action Buttons -->
       <div class="action-buttons col-3">
-        <button class="action-button">
+        <button class="action-button" aria-label="Bekijk spelregels">
           <span>Spelregels</span>
-          <img src="assets/arrow.svg" alt="" class="action-arrow">
+          <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
         </button>
-        <button class="action-button">
+        <button class="action-button" aria-label="Bekijk statistieken">
           <span>Statistieken</span>
-          <img src="assets/arrow.svg" alt="" class="action-arrow">
+          <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
         </button>
-        <button class="action-button" id="logout-button">
+        <button class="action-button" id="logout-button" aria-label="Uitloggen">
           <span>Uitloggen</span>
-          <img src="assets/arrow.svg" alt="" class="action-arrow">
+          <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
         </button>
       </div>
 
@@ -69,8 +71,12 @@
                 name="teamName" 
                 class="form-input" 
                 placeholder="Vul je teamnaam hier in"
+                required
+                aria-required="true"
+                aria-describedby="teamname-error"
+                aria-invalid="false"
               >
-              <span class="error-message" id="teamname-error" role="alert"></span>
+              <span class="error-message" id="teamname-error" role="alert" aria-live="polite"></span>
             </div>
           </div>
 
@@ -84,8 +90,10 @@
                 name="email" 
                 class="form-input" 
                 placeholder="Vul je e-mail adres hier in"
+                aria-describedby="email-error"
+                aria-invalid="false"
               >
-              <span class="error-message" id="email-error" role="alert"></span>
+              <span class="error-message" id="email-error" role="alert" aria-live="polite"></span>
             </div>
           </div>
 
@@ -107,19 +115,19 @@
 
           <!-- Checkbox -->
           <div class="checkbox-group">
-            <input type="checkbox" id="newsletter" name="newsletter" class="checkbox-input" checked>
-            <label for="newsletter" class="checkbox-label">Ik wil op de hoogte blijven</label>
+            <input type="checkbox" id="newsletter" name="newsletter" class="checkbox-input" checked aria-describedby="newsletter-description">
+            <label for="newsletter" class="checkbox-label" id="newsletter-description">Ik wil op de hoogte blijven</label>
           </div>
 
           <!-- Navigation Buttons -->
           <div class="navigation-buttons">
-            <button type="button" class="nav-button nav-button-prev" id="prev-button">
-              <img src="assets/arrow.svg" alt="" class="nav-arrow nav-arrow-left">
+            <button type="button" class="nav-button nav-button-prev" id="prev-button" aria-label="Ga naar vorige stap">
+              <img src="assets/arrow.svg" alt="" class="nav-arrow nav-arrow-left" aria-hidden="true">
               <span>vorige</span>
             </button>
-            <button type="submit" class="nav-button nav-button-next" id="next-button">
+            <button type="submit" class="nav-button nav-button-next" id="next-button" aria-label="Ga naar volgende stap">
               <span>volgende</span>
-              <img src="assets/arrow.svg" alt="" class="nav-arrow nav-arrow-right">
+              <img src="assets/arrow.svg" alt="" class="nav-arrow nav-arrow-right" aria-hidden="true">
             </button>
           </div>
         </form>

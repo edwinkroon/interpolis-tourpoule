@@ -1,29 +1,24 @@
-let auth0Client;
+// Load shared Auth0 utilities
 let isInitialized = false;
 
-async function initAuth() {
-  // Wacht tot auth0 beschikbaar is
+async function initLoginAuth() {
   if (typeof auth0 === 'undefined') {
     return;
   }
 
   try {
-    auth0Client = await auth0.createAuth0Client({
-      domain: AUTH0_CONFIG.domain,
-      clientId: AUTH0_CONFIG.clientId,
-      authorizationParams: {
-        redirect_uri: AUTH0_CONFIG.redirectUri
-      }
-    });
+    await initAuth(); // Use shared initAuth
     isInitialized = true;
     const loginButton = document.getElementById('login-button');
     if (loginButton) {
       loginButton.disabled = false;
+      loginButton.setAttribute('aria-busy', 'false');
     }
   } catch (error) {
     const loginButton = document.getElementById('login-button');
     if (loginButton) {
       loginButton.textContent = 'Fout bij laden. Ververs de pagina.';
+      loginButton.setAttribute('aria-label', 'Fout bij laden. Ververs de pagina.');
     }
   }
 }
@@ -33,31 +28,31 @@ async function login() {
     return;
   }
   try {
+    setLoadingState(document.getElementById('login-button'), 'Bezig met inloggen...');
     await auth0Client.loginWithRedirect();
   } catch (error) {
+    removeLoadingState(document.getElementById('login-button'));
     // Silent fail on login error
   }
 }
 
-// Wacht tot DOM en scripts geladen zijn
+// Wait until DOM and scripts are loaded
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
-    // Wacht even om er zeker van te zijn dat scripts geladen zijn
-    setTimeout(initAuth, 100);
+    setTimeout(initLoginAuth, 100);
     
-    // Add click handler to login button
     const loginButton = document.getElementById('login-button');
     if (loginButton) {
       loginButton.addEventListener('click', login);
+      loginButton.setAttribute('aria-busy', 'true');
     }
   });
 } else {
-  setTimeout(initAuth, 100);
+  setTimeout(initLoginAuth, 100);
   
-  // Add click handler to login button
   const loginButton = document.getElementById('login-button');
   if (loginButton) {
     loginButton.addEventListener('click', login);
+    loginButton.setAttribute('aria-busy', 'true');
   }
 }
-

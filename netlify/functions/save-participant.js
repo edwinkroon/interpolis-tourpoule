@@ -1,33 +1,41 @@
-import pg from 'pg';
+const { Client } = require('pg');
 
-const client = new pg.Client({
-  connectionString: process.env.NEON_DATABASE_URL,
-  ssl: { rejectUnauthorized: false } // Neon gebruikt SSL
-});
-
-let connected = false;
-async function ensureConnected() {
-  if (!connected) {
-    await client.connect();
-    connected = true;
-  }
-}
-
-export async function handler(event) {
+exports.handler = async function(event) {
   console.log('save-participant CALLED, method =', event.httpMethod);
+  console.log('body =', event.body);
 
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+    return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
   }
 
-  const { teamName, email, avatarUrl, newsletter } = JSON.parse(event.body || '{}');
-
-  if (!teamName || !email) {
-    return { statusCode: 400, body: 'teamName en email zijn verplicht' };
-  }
-
+  let client;
   try {
-    await ensureConnected();
+    const { teamName, email, avatarUrl, newsletter } = JSON.parse(event.body || '{}');
+
+    if (!teamName || !email) {
+      return { 
+        statusCode: 400, 
+        body: JSON.stringify({ ok: false, error: 'teamName en email zijn verplicht' }) 
+      };
+    }
+
+    // Check if database URL is set
+    if (!process.env.NEON_DATABASE_URL) {
+      console.error('NEON_DATABASE_URL environment variable is not set');
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ ok: false, error: 'Database configuration missing' })
+      };
+    }
+
+    // Create new client for each request (serverless best practice)
+    client = new Client({
+      connectionString: process.env.NEON_DATABASE_URL,
+      ssl: { rejectUnauthorized: false }
+    });
+
+    await client.connect();
+    console.log('Database connected');
 
     const query = `
       INSERT INTO participants (team_name, email, avatar_url, newsletter)
@@ -36,17 +44,42 @@ export async function handler(event) {
     `;
     const values = [teamName, email, avatarUrl || null, !!newsletter];
 
+    console.log('Executing query with values:', values);
     const { rows } = await client.query(query, values);
+    console.log('Query successful, inserted id:', rows[0].id);
+
+    await client.end();
 
     return {
       statusCode: 200,
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({ ok: true, id: rows[0].id })
     };
   } catch (err) {
-    console.error('Neon insert error', err);
+    console.error('Error in save-participant:', err);
+    console.error('Error message:', err.message);
+    console.error('Error stack:', err.stack);
+    
+    if (client) {
+      try {
+        await client.end();
+      } catch (closeErr) {
+        console.error('Error closing connection:', closeErr);
+      }
+    }
+
     return {
       statusCode: 500,
-      body: JSON.stringify({ ok: false, error: 'DB error' })
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ 
+        ok: false, 
+        error: err.message || 'Database error',
+        details: process.env.NODE_ENV === 'development' ? err.stack : undefined
+      })
     };
   }
-}
+};

@@ -1,8 +1,6 @@
 const { Client } = require('pg');
 
 exports.handler = async function(event) {
-  console.log('get-user CALLED, method =', event.httpMethod);
-
   if (event.httpMethod !== 'GET') {
     return { 
       statusCode: 405, 
@@ -25,7 +23,6 @@ exports.handler = async function(event) {
   let client;
   try {
     if (!process.env.NEON_DATABASE_URL) {
-      console.error('NEON_DATABASE_URL environment variable is not set');
       return {
         statusCode: 500,
         headers: { 'Content-Type': 'application/json' },
@@ -42,7 +39,6 @@ exports.handler = async function(event) {
     });
 
     await client.connect();
-    console.log('Database connected');
 
     const query = `
       SELECT id, team_name, email, avatar_url, newsletter
@@ -51,13 +47,11 @@ exports.handler = async function(event) {
       LIMIT 1
     `;
     
-    console.log('Checking for user_id:', userId);
     const { rows } = await client.query(query, [userId]);
     
     await client.end();
 
     if (rows.length > 0) {
-      console.log('User found:', rows[0]);
       return {
         statusCode: 200,
         headers: { 'Content-Type': 'application/json' },
@@ -68,7 +62,6 @@ exports.handler = async function(event) {
         })
       };
     } else {
-      console.log('User not found');
       return {
         statusCode: 200,
         headers: { 'Content-Type': 'application/json' },
@@ -79,15 +72,11 @@ exports.handler = async function(event) {
       };
     }
   } catch (err) {
-    console.error('Error in get-user:', err);
-    console.error('Error message:', err.message);
-    console.error('Error stack:', err.stack);
-    
     if (client) {
       try {
         await client.end();
       } catch (closeErr) {
-        console.error('Error closing connection:', closeErr);
+        // Silent fail on connection close error
       }
     }
 

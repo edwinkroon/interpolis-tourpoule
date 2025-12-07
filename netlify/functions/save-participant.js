@@ -9,8 +9,6 @@ exports.handler = async function(event) {
   try {
     const body = JSON.parse(event.body || '{}');
     const { userId, teamName, email, avatarUrl, newsletter } = body;
-    
-    console.log('Saving participant:', { userId: userId || 'none', teamName, email });
 
     if (!teamName || !email) {
       return { 
@@ -22,8 +20,6 @@ exports.handler = async function(event) {
 
     // Check if database URL is set
     if (!process.env.NEON_DATABASE_URL) {
-      console.error('NEON_DATABASE_URL environment variable is not set');
-      console.error('Please set NEON_DATABASE_URL in Netlify: Site settings → Environment variables');
       return {
         statusCode: 500,
         headers: {
@@ -44,7 +40,6 @@ exports.handler = async function(event) {
     });
 
     await client.connect();
-    console.log('Database connected');
 
     let query;
     let values;
@@ -74,7 +69,6 @@ exports.handler = async function(event) {
     }
 
     const { rows } = await client.query(query, values);
-    console.log('Participant saved:', { id: rows[0].id, userId: rows[0].user_id || 'none' });
 
     await client.end();
 
@@ -86,15 +80,11 @@ exports.handler = async function(event) {
       body: JSON.stringify({ ok: true, id: rows[0].id })
     };
   } catch (err) {
-    console.error('Error in save-participant:', err);
-    console.error('Error message:', err.message);
-    console.error('Error stack:', err.stack);
-    
     if (client) {
       try {
         await client.end();
       } catch (closeErr) {
-        console.error('Error closing connection:', closeErr);
+        // Silent fail on connection close error
       }
     }
 

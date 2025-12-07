@@ -16,7 +16,7 @@ async function initAuth() {
     });
     auth0Initialized = true;
   } catch (error) {
-    console.error('Fout bij initialiseren van Auth0:', error);
+    // Silent fail on Auth0 initialization error
   }
 }
 
@@ -25,7 +25,6 @@ async function logout() {
   sessionStorage.removeItem('auth0_user_id');
   
   if (!auth0Client) {
-    console.error('Auth0 client niet geïnitialiseerd');
     return;
   }
 
@@ -37,7 +36,7 @@ async function logout() {
       }
     });
   } catch (error) {
-    console.error('Fout bij uitloggen:', error);
+    // Silent fail on logout error
   }
 }
 
@@ -124,7 +123,7 @@ document.addEventListener('DOMContentLoaded', async function() {
           }
         }
       } catch (error) {
-        console.error('Fout bij ophalen van user:', error);
+        // Silent fail on user retrieval error
       }
     }
 
@@ -151,7 +150,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         alert('Er is een fout opgetreden bij het opslaan. Probeer het opnieuw.');
       }
     } catch (error) {
-      console.error('Fout bij opslaan:', error);
       alert('Er is een fout opgetreden bij het opslaan. Probeer het opnieuw.');
     }
   });

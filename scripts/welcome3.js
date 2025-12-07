@@ -14,7 +14,7 @@ async function initAuth() {
       }
     });
   } catch (error) {
-    console.error('Fout bij initialiseren van Auth0:', error);
+    // Silent fail on Auth0 initialization error
   }
 }
 
@@ -23,7 +23,6 @@ async function logout() {
   sessionStorage.removeItem('auth0_user_id');
   
   if (!auth0Client) {
-    console.error('Auth0 client niet geïnitialiseerd');
     return;
   }
 
@@ -35,7 +34,7 @@ async function logout() {
       }
     });
   } catch (error) {
-    console.error('Fout bij uitloggen:', error);
+    // Silent fail on logout error
   }
 }
 
@@ -57,7 +56,6 @@ document.addEventListener('DOMContentLoaded', function() {
   nextButton.addEventListener('click', function(e) {
     e.preventDefault();
     // Add your navigation logic here
-    console.log('Navigating to next step...');
   });
 
   // Handle logout button click

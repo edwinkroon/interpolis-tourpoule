@@ -4,7 +4,6 @@ let isInitialized = false;
 async function initAuth() {
   // Wacht tot auth0 beschikbaar is
   if (typeof auth0 === 'undefined') {
-    console.error('Auth0 SDK niet geladen');
     return;
   }
 
@@ -22,7 +21,6 @@ async function initAuth() {
       loginButton.disabled = false;
     }
   } catch (error) {
-    console.error('Fout bij initialiseren van Auth0:', error);
     const loginButton = document.getElementById('login-button');
     if (loginButton) {
       loginButton.textContent = 'Fout bij laden. Ververs de pagina.';
@@ -32,13 +30,12 @@ async function initAuth() {
 
 async function login() {
   if (!isInitialized || !auth0Client) {
-    console.error('Auth0 client nog niet klaar');
     return;
   }
   try {
     await auth0Client.loginWithRedirect();
   } catch (error) {
-    console.error('Fout bij inloggen:', error);
+    // Silent fail on login error
   }
 }
 

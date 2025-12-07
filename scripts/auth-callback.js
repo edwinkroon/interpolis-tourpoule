@@ -11,7 +11,6 @@
     }
     
     if (typeof auth0 === 'undefined') {
-      console.error('Auth0 SDK niet geladen na wachten');
       document.body.innerHTML = '<p>Fout: Auth0 SDK niet geladen. Ververs de pagina.</p>';
       return;
     }
@@ -29,7 +28,6 @@
     const user = await auth0Client.getUser();
 
     if (!user || !user.sub) {
-      console.error('Geen user of user.sub gevonden');
       window.location.href = 'index.html';
       return;
     }
@@ -50,12 +48,10 @@
         window.location.href = 'index.html';
       }
     } catch (error) {
-      console.error('Fout bij checken van gebruiker:', error);
       // Bij error, gewoon naar index redirecten
       window.location.href = 'index.html';
     }
   } catch (error) {
-    console.error('Fout bij verwerken van callback:', error);
     document.body.innerHTML = `<p>Fout bij inloggen: ${error.message || error}. <a href="login.html">Probeer opnieuw</a></p>`;
   }
 })();

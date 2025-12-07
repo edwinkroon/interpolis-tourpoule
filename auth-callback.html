@@ -7,26 +7,54 @@
 <body>
   <p>Bezig met inloggen...</p>
 
-  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.5/auth0-spa-js.production.js"></script>
+  <!-- Lokale Auth0 SPA SDK -->
+  <script src="auth0-spa-js.production.js"></script>
   <script src="auth-config.js"></script>
   <script>
     (async () => {
-      const auth0Client = await createAuth0Client({
-        domain: AUTH0_CONFIG.domain,
-        clientId: AUTH0_CONFIG.clientId,
-        authorizationParams: {
-          redirect_uri: AUTH0_CONFIG.redirectUri
+      try {
+        // Wacht even om er zeker van te zijn dat scripts geladen zijn
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Wacht tot auth0 beschikbaar is (max 5 seconden)
+        let attempts = 0;
+        while (typeof auth0 === 'undefined' && attempts < 50) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+          attempts++;
         }
-      });
+        
+        if (typeof auth0 === 'undefined') {
+          console.error('Auth0 SDK niet geladen na wachten');
+          document.body.innerHTML = '<p>Fout: Auth0 SDK niet geladen. Ververs de pagina.</p>';
+          return;
+        }
 
-      // Verwerk het antwoord van Auth0
-      await auth0Client.handleRedirectCallback();
+        console.log('Initialiseren Auth0 client...');
+        const auth0Client = await auth0.createAuth0Client({
+          domain: AUTH0_CONFIG.domain,
+          clientId: AUTH0_CONFIG.clientId,
+          authorizationParams: {
+            redirect_uri: AUTH0_CONFIG.redirectUri
+          }
+        });
+        console.log('Auth0 client geïnitialiseerd');
 
-      const user = await auth0Client.getUser();
+        // Verwerk het antwoord van Auth0
+        console.log('Verwerken redirect callback...');
+        await auth0Client.handleRedirectCallback();
+        console.log('Redirect callback verwerkt');
 
-      // TODO: hier straks call naar get-team backend
-      // Voor nu: altijd naar index.html
-      window.location.href = '/index.html';
+        const user = await auth0Client.getUser();
+        console.log('Gebruiker ingelogd:', user);
+
+        // TODO: hier straks call naar get-team backend
+        // Voor nu: altijd naar index.html
+        console.log('Redirecten naar index.html...');
+        window.location.href = 'index.html';
+      } catch (error) {
+        console.error('Fout bij verwerken van callback:', error);
+        document.body.innerHTML = `<p>Fout bij inloggen: ${error.message || error}. <a href="login.html">Probeer opnieuw</a></p>`;
+      }
     })();
   </script>
 </body>

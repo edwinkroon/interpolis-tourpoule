@@ -7,67 +7,12 @@
 <body>
   <h1>Login Interpolis Tourpoule</h1>
 
-  <button id="login-button" onclick="login()" disabled>Log in met Auth0</button>
+  <button id="login-button" disabled>Log in met Auth0</button>
 
   <!-- Lokale Auth0 SPA SDK -->
   <script src="auth0-spa-js.production.js"></script>
   <!-- Jouw config met domain/clientId/redirectUri -->
   <script src="auth-config.js"></script>
-
-  <script>
-    let auth0Client;
-    let isInitialized = false;
-
-    async function initAuth() {
-      // Wacht tot auth0 beschikbaar is
-      if (typeof auth0 === 'undefined') {
-        console.error('Auth0 SDK niet geladen');
-        return;
-      }
-
-      try {
-        auth0Client = await auth0.createAuth0Client({
-          domain: AUTH0_CONFIG.domain,
-          clientId: AUTH0_CONFIG.clientId,
-          authorizationParams: {
-            redirect_uri: AUTH0_CONFIG.redirectUri
-          }
-        });
-        isInitialized = true;
-        const loginButton = document.getElementById('login-button');
-        if (loginButton) {
-          loginButton.disabled = false;
-        }
-      } catch (error) {
-        console.error('Fout bij initialiseren van Auth0:', error);
-        const loginButton = document.getElementById('login-button');
-        if (loginButton) {
-          loginButton.textContent = 'Fout bij laden. Ververs de pagina.';
-        }
-      }
-    }
-
-    async function login() {
-      if (!isInitialized || !auth0Client) {
-        console.error('Auth0 client nog niet klaar');
-        return;
-      }
-      try {
-        await auth0Client.loginWithRedirect();
-      } catch (error) {
-        console.error('Fout bij inloggen:', error);
-      }
-    }
-
-    // Wacht tot DOM en scripts geladen zijn
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
-        // Wacht even om er zeker van te zijn dat scripts geladen zijn
-        setTimeout(initAuth, 100);
-      });
-    } else {
-      setTimeout(initAuth, 100);
-    }
-  </script>
+  <script src="scripts/login.js"></script>
 </body>
 </html>

@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Handle next button click
   nextButton.addEventListener('click', function(e) {
     e.preventDefault();
-    // Add your navigation logic here
+    window.location.href = 'home.html';
   });
 
   // Handle logout button click

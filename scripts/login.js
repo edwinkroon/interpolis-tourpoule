@@ -25,14 +25,21 @@ async function initLoginAuth() {
 
 async function login() {
   if (!isInitialized || !auth0Client) {
+    console.error('Login failed: Auth0 not initialized', { isInitialized, auth0Client: !!auth0Client });
     return;
   }
   try {
+    console.log('Starting login with redirect...');
     setLoadingState(document.getElementById('login-button'), 'Bezig met inloggen...');
-    await auth0Client.loginWithRedirect();
+    await auth0Client.loginWithRedirect({
+      authorizationParams: {
+        redirect_uri: AUTH0_CONFIG.redirectUri
+      }
+    });
   } catch (error) {
+    console.error('Login error:', error);
     removeLoadingState(document.getElementById('login-button'));
-    // Silent fail on login error
+    alert('Er is een fout opgetreden bij het inloggen: ' + (error.message || error));
   }
 }
 

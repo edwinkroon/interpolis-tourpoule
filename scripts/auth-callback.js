@@ -40,6 +40,11 @@
       const response = await fetch(`/.netlify/functions/get-user?userId=${encodeURIComponent(user.sub)}`);
       const result = await response.json();
       
+      // Log error details for debugging
+      if (!result.ok) {
+        console.error('Error checking user:', result.error, result.details);
+      }
+      
       if (result.ok && result.exists) {
         // Gebruiker bestaat al, redirect naar home
         window.location.href = 'home.html';
@@ -48,7 +53,8 @@
         window.location.href = 'login.html';
       }
     } catch (error) {
-      // Bij error, redirect naar login
+      // Bij error, log en redirect naar login
+      console.error('Error fetching user data:', error);
       window.location.href = 'login.html';
     }
   } catch (error) {

@@ -80,12 +80,16 @@ exports.handler = async function(event) {
       }
     }
 
+    console.error('Error in get-user function:', err);
+    
     return {
       statusCode: 500,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
         ok: false, 
-        error: err.message || 'Database error'
+        error: err.message || 'Database error',
+        details: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+        query: 'SELECT id, team_name, email, avatar_url, newsletter FROM participants WHERE user_id = $1'
       })
     };
   }

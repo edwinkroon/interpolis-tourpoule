@@ -79,9 +79,15 @@ async function checkParticipantExists(userId) {
     const response = await fetch(`/.netlify/functions/get-user?userId=${encodeURIComponent(userId)}`);
     const result = await response.json();
     
+    // Log error details for debugging
+    if (!result.ok) {
+      console.error('Error checking participant:', result.error, result.details);
+    }
+    
     return result.ok && result.exists === true;
   } catch (error) {
-    // Silent fail on check error
+    // Log error for debugging
+    console.error('Error fetching participant data:', error);
     return false;
   }
 }

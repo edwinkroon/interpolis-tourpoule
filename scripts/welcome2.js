@@ -3,7 +3,6 @@
 document.addEventListener('DOMContentLoaded', async function() {
   const prevButton = document.getElementById('prev-button');
   const nextButton = document.getElementById('next-button');
-  const logoutButton = document.getElementById('logout-button');
   const teamForm = document.getElementById('team-form');
   const teamnameInput = document.getElementById('teamname');
   const emailInput = document.getElementById('email');
@@ -200,11 +199,5 @@ document.addEventListener('DOMContentLoaded', async function() {
       };
       reader.readAsDataURL(file);
     }
-  });
-
-  // Handle logout button click
-  logoutButton.addEventListener('click', function(e) {
-    e.preventDefault();
-    logout();
   });
 });

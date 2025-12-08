@@ -75,6 +75,7 @@ const stubDashboardData = {
       id: 1,
       name: "Jochem Messbauer",
       team: "MessbauerMennekes",
+      route: "Houlgate - Nice (183km)",
       date: "2024-07-03",
       stage: "Rit 3",
       points: 49
@@ -83,6 +84,7 @@ const stubDashboardData = {
       id: 2,
       name: "Henry Schut",
       team: "Smart Meets",
+      route: "Lille - Calais (175km)",
       date: "2024-07-02",
       stage: "Rit 2",
       points: 47
@@ -91,6 +93,7 @@ const stubDashboardData = {
       id: 3,
       name: "Jan Jansen",
       team: "Team Jansen",
+      route: "Utrecht - Utrecht (8km)",
       date: "2024-07-01",
       stage: "Rit 1",
       points: 45
@@ -210,16 +213,22 @@ function renderDayWinners(dayWinners) {
 
   dayWinnersList.innerHTML = '';
 
-  dayWinners.forEach(winner => {
+  // Avatar colors for day winners
+  const avatarColors = ['#0095db', '#668494', '#cdd7dc'];
+  
+  dayWinners.forEach((winner, index) => {
     const winnerItem = document.createElement('div');
     winnerItem.className = 'day-winner-item';
     
+    const avatarColor = avatarColors[index] || '#cdd7dc';
+    
     winnerItem.innerHTML = `
-      <div class="day-winner-date">${sanitizeInput(winner.date)}</div>
-      <div class="day-winner-stage">${sanitizeInput(winner.stage)}</div>
-      <div class="day-winner-name">${sanitizeInput(winner.name)}</div>
-      ${winner.team ? `<div class="day-winner-team">${sanitizeInput(winner.team)}</div>` : ''}
-      <div class="day-winner-points">${sanitizeInput(winner.points)} punten</div>
+      <div class="day-winner-avatar" style="background-color: ${avatarColor};"></div>
+      <div class="day-winner-info">
+        <div class="day-winner-name">${sanitizeInput(winner.name)}</div>
+        ${winner.team ? `<div class="day-winner-team">${sanitizeInput(winner.team)}</div>` : ''}
+      </div>
+      <div class="day-winner-route">${sanitizeInput(winner.route || '')}</div>
     `;
     
     dayWinnersList.appendChild(winnerItem);

@@ -50,10 +50,6 @@
           <span>Statistieken</span>
           <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
         </button>
-        <button class="action-button" id="logout-button" aria-label="Uitloggen">
-          <span>Uitloggen</span>
-          <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
-        </button>
       </div>
 
       <!-- Dashboard Content -->
@@ -91,47 +87,42 @@
               </button>
             </div>
 
-            <!-- Mijn Team Section -->
-            <div class="dashboard-section team-section">
-              <h2 class="dashboard-section-title">
-                <svg class="section-arrow" width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M5 1L9 5L5 9M1 5H9" stroke="#00334e" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <span>mijn team</span>
-              </h2>
-              <div class="team-list" id="team-list">
-                <!-- Team members will be rendered here -->
-              </div>
-            </div>
-
-            <!-- Etappe Informatie Section -->
-            <div class="dashboard-section stage-section">
-              <h2 class="dashboard-section-title">
-                <svg class="section-arrow" width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M5 1L9 5L5 9M1 5H9" stroke="#00334e" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <span>etappe informatie</span>
-              </h2>
-              <div class="stage-info" id="stage-info">
-                <!-- Stage information will be rendered here -->
-              </div>
-              <button class="stage-info-button" aria-label="Bekijk etappe informatie">
-                <svg class="button-arrow" width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M5 1L9 5L5 9M1 5H9" stroke="#00334e" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <span>etappe informatie</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Right Column -->
-          <div class="dashboard-column">
             <!-- Mijn Prijzenkast Section -->
             <div class="dashboard-section achievements-section">
               <h2 class="dashboard-section-title">Mijn prijzenkast</h2>
               <div class="achievements-list" id="achievements-list">
                 <!-- Achievements will be rendered here -->
               </div>
+            </div>
+          </div>
+
+          <!-- Right Column -->
+          <div class="dashboard-column">
+            <!-- Stand Section -->
+            <div class="dashboard-section standings-section">
+              <h2 class="dashboard-section-title">Stand</h2>
+              <div class="standings-list" id="standings-list">
+                <!-- Standings will be rendered here -->
+              </div>
+              <button class="standings-button" aria-label="Bekijk volledige stand">
+                <span>volledige stand</span>
+                <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
+              </button>
+            </div>
+
+            <!-- Prikbord Section -->
+            <div class="dashboard-section prikbord-section">
+              <h2 class="dashboard-section-title">
+                Prikbord
+                <span class="prikbord-dot" id="prikbord-dot"></span>
+              </h2>
+              <div class="prikbord-list" id="prikbord-list">
+                <!-- Prikbord items will be rendered here -->
+              </div>
+              <button class="prikbord-button" aria-label="Bekijk prikbord">
+                <span>prikbord</span>
+                <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
+              </button>
             </div>
           </div>
         </div>

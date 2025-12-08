@@ -20,6 +20,7 @@ exports.handler = async function(event) {
 
   // Get rider name from query string
   const riderName = event.queryStringParameters?.riderName;
+  const teamName = event.queryStringParameters?.teamName; // Optional team name
   
   if (!riderName) {
     return {
@@ -30,8 +31,53 @@ exports.handler = async function(event) {
   }
 
   try {
+    // Special mappings for specific users with local photos (temporary, will come from database later)
+    // Check both by name and by team name
+    // Note: These files are in assets/ folder as webp files
+    // Use relative path from root (same as other assets)
+    const localPhotos = {
+      'Jan Jansen': 'assets/RogerSchmidt.webp',
+      'Smart Meets': 'assets/MartSmeets.webp',
+      'Henry Schut': 'assets/MartSmeets.webp' // Henry Schut is in team Smart Meets
+    };
+    
+    // Check by team name if provided
+    if (teamName && localPhotos[teamName]) {
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          ok: true,
+          riderName: riderName,
+          photoUrl: localPhotos[teamName]
+        })
+      };
+    }
+    
+    // Check if we have a local photo for this user
+    if (localPhotos[riderName]) {
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          ok: true,
+          riderName: riderName,
+          photoUrl: localPhotos[riderName]
+        })
+      };
+    }
+    
+    // Special mappings for Wikipedia search
+    const specialMappings = {
+      'Jan Jansen': 'Roger Schmidt',
+      'Smart Meets': 'Mart Smeets'
+    };
+    
+    // Use mapped name if available, otherwise use original name
+    const searchName = specialMappings[riderName] || riderName;
+    
     // Try to fetch photo from Wikipedia API (free and open)
-    const photoUrl = await fetchRiderPhoto(riderName);
+    const photoUrl = await fetchRiderPhoto(searchName);
     
     return {
       statusCode: 200,
@@ -62,9 +108,15 @@ exports.handler = async function(event) {
  */
 async function fetchRiderPhoto(riderName) {
   try {
-    // Try Wikipedia API - it's free and open
-    const wikiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(riderName)}`;
-    const response = await fetch(wikiUrl);
+    // Try Dutch Wikipedia first (for Dutch names like Roger Smit, Mart Smeets)
+    const nlWikiUrl = `https://nl.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(riderName)}`;
+    let response = await fetch(nlWikiUrl);
+    
+    // If not found in Dutch, try English Wikipedia
+    if (!response.ok) {
+      const enWikiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(riderName)}`;
+      response = await fetch(enWikiUrl);
+    }
     
     if (!response.ok) {
       return null;

@@ -114,6 +114,107 @@ const stubDashboardData = {
       stage: "Rit 1",
       points: 45
     }
+  ],
+  standings: [
+    {
+      id: 1,
+      rank: 1,
+      name: "Jan Jansen",
+      totalPoints: 301,
+      rankChange: 0
+    },
+    {
+      id: 2,
+      rank: 2,
+      name: "Op goed geluk",
+      totalPoints: 290,
+      rankChange: 2
+    },
+    {
+      id: 3,
+      rank: 3,
+      name: "Dappere dodo's",
+      totalPoints: 283,
+      rankChange: -1
+    },
+    {
+      id: 4,
+      rank: 4,
+      name: "Gladde benen",
+      totalPoints: 254,
+      rankChange: 17
+    },
+    {
+      id: 5,
+      rank: 5,
+      name: "MessbauersMennekes",
+      totalPoints: 225,
+      rankChange: 9
+    },
+    {
+      id: 6,
+      rank: 5,
+      name: "Berries Bikkels",
+      totalPoints: 225,
+      rankChange: 0
+    },
+    {
+      id: 7,
+      rank: 7,
+      name: "Finish First",
+      totalPoints: 224,
+      rankChange: -2
+    },
+    {
+      id: 8,
+      rank: 8,
+      name: "ZonneVuurbalJonguh",
+      totalPoints: 219,
+      rankChange: 5
+    },
+    {
+      id: 9,
+      rank: 9,
+      name: "Roy's Renstal",
+      totalPoints: 217,
+      rankChange: 0
+    },
+    {
+      id: 10,
+      rank: 10,
+      name: "Beter laatst dan nooitst",
+      totalPoints: 215,
+      rankChange: 0
+    }
+  ],
+  prikbord: [
+    {
+      id: 1,
+      message: "Wanneer is de uitslag bekend?",
+      author: "Dappere dodo's",
+      date: "31-05-2022",
+      time: "14:35",
+      isNew: false,
+      replies: [
+        {
+          id: 2,
+          message: "Ik heb de stand zojuist geupdate",
+          author: "MessbauersMennekes",
+          date: "31-05-2022",
+          time: "15:15",
+          isNew: false
+        }
+      ]
+    },
+    {
+      id: 3,
+      message: "Thanks, goed bezig Jochem!",
+      author: "Dappere dodo's",
+      date: "31-05-2022",
+      time: "15:45",
+      isNew: true,
+      replies: []
+    }
   ]
 };
 
@@ -262,6 +363,109 @@ function renderStageInfo(stageInfo) {
   `;
 }
 
+function renderStandings(standings) {
+  const standingsList = document.getElementById('standings-list');
+  if (!standingsList) return;
+
+  standingsList.innerHTML = '';
+
+  standings.forEach((team) => {
+    const teamItem = document.createElement('div');
+    teamItem.className = 'standing-item';
+    
+    // Rank change indicator (always show)
+    let changeIndicator = '';
+    const rankChange = team.rankChange !== null && team.rankChange !== undefined ? team.rankChange : 0;
+    
+    if (rankChange > 0) {
+      // Gestegen - groen met pijl omhoog
+      changeIndicator = `<div class="standing-change standing-change-up">
+        <span class="standing-change-value">${rankChange}</span>
+        <svg class="standing-change-arrow" width="6" height="6" viewBox="0 0 6 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 0L6 6L0 6Z" fill="#18AA2E"/>
+        </svg>
+      </div>`;
+    } else if (rankChange < 0) {
+      // Gedaald - rood met pijl naar beneden
+      const absChange = Math.abs(rankChange);
+      changeIndicator = `<div class="standing-change standing-change-down">
+        <span class="standing-change-value">${absChange}</span>
+        <svg class="standing-change-arrow" width="6" height="6" viewBox="0 0 6 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 6L6 0L0 0Z" fill="#ff0000"/>
+        </svg>
+      </div>`;
+    } else {
+      // Gelijk gebleven - 0 met pijl naar links
+      changeIndicator = `<div class="standing-change standing-change-neutral">
+        <span class="standing-change-value">0</span>
+        <img src="assets/arrow.svg" alt="" class="standing-change-arrow standing-change-arrow-left" aria-hidden="true">
+      </div>`;
+    }
+    
+    teamItem.innerHTML = `
+      <div class="standing-rank">${team.rank}</div>
+      <div class="standing-name">${sanitizeInput(team.name)}</div>
+      <div class="standing-points">${sanitizeInput(String(team.totalPoints))}</div>
+      ${changeIndicator}
+    `;
+    
+    standingsList.appendChild(teamItem);
+  });
+}
+
+function renderPrikbord(prikbordItems) {
+  const prikbordList = document.getElementById('prikbord-list');
+  const prikbordDot = document.getElementById('prikbord-dot');
+  
+  if (!prikbordList) return;
+
+  prikbordList.innerHTML = '';
+
+  // Check if there are new items
+  const hasNewItems = prikbordItems.some(item => item.isNew || (item.replies && item.replies.some(reply => reply.isNew)));
+  if (prikbordDot) {
+    if (hasNewItems) {
+      prikbordDot.innerHTML = '<span class="prikbord-dot-indicator"></span>';
+    } else {
+      prikbordDot.innerHTML = '';
+    }
+  }
+
+  prikbordItems.forEach((item) => {
+    // Main message
+    const messageItem = document.createElement('div');
+    messageItem.className = 'prikbord-item';
+    
+    messageItem.innerHTML = `
+      <div class="prikbord-message">${sanitizeInput(item.message)}</div>
+      <div class="prikbord-meta">
+        <span class="prikbord-author">${sanitizeInput(item.author)}</span>
+        <span class="prikbord-date">${sanitizeInput(item.date)} ${sanitizeInput(item.time)}</span>
+      </div>
+    `;
+    
+    prikbordList.appendChild(messageItem);
+
+    // Replies (indented)
+    if (item.replies && item.replies.length > 0) {
+      item.replies.forEach((reply) => {
+        const replyItem = document.createElement('div');
+        replyItem.className = 'prikbord-item prikbord-reply';
+        
+        replyItem.innerHTML = `
+          <div class="prikbord-message">${sanitizeInput(reply.message)}</div>
+          <div class="prikbord-meta">
+            <span class="prikbord-author">${sanitizeInput(reply.author)}</span>
+            <span class="prikbord-date">${sanitizeInput(reply.date)} ${sanitizeInput(reply.time)}</span>
+          </div>
+        `;
+        
+        prikbordList.appendChild(replyItem);
+      });
+    }
+  });
+}
+
 function renderDayWinners(dayWinners) {
   const dayWinnersList = document.getElementById('day-winners-list');
   const dayWinnersRoute = document.getElementById('day-winners-route');
@@ -279,7 +483,7 @@ function renderDayWinners(dayWinners) {
   // Sort winners by points (highest first) to determine medal colors
   const sortedWinners = [...dayWinners].sort((a, b) => (b.points || 0) - (a.points || 0));
   
-  // Avatar colors for day winners
+  // Avatar colors for day winners (fallback)
   const avatarColors = ['#00334e', '#668494', '#cdd7dc'];
   
   dayWinners.forEach((winner) => {
@@ -300,8 +504,19 @@ function renderDayWinners(dayWinners) {
       medalIcon = '<img src="icons/derdeplaatsmedaille.svg" alt="3e plaats" class="day-winner-medal-icon">';
     }
     
+    // Use photo if available, otherwise use generated avatar or colored fallback
+    let avatarHtml = '';
+    if (winner.photoUrl) {
+      avatarHtml = `<div class="day-winner-avatar"><img src="${sanitizeInput(winner.photoUrl)}" alt="${sanitizeInput(winner.name)}" class="day-winner-avatar-img"></div>`;
+    } else {
+      // Generate avatar using UI Avatars service based on name
+      const initials = winner.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+      const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(winner.name)}&size=76&background=${avatarColor.replace('#', '')}&color=ffffff&bold=true&font-size=0.5`;
+      avatarHtml = `<div class="day-winner-avatar"><img src="${avatarUrl}" alt="${sanitizeInput(winner.name)}" class="day-winner-avatar-img" onerror="this.parentElement.style.backgroundColor='${avatarColor}'"></div>`;
+    }
+    
     winnerItem.innerHTML = `
-      <div class="day-winner-avatar" style="background-color: ${avatarColor};"></div>
+      ${avatarHtml}
       <div class="day-winner-info">
         ${winner.team ? `<div class="day-winner-name">${sanitizeInput(winner.team)}</div>` : ''}
         <div class="day-winner-team">${sanitizeInput(winner.name)}</div>
@@ -315,6 +530,13 @@ function renderDayWinners(dayWinners) {
 }
 
 async function loadRiderPhotos(pointsRiders) {
+  // Local photo mappings (works both locally and on Netlify)
+  const localPhotoMappings = {
+    'Jan Jansen': 'assets/RogerSchmidt.webp',
+    'Smart Meets': 'assets/MartSmeets.webp',
+    'Henry Schut': 'assets/MartSmeets.webp'
+  };
+  
   // Fetch photos for each rider
   const ridersWithPhotos = await Promise.all(
     pointsRiders.map(async (rider) => {
@@ -323,9 +545,23 @@ async function loadRiderPhotos(pointsRiders) {
         return rider;
       }
       
-      // Try to fetch photo from backend
+      // Check local mappings first (works locally)
+      if (localPhotoMappings[rider.name]) {
+        console.log(`Using local photo for ${rider.name}: ${localPhotoMappings[rider.name]}`);
+        return { ...rider, photoUrl: localPhotoMappings[rider.name] };
+      }
+      
+      // Check by team name if available
+      if (rider.team && localPhotoMappings[rider.team]) {
+        console.log(`Using local photo for ${rider.name} (team: ${rider.team}): ${localPhotoMappings[rider.team]}`);
+        return { ...rider, photoUrl: localPhotoMappings[rider.team] };
+      }
+      
+      // Try to fetch photo from backend (Netlify function)
       try {
-        const response = await fetch(`/.netlify/functions/get-rider-photo?riderName=${encodeURIComponent(rider.name)}`);
+        // Include team name if available for better matching
+        const teamParam = rider.team ? `&teamName=${encodeURIComponent(rider.team)}` : '';
+        const response = await fetch(`/.netlify/functions/get-rider-photo?riderName=${encodeURIComponent(rider.name)}${teamParam}`);
         
         if (!response.ok) {
           console.warn(`Failed to fetch photo for ${rider.name}: ${response.status}`);
@@ -341,7 +577,8 @@ async function loadRiderPhotos(pointsRiders) {
           console.log(`No photo found for ${rider.name}`);
         }
       } catch (error) {
-        console.error(`Error fetching photo for ${rider.name}:`, error);
+        // Silently fail if Netlify function is not available (local testing)
+        console.log(`Netlify function not available (local testing?): ${rider.name}`);
       }
       
       // Return rider without photo (will use colored avatar)
@@ -370,10 +607,20 @@ async function loadDashboardData() {
       console.error('Error loading rider photos:', error);
     });
     
-    renderTeam(dashboardData.team);
     renderAchievements(dashboardData.achievements);
-    renderStageInfo(dashboardData.stageInfo);
-    renderDayWinners(dashboardData.dayWinners);
+    
+    // Render day winners first without photos (immediate display)
+    renderDayWinners(dashboardData.dayWinners || []);
+    
+    // Then load photos in background and update
+    loadRiderPhotos(dashboardData.dayWinners || []).then(dayWinnersWithPhotos => {
+      renderDayWinners(dayWinnersWithPhotos);
+    }).catch(error => {
+      console.error('Error loading day winner photos:', error);
+    });
+    
+    renderStandings(dashboardData.standings || []);
+    renderPrikbord(dashboardData.prikbord || []);
   } catch (error) {
     console.error('Error loading dashboard data:', error);
   }
@@ -396,6 +643,26 @@ async function loadDashboardData() {
       // TODO: Navigate to team page when it's created
       console.log('Navigate to mijn team page');
       // window.location.href = 'team.html';
+    });
+  }
+  
+  // Add click handler for volledige stand button
+  const standingsButton = document.querySelector('.standings-button');
+  if (standingsButton) {
+    standingsButton.addEventListener('click', function() {
+      // TODO: Navigate to full standings page when it's created
+      console.log('Navigate to volledige stand page');
+      // window.location.href = 'standings.html';
+    });
+  }
+  
+  // Add click handler for prikbord button
+  const prikbordButton = document.querySelector('.prikbord-button');
+  if (prikbordButton) {
+    prikbordButton.addEventListener('click', function() {
+      // TODO: Navigate to prikbord page when it's created
+      console.log('Navigate to prikbord page');
+      // window.location.href = 'prikbord.html';
     });
   }
 }
@@ -442,7 +709,6 @@ async function loadUserData() {
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
-  const logoutButton = document.getElementById('logout-button');
 
   // Initialize Auth0
   await initAuth();
@@ -456,11 +722,4 @@ document.addEventListener('DOMContentLoaded', async function() {
     await loadDashboardData();
   }, 100);
 
-  // Handle logout button click
-  if (logoutButton) {
-    logoutButton.addEventListener('click', function(e) {
-      e.preventDefault();
-      logout();
-    });
-  }
 });

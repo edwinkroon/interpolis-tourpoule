@@ -223,9 +223,11 @@ function renderAchievements(achievements) {
     // Trophy icon based on achievement type
     let trophyIcon = '';
     if (achievement.type === 'Eerste plaats') {
-      trophyIcon = '<div class="achievement-trophy trophy-gold">🥇</div>';
+      trophyIcon = '<div class="achievement-trophy trophy-gold"><img src="icons/EerstePlaatsAward.svg" alt="Eerste plaats" class="achievement-trophy-icon"></div>';
     } else if (achievement.type === 'Derde plaats') {
-      trophyIcon = '<div class="achievement-trophy trophy-bronze">🥉</div>';
+      trophyIcon = '<div class="achievement-trophy trophy-bronze"><img src="icons/derdeplaatsmedaille.svg" alt="Derde plaats" class="achievement-trophy-icon"></div>';
+    } else if (achievement.type === 'Stijger van de dag') {
+      trophyIcon = '<div class="achievement-trophy trophy-special"><img src="icons/StijgerAward.svg" alt="Stijger van de dag" class="achievement-trophy-icon"></div>';
     } else {
       trophyIcon = '<div class="achievement-trophy trophy-special">⭐</div>';
     }
@@ -290,16 +292,12 @@ function renderDayWinners(dayWinners) {
     
     // Medal based on position (1 = gold, 2 = silver, 3 = bronze)
     let medalIcon = '';
-    let medalColor = '';
     if (position === 1) {
-      medalColor = '#fbb83f'; // Gold
-      medalIcon = '🥇';
+      medalIcon = '<img src="icons/eersteplaatsmedaille.svg" alt="1e plaats" class="day-winner-medal-icon">';
     } else if (position === 2) {
-      medalColor = '#cdd7dc'; // Silver
-      medalIcon = '🥈';
+      medalIcon = '<img src="icons/tweedeplaatsmedaille.svg" alt="2e plaats" class="day-winner-medal-icon">';
     } else if (position === 3) {
-      medalColor = '#fc9567'; // Bronze
-      medalIcon = '🥉';
+      medalIcon = '<img src="icons/derdeplaatsmedaille.svg" alt="3e plaats" class="day-winner-medal-icon">';
     }
     
     winnerItem.innerHTML = `
@@ -308,7 +306,7 @@ function renderDayWinners(dayWinners) {
         ${winner.team ? `<div class="day-winner-name">${sanitizeInput(winner.team)}</div>` : ''}
         <div class="day-winner-team">${sanitizeInput(winner.name)}</div>
       </div>
-      ${medalIcon ? `<div class="day-winner-medal" style="color: ${medalColor};">${medalIcon}</div>` : '<div class="day-winner-medal"></div>'}
+      ${medalIcon ? `<div class="day-winner-medal">${medalIcon}</div>` : '<div class="day-winner-medal"></div>'}
       <div class="day-winner-points">${sanitizeInput(String(winner.points || 0))}</div>
     `;
     

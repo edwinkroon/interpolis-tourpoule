@@ -6,7 +6,7 @@ const stubDashboardData = {
   pointsRiders: [
     {
       id: 1,
-      name: "Tadej Pogačar",
+      name: "Tadej Pogacar",
       team: "UAE-Team Emirates",
       points: 12,
       photoUrl: null // Will be fetched from backend

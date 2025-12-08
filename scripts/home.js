@@ -346,20 +346,30 @@ async function loadRiderPhotos(pointsRiders) {
 }
 
 async function loadDashboardData() {
-  // TODO: Replace with actual backend API call
-  // For now, use stub data
-  const dashboardData = stubDashboardData;
-  
-  renderPoints(dashboardData.points);
-  
-  // Load rider photos if not already loaded
-  const pointsRiders = await loadRiderPhotos(dashboardData.pointsRiders || []);
-  renderPointsRiders(pointsRiders);
-  
-  renderTeam(dashboardData.team);
-  renderAchievements(dashboardData.achievements);
-  renderStageInfo(dashboardData.stageInfo);
-  renderDayWinners(dashboardData.dayWinners);
+  try {
+    // TODO: Replace with actual backend API call
+    // For now, use stub data
+    const dashboardData = stubDashboardData;
+    
+    renderPoints(dashboardData.points);
+    
+    // Load rider photos if not already loaded (don't block on this)
+    try {
+      const pointsRiders = await loadRiderPhotos(dashboardData.pointsRiders || []);
+      renderPointsRiders(pointsRiders);
+    } catch (error) {
+      console.error('Error loading rider photos:', error);
+      // Fallback: render without photos
+      renderPointsRiders(dashboardData.pointsRiders || []);
+    }
+    
+    renderTeam(dashboardData.team);
+    renderAchievements(dashboardData.achievements);
+    renderStageInfo(dashboardData.stageInfo);
+    renderDayWinners(dashboardData.dayWinners);
+  } catch (error) {
+    console.error('Error loading dashboard data:', error);
+  }
   
   // Add click handler for etappe informatie button
   const dayWinnersButton = document.querySelector('.day-winners-button');
@@ -435,7 +445,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   
   // Load dashboard data (using stub data for now)
   // Small delay to ensure DOM is ready
-  setTimeout(() => {
+  setTimeout(async () => {
     await loadDashboardData();
   }, 100);
 

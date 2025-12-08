@@ -85,19 +85,42 @@ function renderTeam(teamMembers) {
 
   teamList.innerHTML = '';
 
-  teamMembers.forEach(member => {
+  // Avatar colors based on position or default
+  const avatarColors = ['#0095db', '#668494', '#cdd7dc', '#cdd7dc', '#cdd7dc'];
+  
+  teamMembers.forEach((member, index) => {
     const teamMember = document.createElement('div');
     teamMember.className = 'team-member';
     
     const position = member.position ? `<span class="team-position">${member.position}</span>` : '';
     const points = member.points ? `<span class="team-points">${member.points}</span>` : '';
+    const avatarColor = avatarColors[index] || '#cdd7dc';
+    
+    // Trophy icon for top positions
+    let trophyIcon = '';
+    if (member.position === 1) {
+      trophyIcon = `<div class="trophy-icon trophy-gold">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="10" cy="10" r="9" fill="#fbb83f" stroke="#00334e" stroke-width="1"/>
+          <text x="10" y="14" text-anchor="middle" font-size="10" font-weight="700" fill="#00334e">${member.position}</text>
+        </svg>
+      </div>`;
+    } else if (member.position === 2) {
+      trophyIcon = `<div class="trophy-icon trophy-silver">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="10" cy="10" r="9" fill="#cdd7dc" stroke="#00334e" stroke-width="1"/>
+          <text x="10" y="14" text-anchor="middle" font-size="10" font-weight="700" fill="#00334e">${member.position}</text>
+        </svg>
+      </div>`;
+    }
     
     teamMember.innerHTML = `
-      ${position}
+      <div class="team-member-avatar" style="background-color: ${avatarColor};"></div>
       <div class="team-member-info">
         <div class="team-member-name">${sanitizeInput(member.name)}</div>
         ${member.team ? `<div class="team-member-team">${sanitizeInput(member.team)}</div>` : ''}
       </div>
+      ${trophyIcon}
       ${points}
     `;
     
@@ -115,10 +138,23 @@ function renderAchievements(achievements) {
     const achievementItem = document.createElement('div');
     achievementItem.className = 'achievement-item';
     
+    // Trophy icon based on achievement type
+    let trophyIcon = '';
+    if (achievement.type === 'Eerste plaats') {
+      trophyIcon = '<div class="achievement-trophy trophy-gold">🥇</div>';
+    } else if (achievement.type === 'Derde plaats') {
+      trophyIcon = '<div class="achievement-trophy trophy-bronze">🥉</div>';
+    } else {
+      trophyIcon = '<div class="achievement-trophy trophy-special">⭐</div>';
+    }
+    
     achievementItem.innerHTML = `
-      <div class="achievement-type">${sanitizeInput(achievement.type)}</div>
-      <div class="achievement-stage">${sanitizeInput(achievement.stage)}</div>
-      <div class="achievement-route">${sanitizeInput(achievement.route)}</div>
+      ${trophyIcon}
+      <div class="achievement-content">
+        <div class="achievement-stage">${sanitizeInput(achievement.stage)}</div>
+        <div class="achievement-route">${sanitizeInput(achievement.route)}</div>
+        <div class="achievement-type">${sanitizeInput(achievement.type)}</div>
+      </div>
     `;
     
     achievementsList.appendChild(achievementItem);

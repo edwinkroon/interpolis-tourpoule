@@ -6,7 +6,7 @@ const stubDashboardData = {
   pointsRiders: [
     {
       id: 1,
-      name: "Tadej Pogacar",
+      name: "Tadej Pogačar",
       team: "UAE-Team Emirates",
       points: 12,
       photoUrl: null // Will be fetched from backend
@@ -220,12 +220,12 @@ function renderAchievements(achievements) {
     const achievementItem = document.createElement('div');
     achievementItem.className = 'achievement-item';
     
-    // Trophy icon based on achievement type
+    // Trophy icon based on achievement type (only award icons for achievements)
     let trophyIcon = '';
     if (achievement.type === 'Eerste plaats') {
       trophyIcon = '<div class="achievement-trophy trophy-gold"><img src="icons/EerstePlaatsAward.svg" alt="Eerste plaats" class="achievement-trophy-icon"></div>';
     } else if (achievement.type === 'Derde plaats') {
-      trophyIcon = '<div class="achievement-trophy trophy-bronze"><img src="icons/derdeplaatsmedaille.svg" alt="Derde plaats" class="achievement-trophy-icon"></div>';
+      trophyIcon = '<div class="achievement-trophy trophy-bronze"><img src="icons/derdeplaatsaward.svg" alt="Derde plaats" class="achievement-trophy-icon"></div>';
     } else if (achievement.type === 'Stijger van de dag') {
       trophyIcon = '<div class="achievement-trophy trophy-special"><img src="icons/StijgerAward.svg" alt="Stijger van de dag" class="achievement-trophy-icon"></div>';
     } else {
@@ -326,10 +326,19 @@ async function loadRiderPhotos(pointsRiders) {
       // Try to fetch photo from backend
       try {
         const response = await fetch(`/.netlify/functions/get-rider-photo?riderName=${encodeURIComponent(rider.name)}`);
+        
+        if (!response.ok) {
+          console.warn(`Failed to fetch photo for ${rider.name}: ${response.status}`);
+          return rider;
+        }
+        
         const result = await response.json();
         
         if (result.ok && result.photoUrl) {
+          console.log(`Photo found for ${rider.name}: ${result.photoUrl}`);
           return { ...rider, photoUrl: result.photoUrl };
+        } else {
+          console.log(`No photo found for ${rider.name}`);
         }
       } catch (error) {
         console.error(`Error fetching photo for ${rider.name}:`, error);
@@ -351,15 +360,15 @@ async function loadDashboardData() {
     
     renderPoints(dashboardData.points);
     
-    // Load rider photos if not already loaded (don't block on this)
-    try {
-      const pointsRiders = await loadRiderPhotos(dashboardData.pointsRiders || []);
-      renderPointsRiders(pointsRiders);
-    } catch (error) {
+    // Render riders first without photos (immediate display)
+    renderPointsRiders(dashboardData.pointsRiders || []);
+    
+    // Then load photos in background and update
+    loadRiderPhotos(dashboardData.pointsRiders || []).then(pointsRidersWithPhotos => {
+      renderPointsRiders(pointsRidersWithPhotos);
+    }).catch(error => {
       console.error('Error loading rider photos:', error);
-      // Fallback: render without photos
-      renderPointsRiders(dashboardData.pointsRiders || []);
-    }
+    });
     
     renderTeam(dashboardData.team);
     renderAchievements(dashboardData.achievements);

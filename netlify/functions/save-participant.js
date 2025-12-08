@@ -42,11 +42,29 @@ exports.handler = async function(event) {
       avatarUrl = null; // Convert empty string or 'null' string to null
     }
 
-    if (!teamName || !email) {
+    // Validate required fields
+    if (!teamName) {
       return { 
         statusCode: 400, 
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ok: false, error: 'teamName en email zijn verplicht' }) 
+        body: JSON.stringify({ ok: false, error: 'teamName is verplicht' }) 
+      };
+    }
+    
+    if (!email) {
+      return { 
+        statusCode: 400, 
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ok: false, error: 'email is verplicht' }) 
+      };
+    }
+    
+    // user_id is now required (NOT NULL in database)
+    if (!userId || !userId.trim()) {
+      return { 
+        statusCode: 400, 
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ok: false, error: 'userId is verplicht' }) 
       };
     }
 
@@ -73,32 +91,19 @@ exports.handler = async function(event) {
 
     await client.connect();
 
-    let query;
-    let values;
-    
-    if (userId && userId.trim() !== '') {
-      // Als userId aanwezig is, gebruik ON CONFLICT voor updates
-      query = `
-        INSERT INTO participants (user_id, team_name, email, avatar_url, newsletter)
-        VALUES ($1, $2, $3, $4, $5)
-        ON CONFLICT (user_id) 
-        DO UPDATE SET 
-          team_name = EXCLUDED.team_name,
-          email = EXCLUDED.email,
-          avatar_url = EXCLUDED.avatar_url,
-          newsletter = EXCLUDED.newsletter
-        RETURNING id, user_id
-      `;
-      values = [userId, teamName, email, avatarUrl || null, !!newsletter];
-    } else {
-      // Als userId niet aanwezig is, gewoon INSERT (zonder user_id)
-      query = `
-        INSERT INTO participants (team_name, email, avatar_url, newsletter)
-        VALUES ($1, $2, $3, $4)
-        RETURNING id
-      `;
-      values = [teamName, email, avatarUrl || null, !!newsletter];
-    }
+    // user_id is now required (NOT NULL), so always use ON CONFLICT for upsert
+    const query = `
+      INSERT INTO participants (user_id, team_name, email, avatar_url, newsletter)
+      VALUES ($1, $2, $3, $4, $5)
+      ON CONFLICT (user_id) 
+      DO UPDATE SET 
+        team_name = EXCLUDED.team_name,
+        email = EXCLUDED.email,
+        avatar_url = EXCLUDED.avatar_url,
+        newsletter = EXCLUDED.newsletter
+      RETURNING id, user_id, created_at
+    `;
+    const values = [userId.trim(), teamName, email, avatarUrl || null, !!newsletter];
 
     const { rows } = await client.query(query, values);
 

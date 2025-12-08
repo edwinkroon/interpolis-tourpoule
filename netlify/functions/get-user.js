@@ -41,7 +41,7 @@ exports.handler = async function(event) {
     await client.connect();
 
     const query = `
-      SELECT id, team_name, email, avatar_url, newsletter
+      SELECT id, user_id, team_name, email, avatar_url, newsletter, created_at
       FROM participants
       WHERE user_id = $1
       LIMIT 1
@@ -89,7 +89,7 @@ exports.handler = async function(event) {
         ok: false, 
         error: err.message || 'Database error',
         details: process.env.NODE_ENV === 'development' ? err.stack : undefined,
-        query: 'SELECT id, team_name, email, avatar_url, newsletter FROM participants WHERE user_id = $1'
+        query: 'SELECT id, user_id, team_name, email, avatar_url, newsletter, created_at FROM participants WHERE user_id = $1'
       })
     };
   }

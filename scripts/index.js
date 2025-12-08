@@ -1,9 +1,19 @@
 // Load shared Auth0 utilities
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
   const nextButton = document.getElementById('next-button');
 
   // Initialize Auth0
-  initAuth();
+  await initAuth();
+
+  // Check if user is already a participant and redirect to home if so
+  const userId = await getUserId();
+  if (userId) {
+    const exists = await checkParticipantExists(userId);
+    if (exists) {
+      window.location.href = 'home.html';
+      return;
+    }
+  }
 
   // Handle next button click
   nextButton.addEventListener('click', function(e) {

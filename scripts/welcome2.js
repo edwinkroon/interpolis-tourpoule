@@ -12,11 +12,18 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Initialize Auth0
   await initAuth();
   
-  // Try to get user ID and store in sessionStorage if not already there
-  if (!sessionStorage.getItem('auth0_user_id')) {
-    const userId = await getUserId();
-    if (userId) {
-      sessionStorage.setItem('auth0_user_id', userId);
+  // Get user ID and store in sessionStorage if not already there
+  let userId = await getUserId();
+  if (userId && !sessionStorage.getItem('auth0_user_id')) {
+    sessionStorage.setItem('auth0_user_id', userId);
+  }
+
+  // Check if user is already a participant and redirect to home if so
+  if (userId) {
+    const exists = await checkParticipantExists(userId);
+    if (exists) {
+      window.location.href = 'home.html';
+      return;
     }
   }
 

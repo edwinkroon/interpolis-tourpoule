@@ -66,6 +66,27 @@ async function getUserId() {
 }
 
 /**
+ * Check if a participant exists in the database
+ * @param {string} userId - The user ID to check
+ * @returns {Promise<boolean>} - True if participant exists, false otherwise
+ */
+async function checkParticipantExists(userId) {
+  if (!userId) {
+    return false;
+  }
+
+  try {
+    const response = await fetch(`/.netlify/functions/get-user?userId=${encodeURIComponent(userId)}`);
+    const result = await response.json();
+    
+    return result.ok && result.exists === true;
+  } catch (error) {
+    // Silent fail on check error
+    return false;
+  }
+}
+
+/**
  * Logout user and clear session
  * @returns {Promise<void>}
  */

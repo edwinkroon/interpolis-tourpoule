@@ -808,6 +808,18 @@ button[aria-busy="true"] {
   font-weight: 700;
   text-transform: none;
   margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.day-winners-route {
+  font-size: 14px;
+  font-weight: 300;
+  color: #00334e;
+  margin-left: auto;
 }
 
 .day-winners-list {
@@ -862,13 +874,61 @@ button[aria-busy="true"] {
   line-height: 1.4;
 }
 
-.day-winner-route {
-  font-size: 14px;
-  font-weight: 300;
+.day-winner-medal {
+  font-size: 20px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+}
+
+.day-winner-points {
+  font-size: 15px;
   color: #00334e;
+  font-weight: 400;
   text-align: right;
-  min-width: 180px;
-  padding-left: 1rem;
+  min-width: 40px;
+  padding-left: 0.5rem;
+}
+
+.day-winners-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  color: #00334e;
+  font-size: 16px;
+  font-family: 'Open Sans', system-ui, sans-serif;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  margin-top: auto;
+  transition: color 0.2s;
+  text-transform: lowercase;
+}
+
+.day-winners-button:hover {
+  color: #00cac6;
+}
+
+.day-winners-button .button-arrow {
+  flex-shrink: 0;
+  transform: rotate(90deg);
+  width: 10px;
+  height: 10px;
+}
+
+.day-winners-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.day-winners-list {
+  flex: 1;
 }
 
 /* Responsive Dashboard */

@@ -209,18 +209,45 @@ function renderStageInfo(stageInfo) {
 
 function renderDayWinners(dayWinners) {
   const dayWinnersList = document.getElementById('day-winners-list');
+  const dayWinnersRoute = document.getElementById('day-winners-route');
+  
   if (!dayWinnersList) return;
 
   dayWinnersList.innerHTML = '';
 
-  // Avatar colors for day winners
-  const avatarColors = ['#0095db', '#668494', '#cdd7dc'];
+  // Show route info in title (from first winner or most recent)
+  if (dayWinners.length > 0 && dayWinnersRoute) {
+    const firstWinner = dayWinners[0];
+    dayWinnersRoute.textContent = firstWinner.route || '';
+  }
+
+  // Sort winners by points (highest first) to determine medal colors
+  const sortedWinners = [...dayWinners].sort((a, b) => (b.points || 0) - (a.points || 0));
   
-  dayWinners.forEach((winner, index) => {
+  // Avatar colors for day winners
+  const avatarColors = ['#00334e', '#668494', '#cdd7dc'];
+  
+  dayWinners.forEach((winner) => {
     const winnerItem = document.createElement('div');
     winnerItem.className = 'day-winner-item';
     
-    const avatarColor = avatarColors[index] || '#cdd7dc';
+    // Find position in sorted list to determine medal
+    const position = sortedWinners.findIndex(w => w.id === winner.id) + 1;
+    const avatarColor = avatarColors[position - 1] || '#cdd7dc';
+    
+    // Medal based on position (1 = gold, 2 = silver, 3 = bronze)
+    let medalIcon = '';
+    let medalColor = '';
+    if (position === 1) {
+      medalColor = '#fbb83f'; // Gold
+      medalIcon = '🥇';
+    } else if (position === 2) {
+      medalColor = '#cdd7dc'; // Silver
+      medalIcon = '🥈';
+    } else if (position === 3) {
+      medalColor = '#fc9567'; // Bronze
+      medalIcon = '🥉';
+    }
     
     winnerItem.innerHTML = `
       <div class="day-winner-avatar" style="background-color: ${avatarColor};"></div>
@@ -228,7 +255,8 @@ function renderDayWinners(dayWinners) {
         <div class="day-winner-name">${sanitizeInput(winner.name)}</div>
         ${winner.team ? `<div class="day-winner-team">${sanitizeInput(winner.team)}</div>` : ''}
       </div>
-      <div class="day-winner-route">${sanitizeInput(winner.route || '')}</div>
+      ${medalIcon ? `<div class="day-winner-medal" style="color: ${medalColor};">${medalIcon}</div>` : ''}
+      <div class="day-winner-points">${sanitizeInput(winner.points || 0)}</div>
     `;
     
     dayWinnersList.appendChild(winnerItem);
@@ -245,6 +273,17 @@ function loadDashboardData() {
   renderAchievements(dashboardData.achievements);
   renderStageInfo(dashboardData.stageInfo);
   renderDayWinners(dashboardData.dayWinners);
+  
+  // Add click handler for etappe informatie button
+  const dayWinnersButton = document.querySelector('.day-winners-button');
+  if (dayWinnersButton) {
+    dayWinnersButton.addEventListener('click', function() {
+      // TODO: Navigate to etappe informatie page when it's created
+      // For now, just log or show alert
+      console.log('Navigate to etappe informatie page');
+      // window.location.href = 'etappe-info.html';
+    });
+  }
 }
 
 async function loadUserData() {

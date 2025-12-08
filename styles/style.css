@@ -835,6 +835,7 @@ button[aria-busy="true"] {
   padding: 1rem 0;
   border-bottom: 1px solid #cdd7dc;
   position: relative;
+  width: 100%;
 }
 
 .day-winner-item:first-child {
@@ -857,6 +858,7 @@ button[aria-busy="true"] {
 .day-winner-info {
   flex: 1;
   min-width: 0;
+  max-width: calc(100% - 200px);
 }
 
 .day-winner-name {
@@ -889,8 +891,12 @@ button[aria-busy="true"] {
   color: #00334e;
   font-weight: 400;
   text-align: right;
-  min-width: 40px;
+  min-width: 50px;
   padding-left: 0.5rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .day-winners-button {
@@ -914,11 +920,12 @@ button[aria-busy="true"] {
   color: #00cac6;
 }
 
-.day-winners-button .button-arrow {
+.day-winners-button .action-arrow {
+  width: 9px;
+  height: 12px;
+  display: block;
   flex-shrink: 0;
-  transform: rotate(90deg);
-  width: 10px;
-  height: 10px;
+  transform: rotate(0deg);
 }
 
 .day-winners-section {

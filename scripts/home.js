@@ -252,11 +252,11 @@ function renderDayWinners(dayWinners) {
     winnerItem.innerHTML = `
       <div class="day-winner-avatar" style="background-color: ${avatarColor};"></div>
       <div class="day-winner-info">
-        <div class="day-winner-name">${sanitizeInput(winner.name)}</div>
-        ${winner.team ? `<div class="day-winner-team">${sanitizeInput(winner.team)}</div>` : ''}
+        ${winner.team ? `<div class="day-winner-name">${sanitizeInput(winner.team)}</div>` : ''}
+        <div class="day-winner-team">${sanitizeInput(winner.name)}</div>
       </div>
-      ${medalIcon ? `<div class="day-winner-medal" style="color: ${medalColor};">${medalIcon}</div>` : ''}
-      <div class="day-winner-points">${sanitizeInput(winner.points || 0)}</div>
+      ${medalIcon ? `<div class="day-winner-medal" style="color: ${medalColor};">${medalIcon}</div>` : '<div class="day-winner-medal"></div>'}
+      <div class="day-winner-points">${sanitizeInput(String(winner.points || 0))}</div>
     `;
     
     dayWinnersList.appendChild(winnerItem);

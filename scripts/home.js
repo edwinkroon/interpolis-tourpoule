@@ -3,6 +3,22 @@
 // Stub data for dashboard (will be replaced with backend data later)
 const stubDashboardData = {
   points: 27,
+  pointsRiders: [
+    {
+      id: 1,
+      name: "Tadej Pogacar",
+      team: "UAE-Team Emirates",
+      points: 12,
+      photoUrl: null // Will be fetched from backend
+    },
+    {
+      id: 2,
+      name: "Wout van Aert",
+      team: "Team Jumbo-Visma",
+      points: 15,
+      photoUrl: null // Will be fetched from backend
+    }
+  ],
   team: [
     {
       id: 1,
@@ -106,6 +122,43 @@ function renderPoints(points) {
   if (pointsDisplay) {
     pointsDisplay.textContent = `(${points})`;
   }
+}
+
+function renderPointsRiders(pointsRiders) {
+  const pointsRidersList = document.getElementById('points-riders-list');
+  if (!pointsRidersList) return;
+
+  pointsRidersList.innerHTML = '';
+
+  // Avatar colors for riders (fallback when no photo)
+  const avatarColors = ['#cdd7dc', '#0095db'];
+  
+  pointsRiders.forEach((rider, index) => {
+    const riderItem = document.createElement('div');
+    riderItem.className = 'points-rider-item';
+    
+    const avatarColor = avatarColors[index] || '#cdd7dc';
+    
+    // Use photo if available, otherwise use colored avatar
+    let avatarHtml = '';
+    if (rider.photoUrl) {
+      avatarHtml = `<img src="${sanitizeInput(rider.photoUrl)}" alt="${sanitizeInput(rider.name)}" class="points-rider-avatar-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+        <div class="points-rider-avatar" style="background-color: ${avatarColor}; display: none;"></div>`;
+    } else {
+      avatarHtml = `<div class="points-rider-avatar" style="background-color: ${avatarColor};"></div>`;
+    }
+    
+    riderItem.innerHTML = `
+      ${avatarHtml}
+      <div class="points-rider-info">
+        <div class="points-rider-name">${sanitizeInput(rider.name)}</div>
+        ${rider.team ? `<div class="points-rider-team">${sanitizeInput(rider.team)}</div>` : ''}
+      </div>
+      <div class="points-rider-points">${sanitizeInput(String(rider.points || 0))}</div>
+    `;
+    
+    pointsRidersList.appendChild(riderItem);
+  });
 }
 
 function renderTeam(teamMembers) {
@@ -263,12 +316,46 @@ function renderDayWinners(dayWinners) {
   });
 }
 
-function loadDashboardData() {
+async function loadRiderPhotos(pointsRiders) {
+  // Fetch photos for each rider
+  const ridersWithPhotos = await Promise.all(
+    pointsRiders.map(async (rider) => {
+      // If photo already exists, use it
+      if (rider.photoUrl) {
+        return rider;
+      }
+      
+      // Try to fetch photo from backend
+      try {
+        const response = await fetch(`/.netlify/functions/get-rider-photo?riderName=${encodeURIComponent(rider.name)}`);
+        const result = await response.json();
+        
+        if (result.ok && result.photoUrl) {
+          return { ...rider, photoUrl: result.photoUrl };
+        }
+      } catch (error) {
+        console.error(`Error fetching photo for ${rider.name}:`, error);
+      }
+      
+      // Return rider without photo (will use colored avatar)
+      return rider;
+    })
+  );
+  
+  return ridersWithPhotos;
+}
+
+async function loadDashboardData() {
   // TODO: Replace with actual backend API call
   // For now, use stub data
   const dashboardData = stubDashboardData;
   
   renderPoints(dashboardData.points);
+  
+  // Load rider photos if not already loaded
+  const pointsRiders = await loadRiderPhotos(dashboardData.pointsRiders || []);
+  renderPointsRiders(pointsRiders);
+  
   renderTeam(dashboardData.team);
   renderAchievements(dashboardData.achievements);
   renderStageInfo(dashboardData.stageInfo);
@@ -282,6 +369,16 @@ function loadDashboardData() {
       // For now, just log or show alert
       console.log('Navigate to etappe informatie page');
       // window.location.href = 'etappe-info.html';
+    });
+  }
+  
+  // Add click handler for mijn team button in points section
+  const pointsTeamButton = document.querySelector('.points-team-button');
+  if (pointsTeamButton) {
+    pointsTeamButton.addEventListener('click', function() {
+      // TODO: Navigate to team page when it's created
+      console.log('Navigate to mijn team page');
+      // window.location.href = 'team.html';
     });
   }
 }
@@ -339,7 +436,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Load dashboard data (using stub data for now)
   // Small delay to ensure DOM is ready
   setTimeout(() => {
-    loadDashboardData();
+    await loadDashboardData();
   }, 100);
 
   // Handle logout button click

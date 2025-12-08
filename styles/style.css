@@ -565,15 +565,127 @@ button[aria-busy="true"] {
 
 /* Points Section */
 .points-section {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .points-section .dashboard-section-title {
   font-size: 19px;
   font-weight: 700;
   color: #00334e;
-  margin-bottom: 0;
+  margin-bottom: 1.5rem;
   text-transform: none;
+}
+
+.points-value {
+  font-weight: 400;
+}
+
+.points-riders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  flex: 1;
+  margin-bottom: 1rem;
+}
+
+.points-rider-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid #cdd7dc;
+  position: relative;
+}
+
+.points-rider-item:first-child {
+  border-top: 1px solid #cdd7dc;
+}
+
+.points-rider-item:last-child {
+  border-bottom: none;
+}
+
+.points-rider-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid #707070;
+  flex-shrink: 0;
+  background-color: #cdd7dc;
+}
+
+.points-rider-avatar-img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid #707070;
+  flex-shrink: 0;
+  object-fit: cover;
+  background-color: #cdd7dc;
+}
+
+.points-rider-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.points-rider-name {
+  font-size: 15px;
+  color: #00334e;
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+  font-weight: 400;
+}
+
+.points-rider-team {
+  font-size: 13px;
+  font-weight: 300;
+  color: #668494;
+  line-height: 1.4;
+}
+
+.points-rider-points {
+  font-size: 15px;
+  color: #00334e;
+  font-weight: 400;
+  text-align: right;
+  min-width: 50px;
+  padding-left: 0.5rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.points-team-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  color: #00334e;
+  font-size: 16px;
+  font-family: 'Open Sans', system-ui, sans-serif;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  margin-top: auto;
+  transition: color 0.2s;
+  text-transform: lowercase;
+}
+
+.points-team-button:hover {
+  color: #00cac6;
+}
+
+.points-team-button .action-arrow {
+  width: 9px;
+  height: 12px;
+  display: block;
+  flex-shrink: 0;
+  transform: rotate(0deg);
 }
 
 .points-value {

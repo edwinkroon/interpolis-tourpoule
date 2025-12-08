@@ -521,6 +521,18 @@ button[aria-busy="true"] {
   gap: 1.5rem;
 }
 
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.dashboard-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
 .dashboard-section {
   background: #fff;
   border-radius: 20px;
@@ -751,8 +763,66 @@ button[aria-busy="true"] {
   font-weight: 300;
 }
 
+/* Day Winners Section */
+.day-winners-section .dashboard-section-title {
+  font-size: 20px;
+  font-weight: 700;
+  text-transform: none;
+  margin-bottom: 1.5rem;
+}
+
+.day-winners-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.day-winner-item {
+  padding: 1rem;
+  background: #f0f3f5;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.day-winner-date {
+  font-size: 14px;
+  font-weight: 300;
+  color: #00334e;
+}
+
+.day-winner-stage {
+  font-size: 14px;
+  font-weight: 300;
+  color: #00334e;
+}
+
+.day-winner-name {
+  font-size: 16px;
+  font-weight: 400;
+  color: #00334e;
+}
+
+.day-winner-team {
+  font-size: 13px;
+  font-weight: 300;
+  color: #668494;
+}
+
+.day-winner-points {
+  font-size: 14px;
+  font-weight: 400;
+  color: #00334e;
+  margin-top: 0.25rem;
+}
+
 /* Responsive Dashboard */
 @media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
   .dashboard-section {
     padding: 1.5rem;
   }

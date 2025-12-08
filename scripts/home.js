@@ -69,7 +69,33 @@ const stubDashboardData = {
     date: "2024-07-05",
     distance: "175 km",
     type: "Vlakke rit"
-  }
+  },
+  dayWinners: [
+    {
+      id: 1,
+      name: "Jochem Messbauer",
+      team: "MessbauerMennekes",
+      date: "2024-07-03",
+      stage: "Rit 3",
+      points: 49
+    },
+    {
+      id: 2,
+      name: "Henry Schut",
+      team: "Smart Meets",
+      date: "2024-07-02",
+      stage: "Rit 2",
+      points: 47
+    },
+    {
+      id: 3,
+      name: "Jan Jansen",
+      team: "Team Jansen",
+      date: "2024-07-01",
+      stage: "Rit 1",
+      points: 45
+    }
+  ]
 };
 
 function renderPoints(points) {
@@ -178,6 +204,28 @@ function renderStageInfo(stageInfo) {
   `;
 }
 
+function renderDayWinners(dayWinners) {
+  const dayWinnersList = document.getElementById('day-winners-list');
+  if (!dayWinnersList) return;
+
+  dayWinnersList.innerHTML = '';
+
+  dayWinners.forEach(winner => {
+    const winnerItem = document.createElement('div');
+    winnerItem.className = 'day-winner-item';
+    
+    winnerItem.innerHTML = `
+      <div class="day-winner-date">${sanitizeInput(winner.date)}</div>
+      <div class="day-winner-stage">${sanitizeInput(winner.stage)}</div>
+      <div class="day-winner-name">${sanitizeInput(winner.name)}</div>
+      ${winner.team ? `<div class="day-winner-team">${sanitizeInput(winner.team)}</div>` : ''}
+      <div class="day-winner-points">${sanitizeInput(winner.points)} punten</div>
+    `;
+    
+    dayWinnersList.appendChild(winnerItem);
+  });
+}
+
 function loadDashboardData() {
   // TODO: Replace with actual backend API call
   // For now, use stub data
@@ -187,6 +235,7 @@ function loadDashboardData() {
   renderTeam(dashboardData.team);
   renderAchievements(dashboardData.achievements);
   renderStageInfo(dashboardData.stageInfo);
+  renderDayWinners(dashboardData.dayWinners);
 }
 
 async function loadUserData() {

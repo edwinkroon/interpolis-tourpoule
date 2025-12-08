@@ -44,12 +44,12 @@
         // Gebruiker bestaat al, redirect naar home
         window.location.href = 'home.html';
       } else {
-        // Gebruiker bestaat nog niet, redirect naar index (welcome flow)
-        window.location.href = 'index.html';
+        // Gebruiker bestaat nog niet, redirect naar login
+        window.location.href = 'login.html';
       }
     } catch (error) {
-      // Bij error, gewoon naar index redirecten
-      window.location.href = 'index.html';
+      // Bij error, redirect naar login
+      window.location.href = 'login.html';
     }
   } catch (error) {
     document.body.innerHTML = `<p>Fout bij inloggen: ${error.message || error}. <a href="login.html">Probeer opnieuw</a></p>`;

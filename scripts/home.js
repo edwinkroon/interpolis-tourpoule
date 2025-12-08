@@ -710,6 +710,13 @@ async function loadUserData() {
 
 document.addEventListener('DOMContentLoaded', async function() {
 
+  // Check if user is authenticated and exists in database
+  // This will redirect to login.html if not authenticated or not found
+  const isAuthorized = await requireParticipant();
+  if (!isAuthorized) {
+    return; // Redirect will happen in requireParticipant
+  }
+
   // Initialize Auth0
   await initAuth();
   

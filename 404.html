@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pagina niet gevonden - Interpolis Tourspel</title>
+  <link rel="stylesheet" href="styles/grid.css">
+  <link rel="stylesheet" href="styles/style.css">
+  <script src="scripts/auth0-spa-js.production.js"></script>
+  <script src="scripts/auth-config.js"></script>
+  <script src="scripts/auth.js"></script>
+  <script src="scripts/utils.js"></script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content page">
+      <div class="grid">
+        <div class="col-12">
+          <div class="header-title">Interpolis tourspel</div>
+        </div>
+        <div class="col-12">
+          <div class="header-welcome-section">
+            <h1 class="welcome-heading">Pagina niet gevonden</h1>
+            <div class="header-illustration">
+              <img src="assets/headerillustration.svg" alt="Fiets illustratie" class="illustration-svg">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content page">
+    <div class="grid">
+      <div class="col-12">
+        <div class="form-card">
+          <h2 class="form-title">404 - Pagina niet gevonden</h2>
+          <p class="form-description">
+            De pagina die je zoekt bestaat niet of is verplaatst.<br><br>
+            Je kunt teruggaan naar het dashboard of naar de startpagina.
+          </p>
+
+          <!-- Navigation Buttons -->
+          <div class="navigation-buttons">
+            <button type="button" class="nav-button nav-button-next" id="home-button" aria-label="Ga naar dashboard">
+              <span>Naar dashboard</span>
+              <img src="assets/arrow.svg" alt="" class="nav-arrow nav-arrow-right" aria-hidden="true">
+            </button>
+            <button type="button" class="nav-button nav-button-prev" id="index-button" aria-label="Ga naar startpagina">
+              <img src="assets/arrow.svg" alt="" class="nav-arrow nav-arrow-left" aria-hidden="true">
+              <span>Naar startpagina</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+      const homeButton = document.getElementById('home-button');
+      const indexButton = document.getElementById('index-button');
+
+      // Initialize Auth0
+      await initAuth();
+
+      // Check if user is authenticated and exists
+      const userId = await getUserId();
+      const exists = userId ? await checkParticipantExists(userId) : false;
+
+      // Set home button destination based on authentication
+      if (exists) {
+        homeButton.addEventListener('click', function(e) {
+          e.preventDefault();
+          window.location.href = 'home.html';
+        });
+      } else {
+        homeButton.style.display = 'none';
+      }
+
+      // Index button always goes to index.html
+      indexButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.location.href = 'index.html';
+      });
+    });
+  </script>
+</body>
+</html>
+

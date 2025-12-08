@@ -87,6 +87,64 @@ async function checkParticipantExists(userId) {
 }
 
 /**
+ * Check if user is authenticated and exists in database
+ * Redirects to login.html if not authenticated or not found
+ * @returns {Promise<boolean>} - True if user is authenticated and exists, false otherwise
+ */
+async function requireParticipant() {
+  // Initialize Auth0
+  await initAuth();
+
+  // Get user ID
+  const userId = await getUserId();
+  
+  if (!userId) {
+    // Not authenticated, redirect to login
+    window.location.href = 'login.html';
+    return false;
+  }
+
+  // Check if participant exists
+  const exists = await checkParticipantExists(userId);
+  
+  if (!exists) {
+    // User is authenticated but not in database, redirect to login
+    window.location.href = 'login.html';
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Check if a page exists by trying to fetch it
+ * @param {string} pagePath - The path to the page (e.g., 'home.html')
+ * @returns {Promise<boolean>} - True if page exists, false otherwise
+ */
+async function checkPageExists(pagePath) {
+  try {
+    const response = await fetch(pagePath, { method: 'HEAD' });
+    return response.ok;
+  } catch (error) {
+    return false;
+  }
+}
+
+/**
+ * Safe redirect that checks if page exists first
+ * @param {string} pagePath - The path to redirect to
+ * @param {string} fallbackPath - The fallback path if page doesn't exist (default: '404.html')
+ */
+async function safeRedirect(pagePath, fallbackPath = '404.html') {
+  const exists = await checkPageExists(pagePath);
+  if (exists) {
+    window.location.href = pagePath;
+  } else {
+    window.location.href = fallbackPath;
+  }
+}
+
+/**
  * Logout user and clear session
  * @returns {Promise<void>}
  */

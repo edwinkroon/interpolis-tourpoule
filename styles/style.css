@@ -514,3 +514,219 @@ button[aria-busy="true"] {
   }
 }
 
+/* Dashboard Styles */
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.dashboard-section {
+  background: #fff;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 16px rgba(0, 51, 78, 0.16);
+}
+
+.dashboard-section-title {
+  font-size: 16px;
+  font-weight: 400;
+  color: #00334e;
+  margin-bottom: 1.5rem;
+  text-transform: lowercase;
+}
+
+/* Points Section */
+.points-section {
+  display: block;
+}
+
+.points-section .dashboard-section-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: #00334e;
+  margin-bottom: 0;
+}
+
+.points-value {
+  font-weight: 700;
+}
+
+/* Team Section */
+.team-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.team-member {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
+
+.team-position {
+  font-size: 13px;
+  font-weight: 700;
+  color: #00334e;
+  min-width: 24px;
+  text-align: left;
+  padding-top: 2px;
+}
+
+.team-member-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.team-member-name {
+  font-size: 15px;
+  color: #00334e;
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+.team-member-team {
+  font-size: 13px;
+  font-weight: 300;
+  color: #668494;
+  line-height: 1.4;
+}
+
+.team-points {
+  font-size: 15px;
+  color: #00334e;
+  font-weight: 400;
+  text-align: right;
+  padding-top: 2px;
+  min-width: 40px;
+}
+
+/* Achievements Section */
+.achievements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.achievement-item {
+  padding: 1rem;
+  background: #f0f3f5;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.achievement-type {
+  font-size: 14px;
+  font-weight: 300;
+  color: #00334e;
+  line-height: 1.4;
+}
+
+.achievement-stage {
+  font-size: 14px;
+  font-weight: 300;
+  color: #00334e;
+  line-height: 1.4;
+}
+
+.achievement-route {
+  font-size: 16px;
+  color: #00334e;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+/* Stage Info Section */
+.stage-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.stage-name {
+  font-size: 14px;
+  font-weight: 300;
+  color: #00334e;
+}
+
+.stage-route {
+  font-size: 16px;
+  color: #00334e;
+  font-weight: 400;
+}
+
+.stage-meta {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.stage-date,
+.stage-distance,
+.stage-type {
+  font-size: 13px;
+  color: #668494;
+  font-weight: 300;
+}
+
+/* Responsive Dashboard */
+@media (max-width: 768px) {
+  .dashboard-section {
+    padding: 1.5rem;
+  }
+
+  .dashboard-section-title {
+    font-size: 14px;
+  }
+
+  .points-display {
+    font-size: 18px;
+  }
+
+  .team-member-name {
+    font-size: 14px;
+  }
+
+  .team-member-team {
+    font-size: 12px;
+  }
+
+  .achievement-route {
+    font-size: 14px;
+  }
+
+  .stage-route {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-content {
+    gap: 1.5rem;
+  }
+
+  .dashboard-section {
+    padding: 1rem;
+  }
+
+  .points-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .team-member {
+    flex-wrap: wrap;
+  }
+
+  .stage-meta {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}
+

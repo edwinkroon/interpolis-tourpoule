@@ -56,12 +56,36 @@
         </button>
       </div>
 
-      <!-- Form Card -->
-      <div class="form-card col-9">
-        <h2 class="form-title">Home</h2>
-        <p class="form-description">
-          Welkom bij het Interpolis tourspel.
-        </p>
+      <!-- Dashboard Content -->
+      <div class="dashboard-content col-9">
+        <!-- Mijn Punten Section -->
+        <div class="dashboard-section points-section">
+          <h2 class="dashboard-section-title">Mijn punten <span class="points-value" id="points-display">(27)</span></h2>
+        </div>
+
+        <!-- Mijn Team Section -->
+        <div class="dashboard-section team-section">
+          <h2 class="dashboard-section-title">mijn team</h2>
+          <div class="team-list" id="team-list">
+            <!-- Team members will be rendered here -->
+          </div>
+        </div>
+
+        <!-- Mijn Prijzenkast Section -->
+        <div class="dashboard-section achievements-section">
+          <h2 class="dashboard-section-title">Mijn prijzenkast</h2>
+          <div class="achievements-list" id="achievements-list">
+            <!-- Achievements will be rendered here -->
+          </div>
+        </div>
+
+        <!-- Etappe Informatie Section -->
+        <div class="dashboard-section stage-section">
+          <h2 class="dashboard-section-title">etappe informatie</h2>
+          <div class="stage-info" id="stage-info">
+            <!-- Stage information will be rendered here -->
+          </div>
+        </div>
       </div>
     </div>
   </main>

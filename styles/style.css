@@ -1350,3 +1350,134 @@ button[aria-busy="true"] {
   }
 }
 
+/* Rules Page Styles */
+.rules-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 0;
+}
+
+.rules-section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 51, 78, 0.1);
+}
+
+.rules-title {
+  font-size: 28px;
+  font-weight: 500;
+  color: #00334e;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #00cac6;
+}
+
+.rules-list {
+  list-style: decimal;
+  padding-left: 1.5rem;
+  color: #00334e;
+  line-height: 1.8;
+}
+
+.rules-list li {
+  margin-bottom: 1rem;
+  padding-left: 0.5rem;
+}
+
+.rules-list li:last-child {
+  margin-bottom: 0;
+}
+
+.points-section {
+  margin-top: 2rem;
+}
+
+.points-section:first-of-type {
+  margin-top: 0;
+}
+
+.points-subtitle {
+  font-size: 20px;
+  font-weight: 500;
+  color: #00334e;
+  margin-bottom: 1rem;
+}
+
+.points-table-container {
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+}
+
+.points-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 51, 78, 0.1);
+}
+
+.points-table thead {
+  background: #00cac6;
+  color: #fff;
+}
+
+.points-table th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.points-table tbody tr {
+  border-bottom: 1px solid #cdd7dc;
+}
+
+.points-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.points-table td {
+  padding: 0.75rem 1rem;
+  color: #00334e;
+  font-size: 14px;
+}
+
+.points-table tbody tr:nth-child(even) {
+  background: #f8f9fa;
+}
+
+.points-table tbody tr:hover {
+  background: #f0f3f5;
+}
+
+@media (max-width: 768px) {
+  .rules-container {
+    padding: 1rem;
+  }
+
+  .rules-section {
+    padding: 1.5rem;
+  }
+
+  .rules-title {
+    font-size: 24px;
+  }
+
+  .points-subtitle {
+    font-size: 18px;
+  }
+
+  .points-table {
+    font-size: 12px;
+  }
+
+  .points-table th,
+  .points-table td {
+    padding: 0.5rem;
+  }
+}
+

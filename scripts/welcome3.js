@@ -28,4 +28,15 @@ document.addEventListener('DOMContentLoaded', async function() {
     e.preventDefault();
     window.location.href = 'home.html';
   });
+
+  // Add click handler for spelregels button
+  const spelregelsButtons = document.querySelectorAll('.action-button');
+  spelregelsButtons.forEach(button => {
+    const buttonText = button.querySelector('span');
+    if (buttonText && buttonText.textContent.trim() === 'Spelregels') {
+      button.addEventListener('click', function() {
+        window.location.href = 'rules.html';
+      });
+    }
+  });
 });

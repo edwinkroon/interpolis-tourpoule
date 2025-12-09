@@ -665,6 +665,17 @@ async function loadDashboardData() {
       // window.location.href = 'prikbord.html';
     });
   }
+  
+  // Add click handler for spelregels button
+  const spelregelsButtons = document.querySelectorAll('.action-button');
+  spelregelsButtons.forEach(button => {
+    const buttonText = button.querySelector('span');
+    if (buttonText && buttonText.textContent.trim() === 'Spelregels') {
+      button.addEventListener('click', function() {
+        window.location.href = 'rules.html';
+      });
+    }
+  });
 }
 
 async function loadUserData() {

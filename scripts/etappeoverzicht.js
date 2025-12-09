@@ -57,6 +57,12 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 function renderStageInfo(data) {
+  // Update stage number
+  const stageNumberElement = document.getElementById('stage-number');
+  if (stageNumberElement) {
+    stageNumberElement.textContent = data.name || `Etappe ${data.id}`;
+  }
+
   // Update stage route
   const routeElement = document.getElementById('stage-route');
   if (routeElement) {

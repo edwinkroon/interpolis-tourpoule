@@ -42,14 +42,14 @@
         <button class="stage-nav-button" id="prev-stage" aria-label="Vorige etappe">←</button>
         <div class="stage-nav-info">
           <div class="stage-nav-title">
-            <span class="stage-number">Etappe 7</span>
+            <span class="stage-number" id="stage-number">Etappe 7</span>
             <svg class="bike-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <path d="M5 12C5 9.24 7.24 7 10 7H14L12 5H10V3H14L16 5H19V7H17L19 9H21V11H19L17 13H15V15H13V17H11V15H9L7 13H5V12Z" fill="#00334e"/>
               <circle cx="7" cy="17" r="2" fill="#00334e"/>
               <circle cx="17" cy="17" r="2" fill="#00334e"/>
             </svg>
           </div>
-          <div class="stage-nav-route" id="stage-route">Houlgate - Nice (183km)</div>
+          <div class="stage-nav-route" id="stage-route"></div>
         </div>
         <button class="stage-nav-button" id="next-stage" aria-label="Volgende etappe">→</button>
       </div>
@@ -78,28 +78,9 @@
         <div class="cards-grid">
           <!-- Mijn punten Card -->
           <div class="card card-my-points">
-            <h2 class="card-title">Mijn punten <span class="points-count">(27)</span></h2>
+            <h2 class="card-title">Mijn punten <span class="points-count"></span></h2>
             <ul class="riders-list" id="my-riders-list">
-              <li class="rider-item">
-                <div class="rider-avatar">
-                  <img src="" alt="" class="rider-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                  <div class="rider-avatar-placeholder" style="display: none;">TP</div>
-                </div>
-                <div class="rider-info">
-                  <div class="rider-name">Tadej Pogacar</div>
-                  <div class="rider-team">UAE-Team Emirates</div>
-                </div>
-              </li>
-              <li class="rider-item">
-                <div class="rider-avatar">
-                  <img src="" alt="" class="rider-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                  <div class="rider-avatar-placeholder" style="display: none;">WvA</div>
-                </div>
-                <div class="rider-info">
-                  <div class="rider-name">Wout van Aert</div>
-                  <div class="rider-team">Team Jumbo-Visma</div>
-                </div>
-              </li>
+              <!-- Data wordt geladen vanuit JSON -->
             </ul>
             <a href="#" class="card-link">mijn team ►</a>
           </div>
@@ -108,31 +89,7 @@
           <div class="card card-day-standings">
             <h2 class="card-title">Dag uitslag</h2>
             <ol class="standings-list" id="day-standings-list">
-              <li class="standings-item">
-                <span class="standings-position">1.</span>
-                <span class="standings-name">Jan Jansen</span>
-                <span class="standings-points">48</span>
-              </li>
-              <li class="standings-item">
-                <span class="standings-position">2.</span>
-                <span class="standings-name">Op goed geluk</span>
-                <span class="standings-points">47</span>
-              </li>
-              <li class="standings-item">
-                <span class="standings-position">3.</span>
-                <span class="standings-name">Dappere dodo's</span>
-                <span class="standings-points">47</span>
-              </li>
-              <li class="standings-item">
-                <span class="standings-position">4.</span>
-                <span class="standings-name">Gladde benen</span>
-                <span class="standings-points">47</span>
-              </li>
-              <li class="standings-item">
-                <span class="standings-position">5.</span>
-                <span class="standings-name">MessbauersMennekes</span>
-                <span class="standings-points">46</span>
-              </li>
+              <!-- Data wordt geladen vanuit JSON -->
             </ol>
             <a href="#" class="card-link">volledige dag stand ►</a>
           </div>
@@ -141,36 +98,7 @@
           <div class="card card-stage-results">
             <h2 class="card-title">Etappe uitslag</h2>
             <ol class="results-list list-with-time" id="stage-results-list">
-              <li class="result-item">
-                <span class="result-position">1.</span>
-                <span class="result-rider">Tadej Pogacar</span>
-                <span class="result-time">1:12:23</span>
-              </li>
-              <li class="result-item">
-                <span class="result-position">2.</span>
-                <span class="result-rider">Mathieu van der Poel</span>
-                <span class="result-time">1:12:43</span>
-              </li>
-              <li class="result-item">
-                <span class="result-position">3.</span>
-                <span class="result-rider">Wout van Aert</span>
-                <span class="result-time">1:12:45</span>
-              </li>
-              <li class="result-item">
-                <span class="result-position">4.</span>
-                <span class="result-rider">Tom Dumoulin</span>
-                <span class="result-time">1:12:59</span>
-              </li>
-              <li class="result-item">
-                <span class="result-position">5.</span>
-                <span class="result-rider">Richie Porte</span>
-                <span class="result-time">1:13:01</span>
-              </li>
-              <li class="result-item">
-                <span class="result-position">6.</span>
-                <span class="result-rider">Primoz Roglic</span>
-                <span class="result-time">1:13:03</span>
-              </li>
+              <!-- Data wordt geladen vanuit JSON -->
             </ol>
             <a href="#" class="card-link">volledige etappe uitslag ►</a>
           </div>
@@ -179,50 +107,7 @@
           <div class="card card-jerseys">
             <h2 class="card-title">Truien</h2>
             <ul class="jerseys-list" id="jerseys-list">
-              <li class="jersey-item">
-                <div class="rider-avatar">
-                  <img src="" alt="" class="rider-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                  <div class="rider-avatar-placeholder" style="display: none;">TP</div>
-                </div>
-                <div class="rider-info">
-                  <div class="rider-name">Tadej Pogacar</div>
-                  <div class="rider-team">UAE-Team Emirates</div>
-                </div>
-                <div class="jersey-icon jersey-geel" title="Gele trui"></div>
-              </li>
-              <li class="jersey-item">
-                <div class="rider-avatar">
-                  <img src="" alt="" class="rider-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                  <div class="rider-avatar-placeholder" style="display: none;">PS</div>
-                </div>
-                <div class="rider-info">
-                  <div class="rider-name">Peter Sagan</div>
-                  <div class="rider-team">Team TotalEnergies</div>
-                </div>
-                <div class="jersey-icon jersey-groen" title="Groene trui"></div>
-              </li>
-              <li class="jersey-item">
-                <div class="rider-avatar">
-                  <img src="" alt="" class="rider-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                  <div class="rider-avatar-placeholder" style="display: none;">RB</div>
-                </div>
-                <div class="rider-info">
-                  <div class="rider-name">Romain Bardet</div>
-                  <div class="rider-team">Team DSM</div>
-                </div>
-                <div class="jersey-icon jersey-bolletjes" title="Bolkentrui"></div>
-              </li>
-              <li class="jersey-item">
-                <div class="rider-avatar">
-                  <img src="" alt="" class="rider-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                  <div class="rider-avatar-placeholder" style="display: none;">EB</div>
-                </div>
-                <div class="rider-info">
-                  <div class="rider-name">Egan Bernal</div>
-                  <div class="rider-team">Team Jumbo-Visma</div>
-                </div>
-                <div class="jersey-icon jersey-wit" title="Witte trui"></div>
-              </li>
+              <!-- Data wordt geladen vanuit JSON -->
             </ul>
           </div>
         </div>

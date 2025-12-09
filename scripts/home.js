@@ -767,4 +767,16 @@ document.addEventListener('DOMContentLoaded', async function() {
     await loadDashboardData();
   }, 100);
 
+  // Setup button click handlers
+  setupButtonHandlers();
 });
+
+function setupButtonHandlers() {
+  // Kies renners button
+  const chooseRidersButton = document.querySelector('.choose-riders-button');
+  if (chooseRidersButton) {
+    chooseRidersButton.addEventListener('click', function() {
+      window.location.href = 'teamoverzicht.html';
+    });
+  }
+}

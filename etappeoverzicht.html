@@ -19,7 +19,10 @@
       <div class="grid">
         <div class="col-12">
           <div class="header-top">
-            <a href="home.html" class="back-link">← Terug</a>
+            <a href="home.html" class="back-link">
+              <img src="assets/arrow.svg" alt="" class="back-arrow" aria-hidden="true">
+              <span>Terug</span>
+            </a>
             <div class="header-title">Interpolis tourspel</div>
           </div>
         </div>
@@ -38,14 +41,18 @@
     <nav class="stage-navigation">
       <div class="page">
         <div class="stage-nav-content">
-          <button class="stage-nav-button" id="prev-stage" aria-label="Vorige etappe">←</button>
+          <button class="stage-nav-button" id="prev-stage" aria-label="Vorige etappe">
+            <img src="assets/arrow.svg" alt="" class="stage-nav-arrow stage-nav-arrow-left" aria-hidden="true">
+          </button>
           <div class="stage-nav-info">
             <div class="stage-nav-title">
               <span class="stage-number" id="stage-number">Etappe 7</span>
             </div>
             <div class="stage-nav-route" id="stage-route"></div>
           </div>
-          <button class="stage-nav-button" id="next-stage" aria-label="Volgende etappe">→</button>
+          <button class="stage-nav-button" id="next-stage" aria-label="Volgende etappe">
+            <img src="assets/arrow.svg" alt="" class="stage-nav-arrow stage-nav-arrow-right" aria-hidden="true">
+          </button>
         </div>
       </div>
     </nav>

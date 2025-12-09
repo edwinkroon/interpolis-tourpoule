@@ -1822,10 +1822,21 @@ button[aria-busy="true"] {
   font-weight: 400;
   text-decoration: none;
   transition: color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .back-link:hover {
   color: #00cac6;
+}
+
+.back-arrow {
+  width: 9px;
+  height: 12px;
+  display: block;
+  flex-shrink: 0;
+  transform: rotate(180deg);
 }
 
 /* Stage Navigation Bar */
@@ -1867,6 +1878,22 @@ button[aria-busy="true"] {
   transition: background-color 0.2s, transform 0.1s;
   box-shadow: 0 2px 4px rgba(0, 51, 78, 0.1);
   flex-shrink: 0;
+  padding: 0;
+}
+
+.stage-nav-arrow {
+  width: 9px;
+  height: 12px;
+  display: block;
+  flex-shrink: 0;
+}
+
+.stage-nav-arrow-left {
+  transform: rotate(180deg);
+}
+
+.stage-nav-arrow-right {
+  transform: rotate(0deg);
 }
 
 .stage-nav-button:hover {

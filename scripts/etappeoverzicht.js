@@ -49,26 +49,72 @@ document.addEventListener('DOMContentLoaded', async function() {
     console.log('Continuing with dummy data due to auth error');
   }
 
-  // Render the page with dummy data
+  // Load latest stage from database
+  await loadLatestStage();
+  
+  // Render the page with dummy data for cards
   renderStageInfo(stageData);
   
   // Setup navigation buttons
   setupNavigation();
 });
 
+async function loadLatestStage() {
+  try {
+    const response = await fetch('/.netlify/functions/get-latest-stage');
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (data.ok && data.stage) {
+      // Update stage number
+      const stageNumberElement = document.getElementById('stage-number');
+      if (stageNumberElement) {
+        stageNumberElement.textContent = data.stage.name || `Etappe ${data.stage.stage_number}`;
+      }
+
+      // Update stage route
+      const routeElement = document.getElementById('stage-route');
+      if (routeElement) {
+        if (data.stage.route_text) {
+          routeElement.textContent = data.stage.route_text;
+        } else if (data.stage.start_location && data.stage.end_location) {
+          const distance = data.stage.distance_km 
+            ? ` (${parseFloat(data.stage.distance_km).toFixed(0)}km)`
+            : '';
+          routeElement.textContent = `${data.stage.start_location} - ${data.stage.end_location}${distance}`;
+        }
+      }
+    } else {
+      console.warn('No latest stage found, using fallback');
+      // Fallback to default
+      const stageNumberElement = document.getElementById('stage-number');
+      if (stageNumberElement) {
+        stageNumberElement.textContent = 'Etappe 1';
+      }
+      const routeElement = document.getElementById('stage-route');
+      if (routeElement) {
+        routeElement.textContent = 'Lille - Lille (185km)';
+      }
+    }
+  } catch (error) {
+    console.error('Error loading latest stage:', error);
+    // Fallback to default
+    const stageNumberElement = document.getElementById('stage-number');
+    if (stageNumberElement) {
+      stageNumberElement.textContent = 'Etappe 1';
+    }
+    const routeElement = document.getElementById('stage-route');
+    if (routeElement) {
+      routeElement.textContent = 'Lille - Lille (185km)';
+    }
+  }
+}
+
 function renderStageInfo(data) {
-  // Update stage number
-  const stageNumberElement = document.getElementById('stage-number');
-  if (stageNumberElement) {
-    stageNumberElement.textContent = data.name || `Etappe ${data.id}`;
-  }
-
-  // Update stage route
-  const routeElement = document.getElementById('stage-route');
-  if (routeElement) {
-    routeElement.textContent = `${data.route} (${data.distanceKm}km)`;
-  }
-
   // Update points count
   const pointsCount = document.querySelector('.points-count');
   if (pointsCount) {

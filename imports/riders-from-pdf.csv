@@ -1,0 +1,185 @@
+start_number,first_name,last_name,team_name
+1,Tadej,Pogacar,UAE Team Emirates
+2,Joao,Almeida,UAE Team Emirates
+3,Jhonatan,Narvaez,UAE Team Emirates
+4,Nils,Politt,UAE Team Emirates
+5,Pavel,Sivakov,UAE Team Emirates
+6,Marc,Soler,UAE Team Emirates
+7,Tim,Wellens,UAE Team Emirates
+8,Adam,Yates,UAE Team Emirates
+11,Jonas,Vingegaard,Team Visma Lease a Bike
+12,Edoardo,Affini,Team Visma Lease a Bike
+13,Tiesj,Benoot,Team Visma Lease a Bike
+14,Victor,Campenaerts,Team Visma Lease a Bike
+15,Matteo,Jorgenson,Team Visma Lease a Bike
+16,Sepp,Kuss,Team Visma Lease a Bike
+17,Wout,Van Aert,Team Visma Lease a Bike
+18,Simon,Yates,Team Visma Lease a Bike
+21,Remco,Evenepoel,Soudal Quick-Step
+22,Mattia,Cattaneo,Soudal Quick-Step
+23,Pascal,Eenkhoorn,Soudal Quick-Step
+24,Tim,Merlier,Soudal Quick-Step
+25,Valentin,Paret-Peintre,Soudal Quick-Step
+26,Maximilian,Schachmann,Soudal Quick-Step
+27,Bert,Van Lerberghe,Soudal Quick-Step
+28,Ilan,Van Wilder,Soudal Quick-Step
+31,Ben,Healy,EF Education-EasyPost
+32,Vincenzo,Albanese,EF Education-EasyPost
+33,Kasper,Asgreen,EF Education-EasyPost
+34,Alex,Baudin,EF Education-EasyPost
+35,Neilson,Powless,EF Education-EasyPost
+36,Harry,Sweeny,EF Education-EasyPost
+37,Michael,Valgren,EF Education-EasyPost
+38,Marijn,Van Den Berg,EF Education-EasyPost
+41,Biniam,Girmay,Intermarche - Wanty
+42,Louis,Barre,Intermarche - Wanty
+43,Vito,Braet,Intermarche - Wanty
+44,Hugo,Page,Intermarche - Wanty
+45,Laurenz,Rex,Intermarche - Wanty
+46,Jonas,Rutsch,Intermarche - Wanty
+47,Roel,Van Sintmaartensdijk,Intermarche - Wanty
+48,Georg,Zimmermann,Intermarche - Wanty
+51,Santiago,Buitrago,Bahrain - Victorious
+52,Phil,Bauhaus,Bahrain - Victorious
+53,Kamil,Gradek,Bahrain - Victorious
+54,Jack,Haig,Bahrain - Victorious
+55,Lenny,Martinez,Bahrain - Victorious
+56,Matej,Mohoric,Bahrain - Victorious
+57,Robert,Stannard,Bahrain - Victorious
+58,Fred,Wright,Bahrain - Victorious
+61,Geraint,Thomas,INEOS Grenadiers
+62,Thymen,Arensman,INEOS Grenadiers
+63,Tobias,Foss,INEOS Grenadiers
+64,Filippo,Ganna,INEOS Grenadiers
+65,Axel,Laurance,INEOS Grenadiers
+66,Carlos,Rodriguez,INEOS Grenadiers
+67,Connor,Swift,INEOS Grenadiers
+68,Samuel,Watson,INEOS Grenadiers
+71,Primoz,Roglic,Bora-Hansgrohe
+72,Florian,Lipowitz,Bora-Hansgrohe
+73,Jordi,Meeus,Bora-Hansgrohe
+74,Gianni,Moscon,Bora-Hansgrohe
+75,Laurence,Pithie,Bora-Hansgrohe
+76,Mick,Van Dijke,Bora-Hansgrohe
+77,Danny,Van Poppel,Bora-Hansgrohe
+78,Aleksandr,Vlasov,Bora-Hansgrohe
+81,Jonathan,Milan,Lidl - Trek
+82,Simone,Consonni,Lidl - Trek
+83,Thibau,Nys,Lidl - Trek
+84,Quinn,Simmons,Lidl - Trek
+85,Mattias,Skjelmose,Lidl - Trek
+86,Toms,Skujins,Lidl - Trek
+87,Jasper,Stuyven,Lidl - Trek
+88,Edward,Theuns,Lidl - Trek
+91,Guillaume,Martin,Groupama - FDJ
+92,Lewis,Askey,Groupama - FDJ
+93,Cyril,Barthe,Groupama - FDJ
+94,Romain,Gregoire,Groupama - FDJ
+95,Valentin,Madouas,Groupama - FDJ
+96,Quentin,Pacher,Groupama - FDJ
+97,Paul,Penhoet,Groupama - FDJ
+98,Clement,Russo,Groupama - FDJ
+101,Jasper,Philipsen,Alpecin-Deceuninck
+102,Silvan,Dillier,Alpecin-Deceuninck
+103,Kaden,Groves,Alpecin-Deceuninck
+104,Xandro,Meurisse,Alpecin-Deceuninck
+105,Jonas,Rickaert,Alpecin-Deceuninck
+106,Mathieu,Van Der Poel,Alpecin-Deceuninck
+107,Gianni,Vermeersch,Alpecin-Deceuninck
+108,Emiel,Verstrynge,Alpecin-Deceuninck
+111,Julian,Alaphilippe,Tudor Pro Cycling Team
+112,Alberto,Dainese,Tudor Pro Cycling Team
+113,Marco,Haller,Tudor Pro Cycling Team
+114,Marc,Hirschi,Tudor Pro Cycling Team
+115,Fabian,Lienhard,Tudor Pro Cycling Team
+116,Marius,Mayrhofer,Tudor Pro Cycling Team
+117,Michael,Storer,Tudor Pro Cycling Team
+118,Matteo,Trentin,Tudor Pro Cycling Team
+121,Ben,O'Connor,Team Jayco AlUla
+122,Eddie,Dunbar,Team Jayco AlUla
+123,Luke,Durbridge,Team Jayco AlUla
+124,Dylan,Groenewegen,Team Jayco AlUla
+125,Luka,Mezgec,Team Jayco AlUla
+126,Luke,Plapp,Team Jayco AlUla
+127,Elmar,Reinders,Team Jayco AlUla
+128,Mauro,Schmid,Team Jayco AlUla
+131,Kevin,Vauquelin,Arkéa - B&B Hotels
+132,Amaury,Capiot,Arkéa - B&B Hotels
+133,Ewen,Costiou,Arkéa - B&B Hotels
+134,Arnaud,Demare,Arkéa - B&B Hotels
+135,Raul,Garcia Pierna,Arkéa - B&B Hotels
+136,Mathis,Le Berre,Arkéa - B&B Hotels
+137,Cristian,Rodriguez,Arkéa - B&B Hotels
+138,Clement,Venturini,Arkéa - B&B Hotels
+141,Enric Mondiale Team,Mas,Movistar Team
+142,Will,Barta,Movistar Team
+143,Pablo,Castrillo,Movistar Team
+144,Nelson,Oliveira,Movistar Team
+145,Ivan,Garcia Cortina,Movistar Team
+146,Gregor,Muhlberger,Movistar Team
+147,Ivan,Romeo,Movistar Team
+148,Einer,Rubio,Movistar Team
+151,Felix,Gall,Decathlon AG2R La Mondiale Team
+152,Bruno,Armirail,Decathlon AG2R La Mondiale Team
+153,Clement,Berthet,Decathlon AG2R La Mondiale Team
+154,Stefan,Bissegger,Decathlon AG2R La Mondiale Team
+155,Oliver,Naesen,Decathlon AG2R La Mondiale Team
+156,Aurelien,Paret-Peintre,Decathlon AG2R La Mondiale Team
+157,Callum,Scotson,Decathlon AG2R La Mondiale Team
+158,Bastien,Tronchon,Decathlon AG2R La Mondiale Team
+161,Emanuel,Buchmann,Cofidis
+162,Alex,Aranburu,Cofidis
+163,Bryan,Coquard,Cofidis
+164,Ion,Izagirre,Cofidis
+165,Alexis,Renard,Cofidis
+166,Dylan,Teuns,Cofidis
+167,Benjamin,Thomas,Cofidis
+168,Damien,Touze,Cofidis
+171,Harold,Tejada,XDS Astana Team
+172,Davide,Ballerini,XDS Astana Team
+173,Cees,Bol,XDS Astana Team
+174,Clement,Champoussin,XDS Astana Team
+175,Yevgeniy,Fedorov,XDS Astana Team
+176,Sergio,Higuita,XDS Astana Team
+177,Mike,Teunissen,XDS Astana Team
+178,Simone,Velasco,XDS Astana Team
+181,Steff,Cras,TotalEnergies
+182,Mathieu,Burgaudeau,TotalEnergies
+183,Alexandre,Delettre,TotalEnergies
+184,Thomas,Gachignard,TotalEnergies
+185,Emilien,Jeanniere,TotalEnergies
+186,Jordan,Jegat,TotalEnergies
+187,Anthony,Turgis,TotalEnergies
+188,Matteo,Vercher,TotalEnergies
+191,Oscar,Onley,Team Picnic PostNL
+192,Warren,Barguil,Team Picnic PostNL
+193,Pavel,Bittner,Team Picnic PostNL
+194,Sean,Flynn,Team Picnic PostNL
+195,Tobias Lund,Andresen,Team Picnic PostNL
+196,Niklas,Markl,Team Picnic PostNL
+197,Tim,Naberman,Team Picnic PostNL
+198,Frank,Van Den Broek,Team Picnic PostNL
+201,Michael,Woods,Israel - Premier Tech
+202,Pascal,Ackermann,Israel - Premier Tech
+203,Joseph,Blackmore,Israel - Premier Tech
+204,Guillaume,Boivin,Israel - Premier Tech
+205,Matis,Louvel,Israel - Premier Tech
+206,Alexey,Lutsenko,Israel - Premier Tech
+207,Krists,Neilands,Israel - Premier Tech
+208,Jake,Stewart,Israel - Premier Tech
+211,Arnaud,De Lie,Lotto
+212,Jenno,Berckmoes,Lotto
+213,Jasper,De Buyst,Lotto
+214,Jarrad,Drizners,Lotto
+215,Sebastien,Grignard,Lotto
+216,Eduardo,Sepulveda,Lotto
+217,Lennert,Van Eetvelt,Lotto
+218,Brent,Van Moer,Lotto
+221,Tobias Halland,Johannessen,Uno-X Mobility
+222,Jonas,Abrahamsen,Uno-X Mobility
+223,Magnus,Cort,Uno-X Mobility
+224,Stian,Fredheim,Uno-X Mobility
+225,Markus,Hoelgaard,Uno-X Mobility
+226,Anders Halland,Johannessen,Uno-X Mobility
+227,Andreas,Leknessund,Uno-X Mobility
+228,Soren,Waerenskjold,Uno-X Mobility

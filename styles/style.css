@@ -31,7 +31,7 @@ h2 {
   overflow: visible;
   position: relative;
   z-index: 100;
-  padding-bottom: 5rem; /* Extra space for navigation bar overlay */
+  padding-bottom: 4.5rem; /* Extra space for navigation bar overlay */
 }
 
 .header-content {
@@ -50,7 +50,7 @@ h2 {
 .header-welcome-section {
   position: relative;
   padding-left: 1rem;
-  padding-bottom: 6rem;
+  padding-bottom: 4.5rem; /* Space for navigation bar overlay */
   min-height: 200px;
 }
 
@@ -1834,6 +1834,7 @@ button[aria-busy="true"] {
   bottom: 0;
   left: 0;
   right: 0;
+  width: 100%;
   background: rgba(179, 229, 227, 0.75); /* Semi-transparent light blue */
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);

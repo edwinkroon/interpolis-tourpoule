@@ -196,6 +196,9 @@ exports.handler = async function(event) {
 
       // Commit transaction
       await client.query('COMMIT');
+      
+      // Close client connection
+      await client.end();
 
       return {
         statusCode: 200,
@@ -211,7 +214,12 @@ exports.handler = async function(event) {
         })
       };
     } catch (err) {
-      await client.query('ROLLBACK');
+      // Rollback transaction on error
+      try {
+        await client.query('ROLLBACK');
+      } catch (rollbackErr) {
+        console.error('Error during rollback:', rollbackErr);
+      }
       throw err;
     }
   } catch (err) {
@@ -224,6 +232,11 @@ exports.handler = async function(event) {
     }
 
     console.error('Error in add-team-riders function:', err);
+    console.error('Error details:', {
+      message: err.message,
+      stack: err.stack,
+      code: err.code
+    });
     
     return {
       statusCode: 500,
@@ -234,7 +247,8 @@ exports.handler = async function(event) {
       body: JSON.stringify({ 
         ok: false, 
         error: err.message || 'Database error',
-        details: process.env.NODE_ENV === 'development' ? err.stack : undefined
+        details: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+        code: err.code
       })
     };
   }

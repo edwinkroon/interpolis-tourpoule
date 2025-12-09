@@ -386,14 +386,47 @@ async function handleAddRiders() {
   const userId = await getUserId();
   if (!userId) {
     console.error('Cannot add riders: user not authenticated');
+    alert('Je moet ingelogd zijn om renners toe te voegen.');
     return;
   }
   
   const addButton = document.getElementById('modal-add-button');
+  const buttonSpan = addButton ? addButton.querySelector('span') : null;
+  
   if (addButton) {
     addButton.disabled = true;
-    addButton.textContent = 'Toevoegen...';
+    if (buttonSpan) {
+      buttonSpan.textContent = 'Toevoegen...';
+    }
   }
+  
+  // Convert Set to Array and ensure rider IDs are integers
+  const riderIdsArray = Array.from(selectedRiderIds).map(id => {
+    const numId = typeof id === 'string' ? parseInt(id, 10) : id;
+    if (isNaN(numId)) {
+      console.error('Invalid rider ID:', id);
+      return null;
+    }
+    return numId;
+  }).filter(id => id !== null);
+  
+  if (riderIdsArray.length === 0) {
+    console.error('No valid rider IDs to add');
+    alert('Geen geldige renners geselecteerd.');
+    if (addButton) {
+      addButton.disabled = false;
+      if (buttonSpan) {
+        buttonSpan.textContent = 'voeg toe';
+      }
+    }
+    return;
+  }
+  
+  console.log('Adding riders:', {
+    userId: userId,
+    riderIds: riderIdsArray,
+    count: riderIdsArray.length
+  });
   
   try {
     const response = await fetch('/.netlify/functions/add-team-riders', {
@@ -403,11 +436,13 @@ async function handleAddRiders() {
       },
       body: JSON.stringify({
         userId: userId,
-        riderIds: Array.from(selectedRiderIds)
+        riderIds: riderIdsArray
       })
     });
     
     const result = await response.json();
+    
+    console.log('Add riders response:', result);
     
     if (result.ok) {
       // Close modal
@@ -416,21 +451,26 @@ async function handleAddRiders() {
       // Reload team riders to show the newly added ones
       await loadTeamRiders();
       
-      // Show success message (optional)
-      console.log(`Successfully added ${result.added} rider(s) to team`);
+      // Show success message
+      if (result.added > 0) {
+        console.log(`Successfully added ${result.added} rider(s) to team`);
+      }
+      if (result.skipped > 0) {
+        console.log(`${result.skipped} rider(s) were already in the team`);
+      }
     } else {
-      console.error('Error adding riders:', result.error);
-      alert('Er is een fout opgetreden bij het toevoegen van renners: ' + (result.error || 'Onbekende fout'));
+      console.error('Error adding riders:', result);
+      const errorMsg = result.error || result.details || 'Onbekende fout';
+      alert('Er is een fout opgetreden bij het toevoegen van renners: ' + errorMsg);
     }
   } catch (error) {
     console.error('Error adding riders:', error);
-    alert('Er is een fout opgetreden bij het toevoegen van renners. Probeer het opnieuw.');
+    alert('Er is een fout opgetreden bij het toevoegen van renners. Probeer het opnieuw. Controleer de console voor details.');
   } finally {
     if (addButton) {
       addButton.disabled = false;
-      const span = addButton.querySelector('span');
-      if (span) {
-        span.textContent = 'voeg toe';
+      if (buttonSpan) {
+        buttonSpan.textContent = 'voeg toe';
       }
     }
   }

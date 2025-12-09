@@ -50,9 +50,14 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 
   // Load latest stage from database
-  await loadLatestStage();
+  const latestStage = await loadLatestStage();
   
-  // Render the page with dummy data for cards
+  // Load stage results for the latest stage
+  if (latestStage && latestStage.stage_number) {
+    await loadStageResults(latestStage.stage_number);
+  }
+  
+  // Render the page with dummy data for other cards
   renderStageInfo(stageData);
   
   // Setup navigation buttons
@@ -88,6 +93,8 @@ async function loadLatestStage() {
           routeElement.textContent = `${data.stage.start_location} - ${data.stage.end_location}${distance}`;
         }
       }
+      
+      return data.stage; // Return stage data for use in other functions
     } else {
       console.warn('No latest stage found, using fallback');
       // Fallback to default
@@ -99,6 +106,7 @@ async function loadLatestStage() {
       if (routeElement) {
         routeElement.textContent = 'Lille - Lille (185km)';
       }
+      return { stage_number: 1 };
     }
   } catch (error) {
     console.error('Error loading latest stage:', error);
@@ -111,6 +119,30 @@ async function loadLatestStage() {
     if (routeElement) {
       routeElement.textContent = 'Lille - Lille (185km)';
     }
+    return { stage_number: 1 };
+  }
+}
+
+async function loadStageResults(stageNumber) {
+  try {
+    const response = await fetch(`/.netlify/functions/get-stage-results?stage_number=${stageNumber}`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (data.ok && data.results && data.results.length > 0) {
+      // Render stage results
+      renderStageResults(data.results);
+    } else {
+      console.warn('No stage results found');
+      // Keep dummy data or show empty
+    }
+  } catch (error) {
+    console.error('Error loading stage results:', error);
+    // Keep dummy data on error
   }
 }
 
@@ -127,8 +159,8 @@ function renderStageInfo(data) {
   // Render day standings
   renderDayStandings(data.dayStandings);
   
-  // Render stage results
-  renderStageResults(data.stageResults);
+  // Stage results are now loaded from database, not from dummy data
+  // renderStageResults(data.stageResults);
   
   // Render jerseys
   renderJerseys(data.jerseys);

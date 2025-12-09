@@ -1145,6 +1145,49 @@ button[aria-busy="true"] {
 }
 
 /* Day Winners Section */
+/* Choose Riders Section */
+.choose-riders-section .dashboard-section-title {
+  font-size: 20px;
+  font-weight: 700;
+  text-transform: none;
+  margin-bottom: 1rem;
+}
+
+.choose-riders-text {
+  font-size: 16px;
+  font-weight: 400;
+  color: #00334e;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.choose-riders-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  color: #00334e;
+  font-size: 16px;
+  font-family: 'Open Sans', system-ui, sans-serif;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 0;
+  margin-top: auto;
+}
+
+.choose-riders-button:hover {
+  color: #00cac6;
+}
+
+.choose-riders-button .action-arrow {
+  width: 9px;
+  height: 12px;
+  display: block;
+  flex-shrink: 0;
+  transform: rotate(0deg);
+}
+
 .day-winners-section .dashboard-section-title {
   font-size: 20px;
   font-weight: 700;

@@ -422,11 +422,13 @@ async function handleAddRiders() {
     return;
   }
   
-  console.log('Adding riders:', {
+  const requestBody = {
     userId: userId,
-    riderIds: riderIdsArray,
-    count: riderIdsArray.length
-  });
+    riderIds: riderIdsArray
+  };
+  
+  console.log('Adding riders:', requestBody);
+  console.log('Request URL: /.netlify/functions/add-team-riders');
   
   try {
     const response = await fetch('/.netlify/functions/add-team-riders', {
@@ -434,15 +436,22 @@ async function handleAddRiders() {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        userId: userId,
-        riderIds: riderIdsArray
-      })
+      body: JSON.stringify(requestBody)
     });
+    
+    console.log('Response status:', response.status);
+    console.log('Response ok:', response.ok);
     
     const result = await response.json();
     
     console.log('Add riders response:', result);
+    console.log('Response details:', {
+      ok: result.ok,
+      added: result.added,
+      skipped: result.skipped,
+      error: result.error,
+      details: result.details
+    });
     
     if (result.ok) {
       // Close modal

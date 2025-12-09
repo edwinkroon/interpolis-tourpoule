@@ -652,10 +652,7 @@ async function loadDashboardData() {
   const dayWinnersButton = document.querySelector('.day-winners-button');
   if (dayWinnersButton) {
     dayWinnersButton.addEventListener('click', function() {
-      // TODO: Navigate to etappe informatie page when it's created
-      // For now, just log or show alert
-      console.log('Navigate to etappe informatie page');
-      // window.location.href = 'etappe-info.html';
+      window.location.href = 'etappeoverzicht.html';
     });
   }
   

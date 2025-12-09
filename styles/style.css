@@ -1835,9 +1835,9 @@ button[aria-busy="true"] {
   left: 0;
   right: 0;
   width: 100%;
-  background: rgba(179, 229, 227, 0.75); /* Semi-transparent light blue */
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(179, 229, 227, 0.25);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   padding: 1rem 0;
   z-index: 101;
   border-top: 1px solid rgba(255, 255, 255, 0.3);

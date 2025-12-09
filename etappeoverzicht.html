@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interpolis Tourspel - Etappe Overzicht</title>
+  <title>Interpolis Tourspel - Etappe informatie</title>
   <link rel="stylesheet" href="styles/grid.css">
   <link rel="stylesheet" href="styles/style.css">
   <script src="scripts/auth0-spa-js.production.js"></script>
@@ -18,11 +18,14 @@
     <div class="header-content page">
       <div class="grid">
         <div class="col-12">
-          <div class="header-title">Interpolis tourspel</div>
+          <div class="header-top">
+            <a href="home.html" class="back-link">← Terug</a>
+            <div class="header-title">Interpolis tourspel</div>
+          </div>
         </div>
         <div class="col-12">
           <div class="header-welcome-section">
-            <h1 class="welcome-heading">Etappe Overzicht</h1>
+            <h1 class="welcome-heading">Etappe informatie</h1>
             <div class="header-illustration">
               <img src="assets/headerillustration.svg" alt="Fiets illustratie" class="illustration-svg">
             </div>
@@ -32,27 +35,195 @@
     </div>
   </header>
 
+  <!-- Stage Navigation Bar -->
+  <nav class="stage-navigation">
+    <div class="page">
+      <div class="stage-nav-content">
+        <button class="stage-nav-button" id="prev-stage" aria-label="Vorige etappe">←</button>
+        <div class="stage-nav-info">
+          <div class="stage-nav-title">
+            <span class="stage-number">Etappe 7</span>
+            <svg class="bike-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M5 12C5 9.24 7.24 7 10 7H14L12 5H10V3H14L16 5H19V7H17L19 9H21V11H19L17 13H15V15H13V17H11V15H9L7 13H5V12Z" fill="#00334e"/>
+              <circle cx="7" cy="17" r="2" fill="#00334e"/>
+              <circle cx="17" cy="17" r="2" fill="#00334e"/>
+            </svg>
+          </div>
+          <div class="stage-nav-route" id="stage-route">Houlgate - Nice (183km)</div>
+        </div>
+        <button class="stage-nav-button" id="next-stage" aria-label="Volgende etappe">→</button>
+      </div>
+    </div>
+  </nav>
+
   <!-- Main Content -->
   <main class="main-content page">
     <div class="grid">
-      <!-- Action Buttons -->
-      <div class="action-buttons col-3">
-        <button class="action-button" aria-label="Bekijk spelregels" onclick="window.location.href='rules.html'">
-          <span>Spelregels</span>
-          <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
-        </button>
-        <button class="action-button" aria-label="Bekijk statistieken" onclick="window.location.href='statistieken.html'">
-          <span>Statistieken</span>
-          <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
-        </button>
+      <!-- Sidebar with Action Buttons -->
+      <div class="sidebar col-3">
+        <div class="action-buttons">
+          <button class="action-button" aria-label="Bekijk spelregels" onclick="window.location.href='rules.html'">
+            <span>Spelregels</span>
+            <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
+          </button>
+          <button class="action-button" aria-label="Bekijk statistieken" onclick="window.location.href='statistieken.html'">
+            <span>Statistieken</span>
+            <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
+          </button>
+        </div>
       </div>
 
-      <!-- Content -->
-      <div class="col-9">
-        <div class="stages-grid-container" id="stages-container">
-          <!-- Stages will be loaded here as tiles -->
-          <div style="text-align: center; padding: 2rem; color: #00334e;">
-            Laden...
+      <!-- Content Area with Cards -->
+      <div class="content-area col-9">
+        <div class="cards-grid">
+          <!-- Mijn punten Card -->
+          <div class="card card-my-points">
+            <h2 class="card-title">Mijn punten <span class="points-count">(27)</span></h2>
+            <ul class="riders-list" id="my-riders-list">
+              <li class="rider-item">
+                <div class="rider-avatar">
+                  <img src="" alt="" class="rider-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                  <div class="rider-avatar-placeholder" style="display: none;">TP</div>
+                </div>
+                <div class="rider-info">
+                  <div class="rider-name">Tadej Pogacar</div>
+                  <div class="rider-team">UAE-Team Emirates</div>
+                </div>
+              </li>
+              <li class="rider-item">
+                <div class="rider-avatar">
+                  <img src="" alt="" class="rider-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                  <div class="rider-avatar-placeholder" style="display: none;">WvA</div>
+                </div>
+                <div class="rider-info">
+                  <div class="rider-name">Wout van Aert</div>
+                  <div class="rider-team">Team Jumbo-Visma</div>
+                </div>
+              </li>
+            </ul>
+            <a href="#" class="card-link">mijn team ►</a>
+          </div>
+
+          <!-- Dag uitslag Card -->
+          <div class="card card-day-standings">
+            <h2 class="card-title">Dag uitslag</h2>
+            <ol class="standings-list" id="day-standings-list">
+              <li class="standings-item">
+                <span class="standings-position">1.</span>
+                <span class="standings-name">Jan Jansen</span>
+                <span class="standings-points">48</span>
+              </li>
+              <li class="standings-item">
+                <span class="standings-position">2.</span>
+                <span class="standings-name">Op goed geluk</span>
+                <span class="standings-points">47</span>
+              </li>
+              <li class="standings-item">
+                <span class="standings-position">3.</span>
+                <span class="standings-name">Dappere dodo's</span>
+                <span class="standings-points">47</span>
+              </li>
+              <li class="standings-item">
+                <span class="standings-position">4.</span>
+                <span class="standings-name">Gladde benen</span>
+                <span class="standings-points">47</span>
+              </li>
+              <li class="standings-item">
+                <span class="standings-position">5.</span>
+                <span class="standings-name">MessbauersMennekes</span>
+                <span class="standings-points">46</span>
+              </li>
+            </ol>
+            <a href="#" class="card-link">volledige dag stand ►</a>
+          </div>
+
+          <!-- Etappe uitslag Card -->
+          <div class="card card-stage-results">
+            <h2 class="card-title">Etappe uitslag</h2>
+            <ol class="results-list list-with-time" id="stage-results-list">
+              <li class="result-item">
+                <span class="result-position">1.</span>
+                <span class="result-rider">Tadej Pogacar</span>
+                <span class="result-time">1:12:23</span>
+              </li>
+              <li class="result-item">
+                <span class="result-position">2.</span>
+                <span class="result-rider">Mathieu van der Poel</span>
+                <span class="result-time">1:12:43</span>
+              </li>
+              <li class="result-item">
+                <span class="result-position">3.</span>
+                <span class="result-rider">Wout van Aert</span>
+                <span class="result-time">1:12:45</span>
+              </li>
+              <li class="result-item">
+                <span class="result-position">4.</span>
+                <span class="result-rider">Tom Dumoulin</span>
+                <span class="result-time">1:12:59</span>
+              </li>
+              <li class="result-item">
+                <span class="result-position">5.</span>
+                <span class="result-rider">Richie Porte</span>
+                <span class="result-time">1:13:01</span>
+              </li>
+              <li class="result-item">
+                <span class="result-position">6.</span>
+                <span class="result-rider">Primoz Roglic</span>
+                <span class="result-time">1:13:03</span>
+              </li>
+            </ol>
+            <a href="#" class="card-link">volledige etappe uitslag ►</a>
+          </div>
+
+          <!-- Truien Card -->
+          <div class="card card-jerseys">
+            <h2 class="card-title">Truien</h2>
+            <ul class="jerseys-list" id="jerseys-list">
+              <li class="jersey-item">
+                <div class="rider-avatar">
+                  <img src="" alt="" class="rider-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                  <div class="rider-avatar-placeholder" style="display: none;">TP</div>
+                </div>
+                <div class="rider-info">
+                  <div class="rider-name">Tadej Pogacar</div>
+                  <div class="rider-team">UAE-Team Emirates</div>
+                </div>
+                <div class="jersey-icon jersey-geel" title="Gele trui"></div>
+              </li>
+              <li class="jersey-item">
+                <div class="rider-avatar">
+                  <img src="" alt="" class="rider-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                  <div class="rider-avatar-placeholder" style="display: none;">PS</div>
+                </div>
+                <div class="rider-info">
+                  <div class="rider-name">Peter Sagan</div>
+                  <div class="rider-team">Team TotalEnergies</div>
+                </div>
+                <div class="jersey-icon jersey-groen" title="Groene trui"></div>
+              </li>
+              <li class="jersey-item">
+                <div class="rider-avatar">
+                  <img src="" alt="" class="rider-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                  <div class="rider-avatar-placeholder" style="display: none;">RB</div>
+                </div>
+                <div class="rider-info">
+                  <div class="rider-name">Romain Bardet</div>
+                  <div class="rider-team">Team DSM</div>
+                </div>
+                <div class="jersey-icon jersey-bolletjes" title="Bolkentrui"></div>
+              </li>
+              <li class="jersey-item">
+                <div class="rider-avatar">
+                  <img src="" alt="" class="rider-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                  <div class="rider-avatar-placeholder" style="display: none;">EB</div>
+                </div>
+                <div class="rider-info">
+                  <div class="rider-name">Egan Bernal</div>
+                  <div class="rider-team">Team Jumbo-Visma</div>
+                </div>
+                <div class="jersey-icon jersey-wit" title="Witte trui"></div>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
@@ -60,4 +231,3 @@
   </main>
 </body>
 </html>
-

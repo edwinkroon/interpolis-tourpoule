@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interpolis Tourspel - Team overzicht</title>
+  <link rel="stylesheet" href="styles/grid.css">
+  <link rel="stylesheet" href="styles/style.css">
+  <script src="scripts/auth0-spa-js.production.js"></script>
+  <script src="scripts/auth-config.js"></script>
+  <script src="scripts/auth.js"></script>
+  <script src="scripts/utils.js"></script>
+  <script src="scripts/teamoverzicht.js"></script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content page">
+      <div class="grid">
+        <div class="col-12">
+          <div class="header-top">
+            <a href="home.html" class="back-link">
+              <img src="assets/arrow.svg" alt="" class="back-arrow" aria-hidden="true">
+              <span>Terug</span>
+            </a>
+            <div class="header-title">Interpolis tourspel</div>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="header-welcome-section">
+            <h1 class="welcome-heading">Team overzicht</h1>
+            <div class="header-illustration">
+              <img src="assets/headerillustration.svg" alt="Fiets illustratie" class="illustration-svg">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content page">
+    <div class="grid">
+      <!-- Sidebar with Action Buttons -->
+      <div class="sidebar col-3">
+        <div class="action-buttons">
+          <button class="action-button" aria-label="Bekijk spelregels" onclick="window.location.href='rules.html'">
+            <span>Spelregels</span>
+            <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
+          </button>
+          <button class="action-button" aria-label="Bekijk statistieken" onclick="window.location.href='statistieken.html'">
+            <span>Statistieken</span>
+            <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
+          </button>
+        </div>
+
+        <!-- Renners Card -->
+        <div class="team-card">
+          <h2 class="team-card-title">Renners</h2>
+          <div class="riders-list-container" id="riders-list-container">
+            <!-- Riders will be loaded here -->
+            <div class="no-riders-message" id="no-riders-message" style="display: none;">
+              Je hebt nog geen renners geselecteerd
+            </div>
+          </div>
+          <button class="team-edit-button" aria-label="Aanpassen">
+            <span>aanpassen</span>
+            <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
+          </button>
+        </div>
+
+        <!-- Compare Team Card -->
+        <div class="team-card team-compare-card">
+          <button class="team-compare-button" aria-label="Vergelijk met ander team">
+            <span>Vergelijk met ander team</span>
+            <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
+          </button>
+        </div>
+      </div>
+
+      <!-- Content Area -->
+      <div class="content-area col-9">
+        <!-- Team Info Card -->
+        <div class="team-card team-info-card">
+          <div class="team-info-header">
+            <div class="team-avatar-container">
+              <img id="team-avatar" src="" alt="Avatar" class="team-avatar-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+              <div class="team-avatar-placeholder" id="team-avatar-placeholder" style="display: none;"></div>
+            </div>
+            <div class="team-info-content">
+              <div class="team-info-top">
+                <h2 class="team-name" id="team-name">Koning Kroon</h2>
+                <div class="team-ranking" id="team-ranking">
+                  <span class="ranking-value">129</span>
+                  <span class="ranking-change ranking-down">
+                    <span class="ranking-change-value">14</span>
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M6 9L1 4H11L6 9Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                </div>
+              </div>
+              <div class="team-member-name" id="team-member-name">Edwin Kroon</div>
+            </div>
+          </div>
+          <div class="team-info-details">
+            <div class="team-detail-item">
+              <span class="team-detail-label">Email</span>
+              <span class="team-detail-value" id="team-email">edwin.kroon@outlook.com</span>
+            </div>
+            <div class="team-detail-item">
+              <span class="team-detail-label">Notificatie</span>
+              <span class="team-detail-value" id="team-notification">Aan</span>
+            </div>
+          </div>
+          <button class="team-edit-button" aria-label="Aanpassen">
+            <span>aanpassen</span>
+            <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
+          </button>
+        </div>
+
+        <!-- Jerseys Card -->
+        <div class="team-card jerseys-card">
+          <h2 class="team-card-title">Truien</h2>
+          <ul class="jerseys-list" id="jerseys-list">
+            <!-- Static jerseys data -->
+            <li class="jersey-item">
+              <div class="rider-avatar">
+                <img src="" alt="" class="rider-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div class="rider-avatar-placeholder" style="display: none;">TP</div>
+              </div>
+              <div class="rider-info">
+                <div class="rider-name">Tadej Pogacar</div>
+                <div class="rider-team">UAE-Team Emirates</div>
+              </div>
+              <div class="jersey-icon jersey-geel" title="Gele trui"></div>
+            </li>
+            <li class="jersey-item">
+              <div class="rider-avatar">
+                <img src="" alt="" class="rider-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div class="rider-avatar-placeholder" style="display: none;">PS</div>
+              </div>
+              <div class="rider-info">
+                <div class="rider-name">Peter Sagan</div>
+                <div class="rider-team">Team TotalEnergies</div>
+              </div>
+              <div class="jersey-icon jersey-groen" title="Groene trui"></div>
+            </li>
+            <li class="jersey-item">
+              <div class="rider-avatar">
+                <img src="" alt="" class="rider-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div class="rider-avatar-placeholder" style="display: none;">RB</div>
+              </div>
+              <div class="rider-info">
+                <div class="rider-name">Romain Bardet</div>
+                <div class="rider-team">Team DSM</div>
+              </div>
+              <div class="jersey-icon jersey-bolletjes" title="Bolkentrui"></div>
+            </li>
+            <li class="jersey-item">
+              <div class="rider-avatar">
+                <img src="" alt="" class="rider-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div class="rider-avatar-placeholder" style="display: none;">EB</div>
+              </div>
+              <div class="rider-info">
+                <div class="rider-name">Egan Bernal</div>
+                <div class="rider-team">Team Jumbo-Visma</div>
+              </div>
+              <div class="jersey-icon jersey-wit" title="Witte trui"></div>
+            </li>
+          </ul>
+          <button class="team-action-button" aria-label="Team aanpassen">
+            <span>Team aanpassen</span>
+            <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
+

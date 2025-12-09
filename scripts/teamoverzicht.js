@@ -187,7 +187,7 @@ let selectedRiderIds = new Set();
 // Setup modal handlers
 function setupModalHandlers() {
   // Open modal when clicking "aanpassen" button in Renners card
-  const editButton = document.querySelector('.team-card .team-edit-button');
+  const editButton = document.getElementById('riders-edit-button');
   if (editButton) {
     editButton.addEventListener('click', openRiderModal);
   }

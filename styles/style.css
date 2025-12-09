@@ -1391,13 +1391,6 @@ button[aria-busy="true"] {
   margin-bottom: 0;
 }
 
-.points-section {
-  margin-top: 2rem;
-}
-
-.points-section:first-of-type {
-  margin-top: 0;
-}
 
 .points-subtitle {
   font-size: 20px;

@@ -660,9 +660,15 @@ async function loadDashboardData() {
   const pointsTeamButton = document.querySelector('.points-team-button');
   if (pointsTeamButton) {
     pointsTeamButton.addEventListener('click', function() {
-      // TODO: Navigate to team page when it's created
-      console.log('Navigate to mijn team page');
-      // window.location.href = 'team.html';
+      window.location.href = 'teamoverzicht.html';
+    });
+  }
+  
+  // Add click handler for Kies renners button
+  const chooseRidersButton = document.querySelector('.choose-riders-button');
+  if (chooseRidersButton) {
+    chooseRidersButton.addEventListener('click', function() {
+      window.location.href = 'teamoverzicht.html';
     });
   }
   
@@ -770,13 +776,3 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Setup button click handlers
   setupButtonHandlers();
 });
-
-function setupButtonHandlers() {
-  // Kies renners button
-  const chooseRidersButton = document.querySelector('.choose-riders-button');
-  if (chooseRidersButton) {
-    chooseRidersButton.addEventListener('click', function() {
-      window.location.href = 'teamoverzicht.html';
-    });
-  }
-}

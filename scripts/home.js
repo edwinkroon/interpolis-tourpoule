@@ -466,7 +466,7 @@ function renderPrikbord(prikbordItems) {
   });
 }
 
-function renderDayWinners(dayWinners) {
+function renderDayWinners(dayWinners, latestStageRoute = null) {
   const dayWinnersList = document.getElementById('day-winners-list');
   const dayWinnersRoute = document.getElementById('day-winners-route');
   
@@ -474,10 +474,14 @@ function renderDayWinners(dayWinners) {
 
   dayWinnersList.innerHTML = '';
 
-  // Show route info in title (from first winner or most recent)
-  if (dayWinners.length > 0 && dayWinnersRoute) {
-    const firstWinner = dayWinners[0];
-    dayWinnersRoute.textContent = firstWinner.route || '';
+  // Show route info in title (use latest stage route if available, otherwise fallback to first winner)
+  if (dayWinnersRoute) {
+    if (latestStageRoute) {
+      dayWinnersRoute.textContent = latestStageRoute;
+    } else if (dayWinners.length > 0) {
+      const firstWinner = dayWinners[0];
+      dayWinnersRoute.textContent = firstWinner.route || '';
+    }
   }
 
   // Sort winners by points (highest first) to determine medal colors
@@ -589,8 +593,26 @@ async function loadRiderPhotos(pointsRiders) {
   return ridersWithPhotos;
 }
 
+async function loadLatestStage() {
+  try {
+    const response = await fetch('/.netlify/functions/get-latest-stage');
+    const data = await response.json();
+    
+    if (data.ok && data.stage && data.stage.route_text) {
+      return data.stage.route_text;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error loading latest stage:', error);
+    return null;
+  }
+}
+
 async function loadDashboardData() {
   try {
+    // Load latest stage route info
+    const latestStageRoute = await loadLatestStage();
+    
     // TODO: Replace with actual backend API call
     // For now, use stub data
     const dashboardData = stubDashboardData;
@@ -610,11 +632,12 @@ async function loadDashboardData() {
     renderAchievements(dashboardData.achievements);
     
     // Render day winners first without photos (immediate display)
-    renderDayWinners(dashboardData.dayWinners || []);
+    // Pass latest stage route to renderDayWinners
+    renderDayWinners(dashboardData.dayWinners || [], latestStageRoute);
     
     // Then load photos in background and update
     loadRiderPhotos(dashboardData.dayWinners || []).then(dayWinnersWithPhotos => {
-      renderDayWinners(dayWinnersWithPhotos);
+      renderDayWinners(dayWinnersWithPhotos, latestStageRoute);
     }).catch(error => {
       console.error('Error loading day winner photos:', error);
     });

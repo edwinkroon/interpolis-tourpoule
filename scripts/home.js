@@ -666,14 +666,21 @@ async function loadDashboardData() {
     });
   }
   
-  // Add click handler for spelregels button
-  const spelregelsButtons = document.querySelectorAll('.action-button');
-  spelregelsButtons.forEach(button => {
+  // Add click handler for spelregels and statistieken buttons
+  const actionButtons = document.querySelectorAll('.action-button');
+  actionButtons.forEach(button => {
     const buttonText = button.querySelector('span');
-    if (buttonText && buttonText.textContent.trim() === 'Spelregels') {
-      button.addEventListener('click', function() {
-        window.location.href = 'rules.html';
-      });
+    if (buttonText) {
+      const text = buttonText.textContent.trim();
+      if (text === 'Spelregels') {
+        button.addEventListener('click', function() {
+          window.location.href = 'rules.html';
+        });
+      } else if (text === 'Statistieken') {
+        button.addEventListener('click', function() {
+          window.location.href = 'statistieken.html';
+        });
+      }
     }
   });
 }

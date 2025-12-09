@@ -43,6 +43,14 @@ exports.handler = async function(event) {
     }
 
     // Validate required fields
+    if (!userId) {
+      return { 
+        statusCode: 400, 
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ok: false, error: 'userId is verplicht. Je moet eerst inloggen via Auth0.' })
+      };
+    }
+    
     if (!teamName) {
       return { 
         statusCode: 400, 

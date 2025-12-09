@@ -5,14 +5,19 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Initialize Auth0
   await initAuth();
 
-  // Check if user is already a participant and redirect to home if so
+  // Check if user is authenticated - if not, redirect to login
   const userId = await getUserId();
-  if (userId) {
-    const exists = await checkParticipantExists(userId);
-    if (exists) {
-      window.location.href = 'home.html';
-      return;
-    }
+  if (!userId) {
+    // Not authenticated, redirect to login
+    window.location.href = 'login.html';
+    return;
+  }
+
+  // Check if user is already a participant and redirect to home if so
+  const exists = await checkParticipantExists(userId);
+  if (exists) {
+    window.location.href = 'home.html';
+    return;
   }
 
   // Handle next button click

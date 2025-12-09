@@ -12,19 +12,24 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Initialize Auth0
   await initAuth();
   
-  // Get user ID and store in sessionStorage if not already there
+  // Check if user is authenticated - if not, redirect to login
   let userId = await getUserId();
-  if (userId && !sessionStorage.getItem('auth0_user_id')) {
+  if (!userId) {
+    // Not authenticated, redirect to login
+    window.location.href = 'login.html';
+    return;
+  }
+
+  // Store user ID in sessionStorage if not already there
+  if (!sessionStorage.getItem('auth0_user_id')) {
     sessionStorage.setItem('auth0_user_id', userId);
   }
 
   // Check if user is already a participant and redirect to home if so
-  if (userId) {
-    const exists = await checkParticipantExists(userId);
-    if (exists) {
-      window.location.href = 'home.html';
-      return;
-    }
+  const exists = await checkParticipantExists(userId);
+  if (exists) {
+    window.location.href = 'home.html';
+    return;
   }
 
   // Handle previous button click
@@ -83,8 +88,15 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Set loading state
     setLoadingState(nextButton, 'Opslaan...');
 
-    // Get user ID
+    // Get user ID - should already be available from page load
     const userId = await getUserId();
+    
+    // Double check: if no userId, redirect to login
+    if (!userId) {
+      removeLoadingState(nextButton);
+      window.location.href = 'login.html';
+      return;
+    }
 
     // Sanitize inputs
     const data = {

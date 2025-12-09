@@ -1,0 +1,180 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model teams_pro {
+  id      Int      @id @default(autoincrement())
+  name    String   @unique @db.VarChar(150)
+  code    String?  @db.VarChar(10)
+  country String?  @db.VarChar(80)
+  riders  riders[]
+}
+
+model riders {
+  id                   Int                    @id @default(autoincrement())
+  team_pro_id          Int?
+  first_name           String?                @db.VarChar(100)
+  last_name            String                 @db.VarChar(100)
+  date_of_birth        DateTime?              @db.Date
+  nationality          String?                @db.VarChar(80)
+  weight_kg            Decimal?               @db.Decimal(4, 1)
+  height_m             Decimal?               @db.Decimal(3, 2)
+  photo_url            String?
+  fantasy_team_riders  fantasy_team_riders[]
+  team_pro             teams_pro?             @relation(fields: [team_pro_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  stage_jersey_wearers stage_jersey_wearers[]
+  stage_results        stage_results[]
+}
+
+model stages {
+  id                        Int                         @id @default(autoincrement())
+  stage_number              Int                         @unique
+  name                      String                      @db.VarChar(150)
+  start_location            String?                     @db.VarChar(150)
+  end_location              String?                     @db.VarChar(150)
+  distance_km               Decimal?                    @db.Decimal(5, 1)
+  date                      DateTime                    @db.Date
+  awards                    awards[]
+  fantasy_cumulative_points fantasy_cumulative_points[] @relation("CumulativeAfterStage")
+  fantasy_stage_points      fantasy_stage_points[]
+  stage_jersey_wearers      stage_jersey_wearers[]
+  stage_results             stage_results[]
+}
+
+model jerseys {
+  id                   Int                    @id @default(autoincrement())
+  type                 String                 @unique @db.VarChar(20)
+  name                 String                 @db.VarChar(100)
+  icon                 String?                @db.VarChar(50)
+  stage_jersey_wearers stage_jersey_wearers[]
+}
+
+model participants {
+  id                        Int                         @id @default(autoincrement())
+  user_id                   String                      @unique
+  team_name                 String                      @db.VarChar(100)
+  email                     String?                     @db.VarChar(255)
+  avatar_url                String?
+  newsletter                Boolean                     @default(false)
+  created_at                DateTime                    @default(now()) @db.Timestamp(6)
+  awards_per_participant    awards_per_participant[]
+  bulletin_messages         bulletin_messages[]
+  fantasy_cumulative_points fantasy_cumulative_points[]
+  fantasy_stage_points      fantasy_stage_points[]
+  fantasy_teams             fantasy_teams?
+}
+
+model fantasy_teams {
+  id                  Int                   @id @default(autoincrement())
+  participant_id      Int                   @unique
+  created_at          DateTime              @default(now()) @db.Timestamp(6)
+  fantasy_team_riders fantasy_team_riders[]
+  participant         participants          @relation(fields: [participant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model fantasy_team_riders {
+  id              Int           @id @default(autoincrement())
+  fantasy_team_id Int
+  rider_id        Int
+  slot_type       String        @db.VarChar(10)
+  slot_number     Int
+  active          Boolean       @default(true)
+  fantasy_team    fantasy_teams @relation(fields: [fantasy_team_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  rider           riders        @relation(fields: [rider_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([fantasy_team_id, slot_type, slot_number])
+  @@unique([fantasy_team_id, rider_id])
+}
+
+model stage_results {
+  id              Int    @id @default(autoincrement())
+  stage_id        Int
+  rider_id        Int
+  position        Int
+  time_seconds    Int?
+  same_time_group Int?
+  rider           riders @relation(fields: [rider_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  stage           stages @relation(fields: [stage_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([stage_id, rider_id])
+  @@unique([stage_id, position])
+}
+
+model stage_jersey_wearers {
+  id        Int     @id @default(autoincrement())
+  stage_id  Int
+  jersey_id Int
+  rider_id  Int
+  jersey    jerseys @relation(fields: [jersey_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  rider     riders  @relation(fields: [rider_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  stage     stages  @relation(fields: [stage_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([stage_id, jersey_id])
+}
+
+model scoring_rules {
+  id             Int    @id @default(autoincrement())
+  rule_type      String @db.VarChar(30)
+  condition_json Json
+  points         Int
+}
+
+model fantasy_stage_points {
+  id             Int          @id @default(autoincrement())
+  stage_id       Int
+  participant_id Int
+  points_stage   Int          @default(0)
+  points_jerseys Int          @default(0)
+  points_bonus   Int          @default(0)
+  total_points   Int?         @default(dbgenerated("((points_stage + points_jerseys) + points_bonus)"))
+  participant    participants @relation(fields: [participant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  stage          stages       @relation(fields: [stage_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([stage_id, participant_id])
+}
+
+model fantasy_cumulative_points {
+  id             Int          @id @default(autoincrement())
+  participant_id Int
+  after_stage_id Int
+  total_points   Int
+  rank           Int?
+  after_stage    stages       @relation("CumulativeAfterStage", fields: [after_stage_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  participant    participants @relation(fields: [participant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([participant_id, after_stage_id])
+}
+
+model awards {
+  id                     Int                      @id @default(autoincrement())
+  stage_id               Int?
+  code                   String                   @db.VarChar(50)
+  title                  String                   @db.VarChar(150)
+  description            String?
+  icon                   String?                  @db.VarChar(50)
+  stage                  stages?                  @relation(fields: [stage_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  awards_per_participant awards_per_participant[]
+}
+
+model awards_per_participant {
+  id             Int          @id @default(autoincrement())
+  award_id       Int
+  participant_id Int
+  award          awards       @relation(fields: [award_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  participant    participants @relation(fields: [participant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([award_id, participant_id])
+}
+
+model bulletin_messages {
+  id             Int          @id @default(autoincrement())
+  participant_id Int
+  message        String
+  created_at     DateTime     @default(now()) @db.Timestamp(6)
+  participant    participants @relation(fields: [participant_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+}

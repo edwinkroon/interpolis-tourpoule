@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interpolis Tourspel - Etappe Overzicht</title>
+  <link rel="stylesheet" href="styles/grid.css">
+  <link rel="stylesheet" href="styles/style.css">
+  <script src="scripts/auth0-spa-js.production.js"></script>
+  <script src="scripts/auth-config.js"></script>
+  <script src="scripts/auth.js"></script>
+  <script src="scripts/utils.js"></script>
+  <script src="scripts/etappeoverzicht.js"></script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content page">
+      <div class="grid">
+        <div class="col-12">
+          <div class="header-title">Interpolis tourspel</div>
+        </div>
+        <div class="col-12">
+          <div class="header-welcome-section">
+            <h1 class="welcome-heading">Etappe Overzicht</h1>
+            <div class="header-illustration">
+              <img src="assets/headerillustration.svg" alt="Fiets illustratie" class="illustration-svg">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content page">
+    <div class="grid">
+      <!-- Action Buttons -->
+      <div class="action-buttons col-3">
+        <button class="action-button" aria-label="Bekijk spelregels" onclick="window.location.href='rules.html'">
+          <span>Spelregels</span>
+          <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
+        </button>
+        <button class="action-button" aria-label="Bekijk statistieken" onclick="window.location.href='statistieken.html'">
+          <span>Statistieken</span>
+          <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
+        </button>
+      </div>
+
+      <!-- Content -->
+      <div class="col-9">
+        <div class="rules-container">
+          <section class="rules-section">
+            <h2 class="rules-title">Alle Etappes</h2>
+            
+            <div class="points-table-container">
+              <table class="points-table" id="stages-table">
+                <thead>
+                  <tr>
+                    <th>Etappe</th>
+                    <th>Van</th>
+                    <th>Naar</th>
+                    <th>Afstand</th>
+                    <th>Datum</th>
+                    <th>Winnaar</th>
+                  </tr>
+                </thead>
+                <tbody id="stages-tbody">
+                  <!-- Stages will be loaded here -->
+                  <tr>
+                    <td colspan="6" style="text-align: center; padding: 2rem;">
+                      Laden...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
+

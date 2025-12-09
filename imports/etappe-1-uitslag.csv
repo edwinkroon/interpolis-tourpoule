@@ -1,0 +1,183 @@
+position,first_name,last_name,rider_id,team_name,time_seconds
+1,Jasper,Philipsen,66,Alpecin-Deceuninck,13991
+2,Biniam,Girmay,153,Intermarche - Wanty,13991
+3,Søren,Wærenskjold,150,Uno-X Mobility,13991
+4,Anthony,Turgis,,TotalEnergies,13991
+5,Matteo,Trentin,,Tudor Pro Cycling Team,13991
+6,Clement,Russo,,Groupama - FDJ,13991
+7,Paul,Penhoet,,Groupama - FDJ,13991
+8,Matteo,Jorgenson,169,Team Visma Lease a Bike,13991
+9,Marius,Mayrhofer,,Tudor Pro Cycling Team,13991
+10,Samuel,Watson,,INEOS Grenadiers,13991
+11,Mike,Teunissen,155,XDS Astana Team,13991
+12,Ivan,Garcia Cortina,117,Movistar Team,13991
+13,Niklas,Maerkl,,Team Picnic PostNL,13991
+14,Harry,Sweeny,48,EF Education-EasyPost,13991
+15,Krists,Neilands,95,Israel - Premier Tech,13991
+16,Kevin,Vauquelin,,Arkea - B&B Hotels,13991
+17,Damien,Touze,,Cofidis,13991
+18,Tadej,Pogacar,1,UAE Team Emirates - XRG,13991
+19,Pascal,Ackermann,,Israel - Premier Tech,13991
+20,Jonas,Vingegaard,9,Team Visma Lease a Bike,13991
+21,Jasper,Stuyven,176,Lidl - Trek,13991
+22,Marco,Haller,32,Tudor Pro Cycling Team,13991
+23,Kaden,Groves,,Alpecin-Deceuninck,13991
+24,Kasper,Asgreen,20,EF Education-EasyPost,13991
+25,Joseph,Blackmore,163,Israel - Premier Tech,13991
+26,Luka,Mezgec,104,Team Jayco AlUla,13991
+27,Tiesj,Benoot,14,Team Visma Lease a Bike,13991
+28,Mathieu,van der Po&,,Alpecin-Deceuninck,13991
+29,Stian,Fredheim,,Uno-X Mobility,13991
+30,Tobias,Johannessen,,Uno-X Mobility,13991
+31,Enric,Mas,73,Movistar Team,13991
+32,Tim,Wellens,7,UAE Team Emirates - XRG,13991
+33,Cyril,Barthe,,"Groupama - Fa,",13991
+34,Jonas,Abrahamson,,Uno-X Mobility,14004
+35,Jonas,Rickaert,69,Alpecin-Deceuninck,14004
+36,Xandro,Meurisse,84,Alpecin-Deceuninck,14004
+37,Davide,Ballerini,,XDS Astana Team,14011
+38,Edoardo,Affini,15,Team Visma Lease a Bike,14016
+39,Jonathan,Milan,,Lidl - Trek,14030
+40,Arnaud,de Lie,,Lotto,14030
+41,Bryan,Coquard,108,Cofidis,14030
+42,Jordi,Meeus,,Red Bull - Bora - hansgrohe,14030
+43,Pavel,Bittner,,Team Picnic PostNL,14030
+44,Alberto,Dainese,,Tudor Pro Cycling Team,14030
+45,Robert,Stannard,164,Bahrain - Victorious,14030
+46,Phil,Bauhaus,62,Bahrain - Victorious,14030
+47,Tim,Merlier,24,Soudal - Quick Step,14030
+48,Wout,van Aert,10,Team Visma Lease a Bike,14030
+49,Danny,van Poppel,29,Red Bull - Bora - hansgrohe,14030
+50,Neilson,Powless,42,EF Education-EasyPost,14030
+51,Markus,Hoelgaard,,Uno-X Mobility,14030
+52,Clement,Berthet,,Decathlon AG2R La Mondiale Team,14030
+53,Tobias Lund,Andresen,157,Team Picnic PostNL,14030
+54,Mattias,Skjelmose,,Lidl - Trek,14030
+55,Jasper,De Buyst,72,Lotto,14030
+56,Emanuel,Buchmann,27,Cofidis,14030
+57,Guillaume,Boivin,92,Israel - Premier Tech,14030
+58,Joao,Almeida,2,UAE Team Emirates - XRG,14030
+59,Amaury,Capiot,109,Arkea - B&B Hotels,14030
+60,Dylan,Groenewegen,99,Team Jayco AlUla,14030
+61,Magnus,Cort,41,Uno-X Mobility,14030
+62,Arnaud,Demare,105,Arkea - B&B Hotels,14030
+63,Alexis,Renard,117,Cofidis,14030
+64,Ben,Healy,45,EF Education-EasyPost,14030
+65,Matis,Louvel,,Israel - Premier Tech,14030
+66,Aurelian,Paret-Peintre,,Decathlon AG2R La Mondiale Team,14030
+67,Rem++,Evenepoel,17,Soudal - Quick Step,14030
+68,Jordan,Jegat,,TotalEnergies,14030
+69,Carlos,Rodriguez,35,INEOS Grenadiers,14030
+70,Gianni,Vermeersch,70,Alpecin-Deceuninck,14030
+71,Santiago,Buitrago,60,Bahrain - Victorious,14030
+72,Michael,Valgren,172,EF Education-EasyPost,14030
+73,Oliver,Naesen,122,Decathlon AG2R La Mondiale Team,14030
+74,Oscar,Onley,,Team Picnic PostNL,14030
+75,Felix,Gall,124,Decathlon AG2R La Mondiale Team,14030
+76,Han,van Wilder,167,Soudal - Quick Step,14030
+77,Pascal,Eenkhoorn,23,Soudal - Quick Step,14030
+78,Florian,Lipowitz,,Red Bull - Bora - hansgrohe,14030
+79,Primo+,Roglic,25,Red Bull - Bora - hansgrohe,14030
+80,Lennert,van Eetvelt,,Lotto,14030
+81,Valentin,Madouas,51,Groupama - FDJ,14030
+82,Guillaume,Martin,113,Groupama - FDJ,14030
+83,Nelson,Oliveira,76,Movistar Team,14030
+84,Fabian,Lienhard,,Tudor Pro Cycling Team,14030
+85,Sean,Flynn,,Team Picnic PostNL,14030
+86,Connor,Swift,,INEOS Grenadiers,14030
+87,Geraint,Thomas,33,INEOS Grenadiers,14030
+88,Thomas,Gachignard,,TotalEnergies,14030
+89,Jhonatan,Narvaez,3,UAE Team Emirates - XRG,14030
+90,Hugo,Page,158,Intermarche - Wanty,14030
+91,Staff,Cras,,TotalEnergies,14030
+92,Bastion,Tronchon,,Decathlon AG2R La Mondiale Team,14030
+93,Alexandre,Delettre,,TotalEnergies,14030
+94,Jack,Haig,64,Bahrain - Victorious,14030
+95,Alex,Aranburu,,Cofidis,14030
+96,Marc,Hirschi,,Tudor Pro Cycling Team,14030
+97,Jenno,Berckmoes,,Lotto,14030
+98,Dylan,Teuns,61,Cofidis,14030
+99,Brent,van Moer,,Lotto,14030
+100,Tobias,Foss,,INEOS Grenadiers,14030
+101,Fred,Wright,163,Bahrain - Victorious,14030
+102,Jarrad,Drizners,,Lotto,14030
+103,Vincenzo,Albanese,46,EF Education-EasyPost,14030
+104,Elmar,Reinders,,Team Jayco AlUla,14057
+105,Aleksandr,Vlasov,28,Red Bull - Bora - hansgrohe,14057
+106,Callum,Scotson,175,Decathlon AG2R La Mondiale Team,14057
+107,Warren,Barguil,106,Team Picnic PostNL,14057
+108,Matej,Mohoric,59,Bahrain - Victorious,14057
+109,Alex,Baudin,47,EF Education-EasyPost,14057
+110,Clement,Venturini,,Arkea - B&B Hotels,14057
+111,Bert,van Lerberghe,,Soudal - Quick Step,14057
+112,Toms,Skujins,87,Lidl - Trek,14077
+113,Edward,Theuns,88,Lidl - Trek,14077
+114,Vito,Brant,,Intermarche - Wanty,14077
+115,Laurence,Pithie,,Red Bull - Bora - hansgrohe,14084
+116,Simone,Consonni,,Lidl - Trek,14084
+117,Mattis,Cattaneo,22,Soudal - Quick Step,14099
+118,Victor,Campenaerts,16,Team Visma Lease a Bike,14110
+119,Sepp,Kuss,11,Team Visma Lease a Bike,14030
+120,Gianni,Moscon,140,Red Bull - Bora - hansgrohe,14125
+121,Mick,van Dijke,,Red Bull - Bora - hansgrohe,14125
+122,Ion,Izagirre,,Cofidis,14125
+123,Marc,Soler,6,UAE Team Emirates - XRG,14137
+124,Kamil,Gradek,63,Bahrain - Victorious,14137
+125,Nils,Politt,4,UAE Team Emirates - XRG,14309
+126,Andreas,Leknessund,,Uno-X Mobility,14309
+127,Anders,Johannessen,,Uno-X Mobility,14309
+128,Quentin,Pacher,54,Groupama - FDJ,14309
+129,Harold,Tejada,141,XDS Astana Team,14309
+130,Bruno,Armirail,,Decathlon AG2R La Mondiale Team,14309
+131,Sebastian,Grignard,,Lotto,14309
+132,Mathis,le Berre,,Arkea - B&B Hotels,14309
+133,Thyme+,Arensman,,INEOS Grenadiers,14309
+134,Jonas,Rutsch,160,Intermarche - Wanty,14309
+135,Eduardo,Sepulveda,,Lotto,14309
+136,Georg,Zimmermann,161,Intermarche - Wanty,14309
+137,Gregor,Muehlberger,,Movistar Team,14309
+138,Benjamin,Thomas,165,Cofidis,14309
+139,Einar,Rubio,,Movistar Team,14309
+140,Cristian,Rodriguez,35,Arkea - B&B Hotels,14309
+141,Frank,van den Brook,,Team Picnic PostNL,14309
+142,Quinn,Simmons,86,Lidl - Trek,14309
+143,Tim,Naberman,,Team Picnic PostNL,14309
+144,Sergio,Higuita,,XDS Astana Team,14309
+145,Clement,Champoussin,,XDS Astana Team,14309
+146,Laurenz,Rex,159,Intermarche - Wanty,14309
+147,Pablo,Castrillo,,Movistar Team,14309
+148,Raul,Garcia Pierna,109,Arkea - B&B Hotels,14309
+149,Romain,Gregoire,173,Groupama - FDJ,14309
+150,Ewen,Costiou,,Arkea - B&B Hotels,14309
+151,Valentin,Paret-Peintre,,Soudal - Quick Step,14309
+152,Emilien,Jeanniere,,TotalEnergies,14309
+153,Michael,Storer,56,Tudor Pro Cycling Team,14309
+154,Edward,Dunbar,101,Team Jayco AlUla,14309
+155,Pavel,Sivakov,5,UAE Team Emirates - XRG,14309
+156,Adam,Yates,8,UAE Team Emirates - XRG,14309
+157,Emiel,Verstrynge,,Alpecin-Deceuninck,14309
+158,Jake,Stewart,,Israel - Premier Tech,14309
+159,Alexey,Lutsenko,137,Israel - Premier Tech,14309
+160,Ben,O'Connor,,Team Jayco AlUla,13991
+161,Mauro,Schmid,104,Team Jayco AlUla,14318
+162,Marijn,van den Berg,171,EF Education-EasyPost,13991
+163,Luke,Durbridge,,Team Jayco AlUla,14382
+164,Simon,Yates,170,Team Visma Lease a Bike,14382
+165,Axel,Laurance,118,INEOS Grenadiers,14382
+166,Silvan,Dillier,68,Alpecin-Deceuninck,14382
+167,Michael,Woods,89,Israel - Premier Tech,14382
+168,Simone,Velasco,142,XDS Astana Team,14382
+169,Maximilian,Schachmann,183,Soudal - Quick Step,14382
+170,Lucas,Plapp,100,Team Jayco AlUla,14382
+171,Yevgeniy,Fedorov,,XDS Astana Team,14382
+172,Cees,Bol,139,XDS Astana Team,14382
+173,Julian,Alaphilippe,18,Tudor Pro Cycling Team,14382
+174,Ro&,van Sintmaartensdijk,162,Intermarche - Wanty,14382
+175,Louis,Barre,156,Intermarche - Wanty,14382
+176,Ivan,Romeo,,Movistar Team,14382
+177,William,Barta,,Movistar Team,14382
+178,Mathieu,Burgaudeau,,TotalEnergies,14382
+179,Matteo,Vercher,,TotalEnergies,14382
+180,Thibau,Nys,,Lidl - Trek,14382
+181,Lewis,Askey,,Groupama - FDJ,14382
+182,Lenny,Martinez,,Bahrain - Victorious,14542

@@ -1,5 +1,6 @@
 const { getDbClient, handleDbError, missingDbConfigResponse } = require('./_shared/db');
 const { calculateCumulativePoints } = require('./calculate-cumulative-points');
+const { calculateAllFinalPoints } = require('./calculate-final-points');
 
 // BUSINESS RULE: Activate reserve riders when main riders drop out
 // This function checks which main riders are no longer in stage results
@@ -94,11 +95,43 @@ async function activateReservesForDroppedRiders(client, stageId) {
   }
 }
 
+// Helper function to check if a stage is the final stage
+async function isFinalStage(client, stageId) {
+  // Get the stage number of the current stage
+  const currentStageQuery = await client.query(
+    'SELECT stage_number FROM stages WHERE id = $1',
+    [stageId]
+  );
+  
+  if (currentStageQuery.rows.length === 0) {
+    return false;
+  }
+  
+  const currentStageNumber = currentStageQuery.rows[0].stage_number;
+  
+  // Get the highest stage number in the database
+  const maxStageQuery = await client.query(
+    'SELECT MAX(stage_number) as max_stage FROM stages'
+  );
+  
+  if (maxStageQuery.rows.length === 0 || !maxStageQuery.rows[0].max_stage) {
+    return false;
+  }
+  
+  const maxStageNumber = maxStageQuery.rows[0].max_stage;
+  
+  return currentStageNumber === maxStageNumber;
+}
+
 // Helper function to calculate stage points (shared with calculate-stage-points.js)
 async function calculateStagePoints(client, stageId) {
   if (!client) {
     throw new Error('Database client is not available');
   }
+  
+  // BUSINESS RULE 9: Check if this is the final stage
+  // If it is, no jersey points should be awarded for this stage
+  const isFinal = await isFinalStage(client, stageId);
   
   // Step 1: Get all scoring rules for stage positions
   const scoringRules = await client.query(
@@ -211,10 +244,13 @@ async function calculateStagePoints(client, stageId) {
     });
 
     // Calculate points from jerseys
-    teams.forEach(team => {
-      const jerseyPoints = riderJerseyPointsMap.get(team.rider_id) || 0;
-      pointsJerseys += jerseyPoints;
-    });
+    // BUSINESS RULE 9: No jersey points on final stage
+    if (!isFinal) {
+      teams.forEach(team => {
+        const jerseyPoints = riderJerseyPointsMap.get(team.rider_id) || 0;
+        pointsJerseys += jerseyPoints;
+      });
+    }
 
     participantPoints.set(participantId, {
       points_stage: pointsStage,
@@ -495,6 +531,19 @@ exports.handler = async function(event) {
         } catch (cumulativeErr) {
           console.error('Error calculating cumulative points:', cumulativeErr);
           // Don't fail the import if cumulative points calculation fails
+        }
+        
+        // BUSINESS RULE: Calculate final classification and final jersey points if this is the final stage
+        try {
+          const isFinal = await isFinalStage(client, stageId);
+          if (isFinal) {
+            console.log('Final stage detected, calculating final classification and jersey points...');
+            await calculateAllFinalPoints(client, stageId);
+            console.log('Final points calculated successfully');
+          }
+        } catch (finalPointsErr) {
+          console.error('Error calculating final points:', finalPointsErr);
+          // Don't fail the import if final points calculation fails
         }
         
       } catch (err) {

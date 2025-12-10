@@ -11,7 +11,14 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   let validatedResults = null;
   let currentStageId = null;
+  let currentStageNumber = null;
   let originalResultsText = null;
+  let selectedJerseys = {
+    geel: null,
+    groen: null,
+    bolletjes: null,
+    wit: null
+  };
 
   // Setup navigation buttons
   document.querySelectorAll('[data-nav]').forEach(button => {
@@ -91,6 +98,18 @@ document.addEventListener('DOMContentLoaded', async function() {
     currentStageId = parseInt(stageId, 10);
     originalResultsText = resultsText; // Store original text
     
+    // Get stage number from select option text
+    const stageSelect = document.getElementById('stage-select');
+    if (stageSelect) {
+      const selectedOption = stageSelect.options[stageSelect.selectedIndex];
+      if (selectedOption) {
+        // Extract stage number from option text like "Etappe 7: Stage name"
+        const match = selectedOption.textContent.match(/Etappe (\d+)/);
+        if (match) {
+          currentStageNumber = parseInt(match[1], 10);
+        }
+      }
+    }
 
     try {
       const response = await fetch('/.netlify/functions/validate-stage-results', {
@@ -140,6 +159,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         // All riders matched - show preview instead of importing directly
         validatedResults = result.results;
         showPreview(result.results);
+        // Load and show jersey selection (with all riders)
+        await loadJerseySelection(result.results);
+        // Initialize validation
+        validateJerseySelection();
       } else {
         // Some riders didn't match - show errors and editable textarea
         validatedResults = null;
@@ -186,6 +209,174 @@ document.addEventListener('DOMContentLoaded', async function() {
     } catch (error) {
       console.error('Error validating results:', error);
       alert('Er is een fout opgetreden bij het valideren: ' + error.message);
+    }
+  }
+
+  // Load jersey selection interface
+  async function loadJerseySelection(results) {
+    try {
+      // Get jersey types, previous wearers, and all riders from API
+      if (!currentStageNumber) {
+        console.error('Stage number not available');
+        return;
+      }
+      
+      const response = await fetch(`/.netlify/functions/get-stage-jerseys?stage_number=${currentStageNumber}`);
+      const data = await response.json();
+      
+      if (data.ok && data.jerseys && data.riders) {
+        showJerseySelection(data.jerseys, data.riders);
+      } else {
+        console.error('Error loading jersey data:', data);
+        alert('Fout bij laden van truien data');
+      }
+    } catch (error) {
+      console.error('Error loading jersey selection:', error);
+      alert('Fout bij laden van truien data: ' + error.message);
+    }
+  }
+
+  // Show jersey selection interface with searchable dropdowns
+  function showJerseySelection(jerseys, allRiders) {
+    const jerseySection = document.getElementById('jersey-selection-section');
+    const jerseyContainer = document.getElementById('jersey-selection-container');
+    
+    if (!jerseySection || !jerseyContainer) return;
+    
+    jerseySection.style.display = 'block';
+    jerseyContainer.innerHTML = '';
+    
+    // Reset selected jerseys
+    selectedJerseys = {
+      geel: null,
+      groen: null,
+      bolletjes: null,
+      wit: null
+    };
+    
+    // Create searchable dropdown for each jersey type
+    jerseys.forEach(jersey => {
+      const jerseyGroup = document.createElement('div');
+      jerseyGroup.className = 'form-group';
+      
+      const label = document.createElement('label');
+      label.className = 'form-label';
+      label.innerHTML = `${jersey.name} <span style="color: #d32f2f;">*</span>`;
+      label.setAttribute('for', `jersey-${jersey.type}`);
+      
+      // Create searchable select container with datalist for better UX
+      const selectContainer = document.createElement('div');
+      selectContainer.className = 'jersey-select-container';
+      selectContainer.style.position = 'relative';
+      
+      // Create datalist for autocomplete
+      const datalist = document.createElement('datalist');
+      datalist.id = `jersey-datalist-${jersey.type}`;
+      
+      // Add all riders to datalist
+      allRiders.forEach(rider => {
+        const option = document.createElement('option');
+        option.value = `${rider.name}${rider.teamName ? ' (' + rider.teamName + ')' : ''}`;
+        option.setAttribute('data-rider-id', rider.id);
+        option.setAttribute('data-search', `${rider.name} ${rider.teamName || ''}`.toLowerCase());
+        datalist.appendChild(option);
+      });
+      
+      // Create input with datalist for searchable dropdown
+      const searchInput = document.createElement('input');
+      searchInput.type = 'text';
+      searchInput.id = `jersey-input-${jersey.type}`;
+      searchInput.className = 'form-input jersey-search-input';
+      searchInput.setAttribute('list', `jersey-datalist-${jersey.type}`);
+      searchInput.placeholder = 'Typ om te zoeken en selecteer renner...';
+      searchInput.required = true;
+      searchInput.setAttribute('data-jersey-type', jersey.type);
+      searchInput.setAttribute('data-jersey-id', jersey.jerseyId || '');
+      
+      // Set default from previous stage
+      if (jersey.defaultRiderId) {
+        const defaultRider = allRiders.find(r => r.id === jersey.defaultRiderId);
+        if (defaultRider) {
+          searchInput.value = defaultRider.teamName 
+            ? `${defaultRider.name} (${defaultRider.teamName})`
+            : defaultRider.name;
+          selectedJerseys[jersey.type] = {
+            jerseyId: jersey.jerseyId,
+            riderId: jersey.defaultRiderId
+          };
+        }
+      }
+      
+      // Handle input change to find rider ID
+      searchInput.addEventListener('input', function() {
+        const inputValue = this.value.trim();
+        if (!inputValue) {
+          selectedJerseys[jersey.type] = null;
+          validateJerseySelection();
+          return;
+        }
+        
+        // Find matching rider
+        const matchingOption = Array.from(datalist.options).find(option => {
+          return option.value.toLowerCase() === inputValue.toLowerCase();
+        });
+        
+        if (matchingOption) {
+          const riderId = parseInt(matchingOption.getAttribute('data-rider-id'), 10);
+          selectedJerseys[jersey.type] = {
+            jerseyId: jersey.jerseyId,
+            riderId: riderId
+          };
+        } else {
+          selectedJerseys[jersey.type] = null;
+        }
+        validateJerseySelection();
+      });
+      
+      // Also handle when user selects from dropdown
+      searchInput.addEventListener('change', function() {
+        const inputValue = this.value.trim();
+        const matchingOption = Array.from(datalist.options).find(option => {
+          return option.value.toLowerCase() === inputValue.toLowerCase();
+        });
+        
+        if (matchingOption) {
+          const riderId = parseInt(matchingOption.getAttribute('data-rider-id'), 10);
+          selectedJerseys[jersey.type] = {
+            jerseyId: jersey.jerseyId,
+            riderId: riderId
+          };
+          validateJerseySelection();
+        }
+      });
+      
+      selectContainer.appendChild(searchInput);
+      selectContainer.appendChild(datalist);
+      jerseyGroup.appendChild(label);
+      jerseyGroup.appendChild(selectContainer);
+      jerseyContainer.appendChild(jerseyGroup);
+    });
+    
+    // Initial validation
+    validateJerseySelection();
+  }
+  
+  // Validate that all jerseys are selected
+  function validateJerseySelection() {
+    const allSelected = ['geel', 'groen', 'bolletjes', 'wit'].every(type => 
+      selectedJerseys[type] && selectedJerseys[type].riderId
+    );
+    
+    const exportButton = document.getElementById('export-button');
+    if (exportButton) {
+      exportButton.disabled = !allSelected;
+      if (!allSelected) {
+        exportButton.title = 'Selecteer alle 4 truien voordat je kunt exporteren';
+        exportButton.style.opacity = '0.6';
+      } else {
+        exportButton.title = '';
+        exportButton.style.opacity = '1';
+      }
     }
   }
 
@@ -245,6 +436,28 @@ document.addEventListener('DOMContentLoaded', async function() {
       alert('Geen gevalideerde resultaten om te importeren');
       return;
     }
+    
+    // Validate that all jerseys are selected
+    const allJerseysSelected = ['geel', 'groen', 'bolletjes', 'wit'].every(type => 
+      selectedJerseys[type] && selectedJerseys[type].riderId
+    );
+    
+    if (!allJerseysSelected) {
+      alert('Selecteer alle 4 truien voordat je kunt exporteren');
+      return;
+    }
+    
+    // Collect selected jerseys
+    const jerseysToImport = [];
+    Object.keys(selectedJerseys).forEach(type => {
+      if (selectedJerseys[type] && selectedJerseys[type].riderId) {
+        jerseysToImport.push({
+          jerseyType: type,
+          jerseyId: selectedJerseys[type].jerseyId,
+          riderId: selectedJerseys[type].riderId
+        });
+      }
+    });
 
     const validationResults = document.getElementById('validation-results');
     const validationSuccess = document.getElementById('validation-success');
@@ -297,7 +510,8 @@ document.addEventListener('DOMContentLoaded', async function() {
             position: r.position,
             riderId: r.riderId,
             timeSeconds: r.timeSeconds
-          }))
+          })),
+          jerseys: jerseysToImport
         })
       });
 
@@ -409,7 +623,19 @@ document.addEventListener('DOMContentLoaded', async function() {
   if (stageSelect) {
     stageSelect.addEventListener('change', function() {
       currentStageId = null;
+      currentStageNumber = null;
       validatedResults = null;
+      selectedJerseys = {
+        geel: null,
+        groen: null,
+        bolletjes: null,
+        wit: null
+      };
+      // Hide jersey selection
+      const jerseySection = document.getElementById('jersey-selection-section');
+      if (jerseySection) {
+        jerseySection.style.display = 'none';
+      }
     });
   }
 

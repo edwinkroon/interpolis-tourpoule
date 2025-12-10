@@ -212,6 +212,7 @@ exports.handler = async function(event) {
 
     const stageId = body.stageId;
     const results = body.results; // Array of {position, riderId, timeSeconds}
+    const jerseys = body.jerseys || []; // Array of {jerseyType, jerseyId, riderId}
 
 
     if (!stageId) {
@@ -264,7 +265,48 @@ exports.handler = async function(event) {
     await client.query('BEGIN');
 
     try {
-      // Delete existing results for this stage
+      // FIRST: Import jerseys if provided (before results)
+      if (jerseys && jerseys.length > 0) {
+        // Delete existing jersey wearers for this stage
+        await client.query('DELETE FROM stage_jersey_wearers WHERE stage_id = $1', [stageId]);
+        
+        // Get jersey IDs by type if not provided
+        const jerseyTypeMap = new Map();
+        if (jerseys.some(j => !j.jerseyId)) {
+          const jerseyQuery = await client.query(
+            `SELECT id, type FROM jerseys WHERE type = ANY($1::text[])`,
+            [jerseys.map(j => j.jerseyType)]
+          );
+          jerseyQuery.rows.forEach(j => {
+            jerseyTypeMap.set(j.type, j.id);
+          });
+        }
+        
+        // Insert jersey wearers
+        for (const jersey of jerseys) {
+          if (!jersey.riderId) {
+            throw new Error(`Jersey ${jersey.jerseyType} heeft geen renner geselecteerd`);
+          }
+          
+          const jerseyId = jersey.jerseyId || jerseyTypeMap.get(jersey.jerseyType);
+          if (!jerseyId) {
+            throw new Error(`Jersey ID niet gevonden voor type: ${jersey.jerseyType}`);
+          }
+          
+          await client.query(
+            `INSERT INTO stage_jersey_wearers (stage_id, jersey_id, rider_id)
+             VALUES ($1, $2, $3)
+             ON CONFLICT (stage_id, jersey_id)
+             DO UPDATE SET rider_id = EXCLUDED.rider_id`,
+            [stageId, jerseyId, jersey.riderId]
+          );
+        }
+      } else {
+        // Validate that all 4 jerseys are provided
+        throw new Error('Alle 4 truien moeten worden geselecteerd (geel, groen, bolletjes, wit)');
+      }
+      
+      // SECOND: Delete existing results for this stage
       await client.query('DELETE FROM stage_results WHERE stage_id = $1', [stageId]);
 
       // Calculate same_time_group based on time_seconds

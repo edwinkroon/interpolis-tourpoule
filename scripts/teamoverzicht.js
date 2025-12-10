@@ -245,6 +245,7 @@ let allRiders = [];
 let filteredRiders = [];
 let selectedRiderIds = new Set();
 let currentSlotType = null; // 'main' or 'reserve' - determines which slot type to prioritize
+let currentRiderCount = 0; // Current number of riders in the team for this slot type
 
 // Delete modal state
 let deleteSelectedRiderIds = new Set();
@@ -309,6 +310,27 @@ async function openRiderModal(slotType = null) {
     searchInput.value = '';
   }
   
+  // Load current rider count for this slot type
+  const userId = await getUserId();
+  if (userId) {
+    try {
+      const response = await fetch(`/.netlify/functions/get-team-riders?userId=${encodeURIComponent(userId)}`);
+      const result = await response.json();
+      
+      if (result.ok && result.riders) {
+        const currentRiders = result.riders.filter(rider => rider.slot_type === slotType);
+        currentRiderCount = currentRiders.length;
+      } else {
+        currentRiderCount = 0;
+      }
+    } catch (error) {
+      console.error('Error loading current rider count:', error);
+      currentRiderCount = 0;
+    }
+  } else {
+    currentRiderCount = 0;
+  }
+  
   // Show modal
   modalOverlay.style.display = 'flex';
   
@@ -317,6 +339,9 @@ async function openRiderModal(slotType = null) {
   
   // Render riders
   renderModalRidersList();
+  
+  // Update warning message
+  updateWarningMessage();
 }
 
 // Close rider selection modal
@@ -430,6 +455,7 @@ function renderModalRidersList() {
         selectedRiderIds.delete(rider.id);
       }
       updateAddButton();
+      updateWarningMessage();
     });
     
     // Make entire item clickable
@@ -451,6 +477,25 @@ function updateAddButton() {
   const addButton = document.getElementById('modal-add-button');
   if (addButton) {
     addButton.disabled = selectedRiderIds.size === 0;
+  }
+}
+
+// Update warning message about too many riders selected
+function updateWarningMessage() {
+  const warningMessage = document.getElementById('modal-warning-message');
+  if (!warningMessage || !currentSlotType) return;
+  
+  const maxForType = currentSlotType === 'main' ? 10 : 5;
+  const totalAfterAdd = currentRiderCount + selectedRiderIds.size;
+  const tooMany = totalAfterAdd > maxForType;
+  
+  if (tooMany) {
+    const excess = totalAfterAdd - maxForType;
+    const typeName = currentSlotType === 'main' ? 'basisrenners' : 'reserverenners';
+    warningMessage.innerHTML = `<p>Je hebt ${excess} ${excess === 1 ? 'renner te veel' : 'renners te veel'} geselecteerd. Je kunt maximaal ${maxForType} ${typeName} hebben. Deselecteer ${excess} ${excess === 1 ? 'renner' : 'renners'} om door te gaan.</p>`;
+    warningMessage.style.display = 'block';
+  } else {
+    warningMessage.style.display = 'none';
   }
 }
 

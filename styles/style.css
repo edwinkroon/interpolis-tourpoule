@@ -3492,35 +3492,102 @@ button[aria-busy="true"] {
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
+  width: 100%;
+}
+.team-compare-filters-container {
+  margin-bottom: 2rem;
+}
+.team-compare-filters {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  padding: 1rem 1.5rem;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #cdd7dc;
+}
+.team-compare-filter-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 14px;
+  color: #00334e;
+  cursor: pointer;
+  user-select: none;
+}
+.team-compare-filter-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #00cac6;
 }
 .team-compare-rider-jerseys {
   display: flex;
   gap: 0.25rem;
   flex-wrap: wrap;
+  margin-left: auto;
 }
 .team-compare-rider-jersey-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: 14px;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border-radius: 4px;
   background: #f0f9f4;
   border: 1px solid #00cac6;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.team-compare-rider-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  width: 100%;
+}
+.team-compare-rider-name-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  flex: 1;
+}
+.team-compare-rider-type-badge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+.team-compare-rider-type-reserve {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffc107;
+}
+.team-compare-rider-type-inactive {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #dc3545;
+}
+.team-compare-rider-reserve {
+  border-left: 3px solid #ffc107;
+}
+.team-compare-rider-inactive {
+  opacity: 0.6;
+  border-left: 3px solid #dc3545;
+}
+.team-compare-rider-shared {
+  background: #f0f9f4;
+  border-left: 3px solid #00cac6;
 }
 .team-compare-rider-points {
   font-size: 12px;
   color: #00cac6;
   font-weight: 600;
   margin-top: 0.25rem;
-}
-.team-compare-rider-shared {
-  opacity: 0.5;
-  background: #f5f5f5;
-}
-.team-compare-rider-shared .team-compare-rider-name {
-  text-decoration: line-through;
 }
 .team-compare-vs {
   display: flex;

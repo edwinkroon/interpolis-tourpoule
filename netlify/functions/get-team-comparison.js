@@ -81,43 +81,44 @@ exports.handler = async function(event) {
     
     const ridersResult = await client.query(ridersQuery, [participantId]);
     
-    // Get jersey assignments
-    let jerseyAssignments = [];
-    if (fantasyTeamId) {
-      try {
-        const jerseyQuery = `
-          SELECT 
-            ftj.jersey_id,
-            ftj.rider_id,
-            j.type as jersey_type,
-            j.name as jersey_name,
-            j.icon as jersey_icon
-          FROM fantasy_team_jerseys ftj
-          INNER JOIN jerseys j ON ftj.jersey_id = j.id
-          WHERE ftj.fantasy_team_id = $1
-        `;
-        const jerseyResult = await client.query(jerseyQuery, [fantasyTeamId]);
-        jerseyAssignments = jerseyResult.rows;
-      } catch (err) {
-        // If table doesn't exist, ignore
-        if (err.code !== '42P01') {
-          console.error('Error fetching jersey assignments:', err);
+    // Get latest stage with results to check current jersey wearers
+    const latestStageQuery = await client.query(`
+      SELECT s.id, s.stage_number
+      FROM stages s
+      WHERE EXISTS (
+        SELECT 1 FROM stage_results sr WHERE sr.stage_id = s.id
+      )
+      ORDER BY s.stage_number DESC
+      LIMIT 1
+    `);
+    
+    const latestStageId = latestStageQuery.rows.length > 0 ? latestStageQuery.rows[0].id : null;
+    
+    // Get current jersey wearers (only for latest stage - who is actually wearing the jersey now)
+    const currentJerseyWearersMap = new Map();
+    if (latestStageId) {
+      const currentJerseysQuery = await client.query(`
+        SELECT 
+          sjw.rider_id,
+          j.type as jersey_type,
+          j.name as jersey_name,
+          j.icon as jersey_icon
+        FROM stage_jersey_wearers sjw
+        INNER JOIN jerseys j ON sjw.jersey_id = j.id
+        WHERE sjw.stage_id = $1
+      `, [latestStageId]);
+      
+      currentJerseysQuery.rows.forEach(jersey => {
+        if (!currentJerseyWearersMap.has(jersey.rider_id)) {
+          currentJerseyWearersMap.set(jersey.rider_id, []);
         }
-      }
-    }
-
-    // Create map of rider_id -> jersey assignments
-    const riderJerseyMap = new Map();
-    jerseyAssignments.forEach(assignment => {
-      if (!riderJerseyMap.has(assignment.rider_id)) {
-        riderJerseyMap.set(assignment.rider_id, []);
-      }
-      riderJerseyMap.get(assignment.rider_id).push({
-        type: assignment.jersey_type,
-        name: assignment.jersey_name,
-        icon: assignment.jersey_icon
+        currentJerseyWearersMap.get(jersey.rider_id).push({
+          type: jersey.jersey_type,
+          name: jersey.jersey_name,
+          icon: jersey.jersey_icon
+        });
       });
-    });
+    }
 
     // Get all stages with results to calculate total points per rider
     const stagesWithResultsQuery = `
@@ -189,6 +190,20 @@ exports.handler = async function(event) {
       }
     }
     
+    // Check which riders are still active (have results in latest stage)
+    const activeRiderIds = new Set();
+    if (latestStageId) {
+      const activeRidersQuery = await client.query(`
+        SELECT DISTINCT rider_id
+        FROM stage_results
+        WHERE stage_id = $1
+      `, [latestStageId]);
+      
+      activeRidersQuery.rows.forEach(row => {
+        activeRiderIds.add(row.rider_id);
+      });
+    }
+    
     const riders = ridersResult.rows.map(row => ({
       id: row.id,
       firstName: row.first_name,
@@ -197,8 +212,9 @@ exports.handler = async function(event) {
       teamName: row.team_name || 'Onbekend team',
       slotType: row.slot_type,
       slotNumber: row.slot_number,
-      jerseys: riderJerseyMap.get(row.id) || [],
-      totalPoints: riderPointsMap.get(row.id) || 0
+      jerseys: currentJerseyWearersMap.get(row.id) || [], // Only current jersey wearers
+      totalPoints: riderPointsMap.get(row.id) || 0,
+      isActive: activeRiderIds.has(row.id) // Whether rider is still active
     }));
 
     // Get latest standings to find rank and total points

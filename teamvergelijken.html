@@ -75,6 +75,28 @@
 
         <!-- Team Comparison -->
         <div class="team-compare-container" id="team-compare-container" style="display: none;">
+          <!-- Filters (shown above both teams) -->
+          <div class="team-compare-filters-container">
+            <div class="team-compare-filters">
+              <label class="team-compare-filter-label">
+                <input type="checkbox" class="team-compare-filter-checkbox" id="filter-main-riders" checked>
+                <span>Basisrenners</span>
+              </label>
+              <label class="team-compare-filter-label">
+                <input type="checkbox" class="team-compare-filter-checkbox" id="filter-reserve-riders" checked>
+                <span>Reserverenners</span>
+              </label>
+              <label class="team-compare-filter-label">
+                <input type="checkbox" class="team-compare-filter-checkbox" id="filter-inactive-riders" checked>
+                <span>Niet meer meedoen</span>
+              </label>
+              <label class="team-compare-filter-label">
+                <input type="checkbox" class="team-compare-filter-checkbox" id="filter-shared-riders" checked>
+                <span>Gedeelde renners</span>
+              </label>
+            </div>
+          </div>
+          
           <div class="team-compare-grid">
             <!-- Your Team -->
             <div class="team-compare-column">
@@ -96,13 +118,8 @@
                 </div>
               </div>
               <div class="team-compare-riders">
-                <h3 class="team-compare-riders-title">Basisrenners</h3>
-                <div class="team-compare-riders-list" id="my-team-main-riders">
-                  <!-- Main riders will be rendered here -->
-                </div>
-                <h3 class="team-compare-riders-title" style="margin-top: 1.5rem;">Reserverenners</h3>
-                <div class="team-compare-riders-list" id="my-team-reserve-riders">
-                  <!-- Reserve riders will be rendered here -->
+                <div class="team-compare-riders-list" id="my-team-riders">
+                  <!-- All riders will be rendered here -->
                 </div>
               </div>
             </div>
@@ -132,13 +149,8 @@
                 </div>
               </div>
               <div class="team-compare-riders">
-                <h3 class="team-compare-riders-title">Basisrenners</h3>
-                <div class="team-compare-riders-list" id="compare-team-main-riders">
-                  <!-- Main riders will be rendered here -->
-                </div>
-                <h3 class="team-compare-riders-title" style="margin-top: 1.5rem;">Reserverenners</h3>
-                <div class="team-compare-riders-list" id="compare-team-reserve-riders">
-                  <!-- Reserve riders will be rendered here -->
+                <div class="team-compare-riders-list" id="compare-team-riders">
+                  <!-- All riders will be rendered here -->
                 </div>
               </div>
             </div>

@@ -174,9 +174,18 @@ function renderMyTeam(team) {
   // Store team data for comparison
   myTeamData = team;
   
-  // Riders (no comparison needed for my team)
-  renderRiders(team.mainRiders || [], 'my-team-main-riders', []);
-  renderRiders(team.reserveRiders || [], 'my-team-reserve-riders', []);
+  // Combine all riders and render
+  const allRiders = [
+    ...(team.mainRiders || []).map(r => ({ ...r, slotType: 'main' })),
+    ...(team.reserveRiders || []).map(r => ({ ...r, slotType: 'reserve' }))
+  ];
+  renderRiders(allRiders, 'my-team-riders', []);
+  
+  // Setup filter handlers (only once)
+  if (!window.riderFiltersSetup) {
+    setupRiderFilters();
+    window.riderFiltersSetup = true;
+  }
 }
 
 // Render compare team
@@ -218,13 +227,18 @@ function renderCompareTeam(team) {
     rankEl.textContent = team.rank ? `#${team.rank}` : '-';
   }
   
-  // Riders
+  // Combine all riders
+  const allCompareRiders = [
+    ...(team.mainRiders || []).map(r => ({ ...r, slotType: 'main' })),
+    ...(team.reserveRiders || []).map(r => ({ ...r, slotType: 'reserve' }))
+  ];
+  
+  // Get my team riders for comparison
   const myTeamMainRiders = myTeamData ? (myTeamData.mainRiders || []) : [];
   const myTeamReserveRiders = myTeamData ? (myTeamData.reserveRiders || []) : [];
   const allMyRiders = [...myTeamMainRiders, ...myTeamReserveRiders];
   
-  renderRiders(team.mainRiders || [], 'compare-team-main-riders', allMyRiders);
-  renderRiders(team.reserveRiders || [], 'compare-team-reserve-riders', allMyRiders);
+  renderRiders(allCompareRiders, 'compare-team-riders', allMyRiders);
 }
 
 // Render riders list
@@ -245,17 +259,44 @@ function renderRiders(riders, containerId, otherTeamRiders = []) {
   riders.forEach(rider => {
     const riderItem = document.createElement('div');
     const isShared = otherTeamRiderIds.has(rider.id);
-    riderItem.className = `team-compare-rider-item ${isShared ? 'team-compare-rider-shared' : ''}`;
+    const slotType = rider.slotType || 'main';
+    const isActive = rider.isActive !== false; // Default to true if not specified
+    
+    // Build classes based on rider type
+    const classes = ['team-compare-rider-item'];
+    if (slotType === 'reserve') {
+      classes.push('team-compare-rider-reserve');
+    }
+    if (!isActive) {
+      classes.push('team-compare-rider-inactive');
+    }
+    if (isShared) {
+      classes.push('team-compare-rider-shared');
+    }
+    
+    riderItem.className = classes.join(' ');
+    riderItem.dataset.slotType = slotType;
+    riderItem.dataset.isActive = isActive.toString();
+    riderItem.dataset.isShared = isShared.toString();
     
     const name = `${rider.firstName || ''} ${rider.lastName || ''}`.trim();
     const initials = getRiderInitials(rider.firstName, rider.lastName);
     
-    // Build jersey badges
+    // Build jersey badges (only show if rider has jerseys)
     let jerseyBadges = '';
     if (rider.jerseys && rider.jerseys.length > 0) {
       jerseyBadges = rider.jerseys.map(jersey => {
         return `<span class="team-compare-rider-jersey-badge" title="${sanitizeInput(jersey.name)}">${jersey.icon || '🏆'}</span>`;
       }).join('');
+    }
+    
+    // Build rider type indicator
+    let typeIndicator = '';
+    if (slotType === 'reserve') {
+      typeIndicator = '<span class="team-compare-rider-type-badge team-compare-rider-type-reserve">Reserve</span>';
+    }
+    if (!isActive) {
+      typeIndicator = '<span class="team-compare-rider-type-badge team-compare-rider-type-inactive">Niet meer meedoen</span>';
     }
     
     riderItem.innerHTML = `
@@ -268,7 +309,10 @@ function renderRiders(riders, containerId, otherTeamRiders = []) {
       </div>
       <div class="team-compare-rider-info">
         <div class="team-compare-rider-header">
-          <div class="team-compare-rider-name">${sanitizeInput(name)}</div>
+          <div class="team-compare-rider-name-wrapper">
+            <div class="team-compare-rider-name">${sanitizeInput(name)}</div>
+            ${typeIndicator}
+          </div>
           ${jerseyBadges ? `<div class="team-compare-rider-jerseys">${jerseyBadges}</div>` : ''}
         </div>
         <div class="team-compare-rider-team">${sanitizeInput(rider.teamName)}</div>
@@ -277,6 +321,47 @@ function renderRiders(riders, containerId, otherTeamRiders = []) {
     `;
     
     container.appendChild(riderItem);
+  });
+  
+  // Apply initial filters
+  applyRiderFilters(containerId);
+}
+
+// Setup rider filter handlers
+function setupRiderFilters() {
+  const checkboxes = document.querySelectorAll('.team-compare-filter-checkbox');
+  checkboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+      applyRiderFilters('my-team-riders');
+      applyRiderFilters('compare-team-riders');
+    });
+  });
+}
+
+// Apply rider filters
+function applyRiderFilters(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  
+  const showMain = document.getElementById('filter-main-riders')?.checked ?? true;
+  const showReserve = document.getElementById('filter-reserve-riders')?.checked ?? true;
+  const showInactive = document.getElementById('filter-inactive-riders')?.checked ?? true;
+  const showShared = document.getElementById('filter-shared-riders')?.checked ?? true;
+  
+  const riders = container.querySelectorAll('.team-compare-rider-item');
+  riders.forEach(rider => {
+    const slotType = rider.dataset.slotType;
+    const isActive = rider.dataset.isActive === 'true';
+    const isShared = rider.dataset.isShared === 'true';
+    
+    let shouldShow = true;
+    
+    if (slotType === 'main' && !showMain) shouldShow = false;
+    if (slotType === 'reserve' && !showReserve) shouldShow = false;
+    if (!isActive && !showInactive) shouldShow = false;
+    if (isShared && !showShared) shouldShow = false;
+    
+    rider.style.display = shouldShow ? 'flex' : 'none';
   });
 }
 

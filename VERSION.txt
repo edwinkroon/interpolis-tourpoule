@@ -1,1 +1,5 @@
+<<<<<<< HEAD
 30
+=======
+33
+>>>>>>> a4a63ee (Pas etappe toevoegen aan voor ProCyclingStats formaat met automatische import en bewerkbare error lijst [v33])

@@ -99,20 +99,125 @@ exports.handler = async function(event) {
       return null;
     }
 
+    // Helper function to merge lines that are split across multiple lines
+    function mergeMultiLineEntries(lines) {
+      const mergedLines = [];
+      let currentLine = null;
+      let currentLineIndex = null;
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        
+        // Skip empty lines
+        if (!line) {
+          continue;
+        }
+
+        // Skip header lines
+        if (line.toLowerCase().includes('rnk') && line.toLowerCase().includes('rider')) {
+          continue;
+        }
+
+        // Check if line starts with a number (position) - indicates start of new entry
+        const startsWithNumber = /^\d+/.test(line);
+        const tabCount = (line.match(/\t/g) || []).length;
+        const commaCount = (line.match(/,/g) || []).length;
+        
+        // Determine if using tabs or commas
+        const useTabs = tabCount >= commaCount;
+        const separator = useTabs ? '\t' : ',';
+        const expectedColumns = useTabs ? 6 : 5; // Rnk, Rider, Team, UCI, Pnt, Time (tabs) or similar (commas)
+        const actualColumnCount = useTabs ? tabCount + 1 : commaCount + 1;
+
+        if (startsWithNumber) {
+          // If we have a pending line, save it
+          if (currentLine !== null) {
+            mergedLines.push({
+              line: currentLine,
+              originalLineNumbers: currentLineIndex
+            });
+          }
+          
+          // Start new entry
+          currentLine = line;
+          currentLineIndex = [i + 1];
+          
+          // Check if line is complete (has enough columns)
+          if (actualColumnCount >= 4) {
+            // Line appears complete, add it
+            mergedLines.push({
+              line: currentLine,
+              originalLineNumbers: currentLineIndex
+            });
+            currentLine = null;
+            currentLineIndex = null;
+          }
+        } else {
+          // This line doesn't start with a number - it's a continuation of the previous line
+          if (currentLine !== null) {
+            // Append to current line (with tab or space separator)
+            currentLine += (useTabs ? '\t' : ' ') + line;
+            currentLineIndex.push(i + 1);
+            
+            // Check if the merged line now has enough columns
+            const mergedTabCount = (currentLine.match(/\t/g) || []).length;
+            const mergedCommaCount = (currentLine.match(/,/g) || []).length;
+            const mergedUseTabs = mergedTabCount >= mergedCommaCount;
+            const mergedColumnCount = mergedUseTabs ? mergedTabCount + 1 : mergedCommaCount + 1;
+            
+            if (mergedColumnCount >= 4) {
+              // Line appears complete now
+              mergedLines.push({
+                line: currentLine,
+                originalLineNumbers: currentLineIndex
+              });
+              currentLine = null;
+              currentLineIndex = null;
+            }
+          } else {
+            // No current line, but this line doesn't start with a number
+            // This might be a continuation of the last merged line
+            if (mergedLines.length > 0) {
+              const lastEntry = mergedLines[mergedLines.length - 1];
+              lastEntry.line += (useTabs ? '\t' : ' ') + line;
+              lastEntry.originalLineNumbers.push(i + 1);
+            } else {
+              // Orphan line - treat as new entry anyway
+              mergedLines.push({
+                line: line,
+                originalLineNumbers: [i + 1]
+              });
+            }
+          }
+        }
+      }
+
+      // Don't forget the last pending line
+      if (currentLine !== null) {
+        mergedLines.push({
+          line: currentLine,
+          originalLineNumbers: currentLineIndex
+        });
+      }
+
+      return mergedLines;
+    }
+
     // Parse the results text (ProCyclingStats format: Rnk, Rider, Team, UCI, Pnt, , Time)
-    const lines = resultsText.trim().split('\n').filter(line => line.trim().length > 0);
+    const rawLines = resultsText.trim().split('\n').filter(line => line.trim().length > 0);
+    
+    // First, merge lines that are split across multiple lines
+    const mergedEntries = mergeMultiLineEntries(rawLines);
+    
     const parsedResults = [];
     const errors = [];
 
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-      const lineNumber = i + 1;
+    for (let i = 0; i < mergedEntries.length; i++) {
+      const entry = mergedEntries[i];
+      const line = entry.line.trim();
+      const originalLineNumbers = entry.originalLineNumbers;
+      const lineNumber = originalLineNumbers.join('-'); // Show range if multiple lines
       
-      // Skip empty lines or header lines
-      if (!line || line.toLowerCase().includes('rnk') && line.toLowerCase().includes('rider')) {
-        continue;
-      }
-
       // Split by tab (ProCyclingStats format) or comma (fallback)
       const parts = line.includes('\t') 
         ? line.split('\t').map(part => part.trim())
@@ -184,7 +289,8 @@ exports.handler = async function(event) {
         pnt,
         timeStr,
         timeSeconds,
-        originalLine: line
+        originalLine: line,
+        originalLineNumbers: originalLineNumbers
       });
     }
 
@@ -194,11 +300,9 @@ exports.handler = async function(event) {
     if (duplicatePositions.length > 0) {
       const uniqueDuplicates = [...new Set(duplicatePositions)];
       uniqueDuplicates.forEach(pos => {
-        const linesWithPos = parsedResults
-          .map((r, idx) => ({ ...r, lineNumber: idx + 1 }))
-          .filter(r => r.position === pos);
+        const linesWithPos = parsedResults.filter(r => r.position === pos);
         errors.push({
-          line: linesWithPos.map(r => r.lineNumber).join(', '),
+          line: linesWithPos.map(r => r.originalLineNumbers ? r.originalLineNumbers.join('-') : '?').join(', '),
           content: `Positie ${pos}`,
           error: `Positie ${pos} komt meerdere keren voor`
         });
@@ -270,7 +374,7 @@ exports.handler = async function(event) {
       } else {
         unmatchedResults.push(result);
         errors.push({
-          line: parsedResults.indexOf(result) + 1,
+          line: result.originalLineNumbers ? result.originalLineNumbers.join('-') : (parsedResults.indexOf(result) + 1),
           content: result.originalLine || `${result.position}\t${result.riderName}`,
           error: `Renner "${result.riderName}" niet gevonden in database`
         });

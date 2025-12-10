@@ -221,7 +221,9 @@ const stubDashboardData = {
 function renderPoints(points) {
   const pointsDisplay = document.getElementById('points-display');
   if (pointsDisplay) {
-    pointsDisplay.textContent = `(${points})`;
+    // Handle both object and number formats
+    const pointsValue = typeof points === 'object' && points !== null ? points.total : points;
+    pointsDisplay.textContent = `(${pointsValue || 0})`;
   }
 }
 
@@ -838,7 +840,7 @@ async function loadDashboardData() {
     
     // Load my points riders dynamically
     const pointsData = await loadMyPointsRiders();
-    renderPoints({ total: pointsData.totalPoints });
+    renderPoints(pointsData.totalPoints);
     renderPointsRiders(pointsData.riders, pointsData.route);
     
     // TODO: Replace with actual backend API call for achievements

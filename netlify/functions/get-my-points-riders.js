@@ -187,10 +187,12 @@ exports.handler = async function(event) {
 
     let resultRiders = [];
     let routeText = '';
+    let totalPoints = 0;
 
     if (ridersWithPoints.length > 0) {
-      // Show riders from latest stage
+      // Show all riders from latest stage (if they all have points from same day)
       resultRiders = ridersWithPoints;
+      totalPoints = ridersWithPoints.reduce((sum, rider) => sum + rider.points, 0);
       if (latestStage.start_location && latestStage.end_location) {
         routeText = `${latestStage.start_location} - ${latestStage.end_location}`;
         if (latestStage.distance_km) {
@@ -294,7 +296,7 @@ exports.handler = async function(event) {
         });
       }
 
-      // Sort by stage_number DESC, then by points DESC, and take top 3
+      // Sort by stage_number DESC, then by points DESC
       allRidersWithPoints.sort((a, b) => {
         if (b.stage_number !== a.stage_number) {
           return b.stage_number - a.stage_number;
@@ -302,10 +304,23 @@ exports.handler = async function(event) {
         return b.points - a.points;
       });
 
-      resultRiders = allRidersWithPoints.slice(0, 3);
+      // Always show at least 3 riders, but show more if they're all from the same stage
+      if (allRidersWithPoints.length > 0) {
+        const latestStageNumber = allRidersWithPoints[0].stage_number;
+        // Find all riders from the latest stage
+        const ridersFromLatestStage = allRidersWithPoints.filter(r => r.stage_number === latestStageNumber);
+        
+        // If there are riders from the latest stage, show all of them (even if more than 3)
+        // Otherwise, show the last 3 riders (which may include riders from different stages)
+        if (ridersFromLatestStage.length > 0) {
+          resultRiders = ridersFromLatestStage;
+        } else {
+          resultRiders = allRidersWithPoints.slice(0, 3);
+        }
+        
+        totalPoints = resultRiders.reduce((sum, rider) => sum + rider.points, 0);
 
-      // Use route from first rider (most recent)
-      if (resultRiders.length > 0) {
+        // Use route from first rider (most recent)
         const firstRider = resultRiders[0];
         if (firstRider.start_location && firstRider.end_location) {
           routeText = `${firstRider.start_location} - ${firstRider.end_location}`;
@@ -330,9 +345,6 @@ exports.handler = async function(event) {
       points: rider.points,
       route: routeText
     }));
-
-    // Calculate total points
-    const totalPoints = formattedRiders.reduce((sum, rider) => sum + rider.points, 0);
 
     await client.end();
 

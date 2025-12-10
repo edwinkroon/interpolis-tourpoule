@@ -483,12 +483,16 @@ button[aria-busy="true"] {
   flex-direction: column;
   min-height: 0;
 }
+.points-section .team-card-header {
+  margin-bottom: 1.5rem;
+}
 .points-section .dashboard-section-title {
   font-size: 19px;
   font-weight: 700;
   color: #00334e;
-  margin-bottom: 1.5rem;
+  margin: 0;
   text-transform: none;
+  flex: 1;
 }
 .etappe-uitslag-section .dashboard-section-title {
   font-size: 20px;

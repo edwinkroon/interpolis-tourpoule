@@ -3296,6 +3296,240 @@ button[aria-busy="true"] {
   color: #668494;
   font-size: 14px;
 }
+/* Team Comparison Page Styles */
+.team-compare-selection {
+  margin-bottom: 2rem;
+}
+.team-compare-select-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.team-compare-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #00334e;
+}
+.team-compare-select {
+  width: 100%;
+  max-width: 400px;
+  padding: 0.75rem 1rem;
+  font-size: 16px;
+  color: #00334e;
+  background: #fff;
+  border: 1px solid #cdd7dc;
+  border-radius: 10px;
+  font-family: 'Open Sans', system-ui, sans-serif;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23668494' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+}
+.team-compare-select:hover {
+  border-color: #668494;
+}
+.team-compare-select:focus {
+  outline: none;
+  border-color: #00cac6;
+}
+.team-compare-container {
+  margin-top: 2rem;
+}
+.team-compare-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+.team-compare-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.team-compare-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #cdd7dc;
+}
+.team-compare-avatar-container {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #cdd7dc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.team-compare-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.team-compare-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: #00334e;
+  text-transform: uppercase;
+}
+.team-compare-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #00334e;
+  text-align: center;
+  margin: 0;
+}
+.team-compare-stats {
+  display: flex;
+  gap: 2rem;
+  margin-top: 0.5rem;
+}
+.team-compare-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+.team-compare-stat-label {
+  font-size: 12px;
+  color: #668494;
+  font-weight: 400;
+}
+.team-compare-stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #00334e;
+}
+.team-compare-riders {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.team-compare-riders-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #00334e;
+  margin: 0;
+}
+.team-compare-riders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #cdd7dc;
+  overflow: hidden;
+}
+.team-compare-rider-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-bottom: 1px solid #cdd7dc;
+}
+.team-compare-rider-item:last-child {
+  border-bottom: none;
+}
+.team-compare-rider-avatar-container {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #cdd7dc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.team-compare-rider-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.team-compare-rider-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #00334e;
+  text-transform: uppercase;
+}
+.team-compare-rider-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+.team-compare-rider-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #00334e;
+}
+.team-compare-rider-team {
+  font-size: 13px;
+  color: #668494;
+  font-weight: 400;
+}
+.team-compare-vs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: #00cac6;
+  padding: 1rem;
+}
+.team-compare-empty {
+  padding: 3rem;
+  text-align: center;
+  color: #668494;
+  font-size: 16px;
+}
+.team-compare-no-riders {
+  padding: 1rem;
+  text-align: center;
+  color: #668494;
+  font-size: 14px;
+  margin: 0;
+}
+/* Responsive Design for Team Comparison */
+@media (max-width: 768px) {
+  .team-compare-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .team-compare-vs {
+    order: 2;
+    padding: 0.5rem;
+  }
+  .team-compare-column:first-child {
+    order: 1;
+  }
+  .team-compare-column:last-child {
+    order: 3;
+  }
+  .team-compare-stats {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
 /* Build Info Indicator */
 .build-info {
   position: fixed;

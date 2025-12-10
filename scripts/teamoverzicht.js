@@ -46,7 +46,20 @@ document.addEventListener('DOMContentLoaded', async function() {
   
   // Setup team edit modal handlers
   setupTeamEditModalHandlers();
+  
+  // Setup team compare button handler
+  setupTeamCompareButton();
 });
+
+// Setup team compare button
+function setupTeamCompareButton() {
+  const compareButton = document.querySelector('.team-compare-button');
+  if (compareButton) {
+    compareButton.addEventListener('click', function() {
+      window.location.href = 'teamvergelijken.html';
+    });
+  }
+}
 
 // Check if first stage has results
 async function checkFirstStageHasResults() {

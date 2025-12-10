@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interpolis Tourspel - Team Vergelijken</title>
+  <link rel="stylesheet" href="styles/grid.css">
+  <link rel="stylesheet" href="styles/style.css">
+  <script src="scripts/auth0-spa-js.production.js"></script>
+  <script src="scripts/auth-config.js"></script>
+  <script src="scripts/auth.js"></script>
+  <script src="scripts/utils.js" defer></script>
+  <script src="scripts/build-info.js" defer></script>
+  <script src="scripts/teamvergelijken.js" defer></script>
+</head>
+<body>
+  <div id="build-info" class="build-info"></div>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content page">
+      <div class="grid">
+        <div class="col-12">
+          <div class="header-top">
+            <a href="teamoverzicht.html" class="back-link">
+              <img src="assets/arrow.svg" alt="" class="back-arrow" aria-hidden="true">
+              <span>Terug</span>
+            </a>
+            <div class="header-title">Interpolis tourspel</div>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="header-welcome-section">
+            <h1 class="welcome-heading">Team Vergelijken</h1>
+            <div class="header-illustration">
+              <img src="assets/headerillustration.svg" alt="Fiets illustratie" class="illustration-svg">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content page">
+    <div class="grid">
+      <!-- Sidebar with Action Buttons -->
+      <div class="sidebar col-3">
+        <div class="action-buttons">
+          <button class="action-button" aria-label="Bekijk spelregels" onclick="window.location.href='rules.html'">
+            <span>Spelregels</span>
+            <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
+          </button>
+          <button class="action-button" aria-label="Bekijk statistieken" onclick="window.location.href='statistieken.html'">
+            <span>Statistieken</span>
+            <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
+          </button>
+          <button class="action-button" aria-label="Etappe toevoegen" onclick="window.location.href='etappetoevoegen.html'">
+            <span>Etappe toevoegen</span>
+            <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
+          </button>
+        </div>
+      </div>
+
+      <!-- Content Area -->
+      <div class="content-area col-9">
+        <!-- Team Selection -->
+        <div class="team-compare-selection">
+          <div class="team-compare-select-container">
+            <label for="compare-team-select" class="team-compare-label">Vergelijk met:</label>
+            <select id="compare-team-select" class="team-compare-select">
+              <option value="">Selecteer een team...</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Team Comparison -->
+        <div class="team-compare-container" id="team-compare-container" style="display: none;">
+          <div class="team-compare-grid">
+            <!-- Your Team -->
+            <div class="team-compare-column">
+              <div class="team-compare-header">
+                <div class="team-compare-avatar-container" id="my-team-avatar-container">
+                  <img id="my-team-avatar" src="" alt="Avatar" class="team-compare-avatar" style="display: none;">
+                  <div class="team-compare-avatar-placeholder" id="my-team-avatar-placeholder"></div>
+                </div>
+                <h2 class="team-compare-title" id="my-team-name">Mijn Team</h2>
+                <div class="team-compare-stats">
+                  <div class="team-compare-stat">
+                    <span class="team-compare-stat-label">Totaal punten</span>
+                    <span class="team-compare-stat-value" id="my-team-points">0</span>
+                  </div>
+                  <div class="team-compare-stat">
+                    <span class="team-compare-stat-label">Ranking</span>
+                    <span class="team-compare-stat-value" id="my-team-rank">-</span>
+                  </div>
+                </div>
+              </div>
+              <div class="team-compare-riders">
+                <h3 class="team-compare-riders-title">Basisrenners</h3>
+                <div class="team-compare-riders-list" id="my-team-riders">
+                  <!-- Riders will be rendered here -->
+                </div>
+              </div>
+            </div>
+
+            <!-- VS Divider -->
+            <div class="team-compare-vs">
+              <span>VS</span>
+            </div>
+
+            <!-- Compare Team -->
+            <div class="team-compare-column">
+              <div class="team-compare-header">
+                <div class="team-compare-avatar-container" id="compare-team-avatar-container">
+                  <img id="compare-team-avatar" src="" alt="Avatar" class="team-compare-avatar" style="display: none;">
+                  <div class="team-compare-avatar-placeholder" id="compare-team-avatar-placeholder"></div>
+                </div>
+                <h2 class="team-compare-title" id="compare-team-name">Ander Team</h2>
+                <div class="team-compare-stats">
+                  <div class="team-compare-stat">
+                    <span class="team-compare-stat-label">Totaal punten</span>
+                    <span class="team-compare-stat-value" id="compare-team-points">0</span>
+                  </div>
+                  <div class="team-compare-stat">
+                    <span class="team-compare-stat-label">Ranking</span>
+                    <span class="team-compare-stat-value" id="compare-team-rank">-</span>
+                  </div>
+                </div>
+              </div>
+              <div class="team-compare-riders">
+                <h3 class="team-compare-riders-title">Basisrenners</h3>
+                <div class="team-compare-riders-list" id="compare-team-riders">
+                  <!-- Riders will be rendered here -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- No Team Selected Message -->
+        <div class="team-compare-empty" id="team-compare-empty">
+          <p>Selecteer een team om te vergelijken met jouw team.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
+

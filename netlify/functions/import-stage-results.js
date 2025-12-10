@@ -85,6 +85,14 @@ exports.handler = async function(event) {
       };
     }
 
+    // Check if results already exist for this stage
+    const existingResultsCheck = await client.query(
+      'SELECT COUNT(*) as count FROM stage_results WHERE stage_id = $1',
+      [stageId]
+    );
+    const existingCount = parseInt(existingResultsCheck.rows[0].count, 10);
+    const hasExistingResults = existingCount > 0;
+
     // Begin transaction
     await client.query('BEGIN');
 
@@ -160,7 +168,9 @@ exports.handler = async function(event) {
         body: JSON.stringify({
           ok: true,
           message: 'Stage results imported successfully',
-          count: results.length
+          count: results.length,
+          replacedExisting: hasExistingResults,
+          existingCount: existingCount
         })
       };
     } catch (err) {

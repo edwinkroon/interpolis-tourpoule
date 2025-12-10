@@ -246,9 +246,18 @@ document.addEventListener('DOMContentLoaded', async function() {
 
       if (result.ok) {
         console.log('Import successful for stageId:', currentStageId);
+        if (result.replacedExisting) {
+          console.log(`Replaced ${result.existingCount} existing results`);
+        }
         validationResults.style.display = 'none';
         validationSuccess.style.display = 'none';
         importSuccess.style.display = 'block';
+        
+        // Show message about replacement if applicable
+        const successMessage = importSuccess.querySelector('.import-success-message p');
+        if (successMessage && result.replacedExisting) {
+          successMessage.textContent = `Uitslag succesvol geïmporteerd! ${result.existingCount} bestaande resultaten zijn overschreven.`;
+        }
 
         // Reset form
         document.getElementById('results-textarea').value = '';

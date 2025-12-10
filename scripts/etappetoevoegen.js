@@ -192,6 +192,17 @@ document.addEventListener('DOMContentLoaded', async function() {
     const validationErrors = document.getElementById('validation-errors');
     const importSuccess = document.getElementById('import-success');
 
+    if (!validationResults || !validationSuccess || !validationErrors || !importSuccess) {
+      console.error('Required DOM elements not found:', {
+        validationResults: !!validationResults,
+        validationSuccess: !!validationSuccess,
+        validationErrors: !!validationErrors,
+        importSuccess: !!importSuccess
+      });
+      alert('Fout: vereiste elementen niet gevonden op de pagina');
+      return;
+    }
+
     // Show loading state
     validationResults.style.display = 'block';
     validationSuccess.style.display = 'block';
@@ -220,6 +231,16 @@ document.addEventListener('DOMContentLoaded', async function() {
           }))
         })
       });
+
+      console.log('Import response status:', response.status, response.statusText);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: `Server error: ${response.status}` }));
+        validationSuccess.style.display = 'none';
+        validationErrors.style.display = 'block';
+        alert('Er is een fout opgetreden bij het importeren: ' + (errorData.error || 'Onbekende fout'));
+        return;
+      }
 
       const result = await response.json();
 

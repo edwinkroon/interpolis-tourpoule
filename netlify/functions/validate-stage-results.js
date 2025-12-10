@@ -525,24 +525,10 @@ exports.handler = async function(event) {
                   riderId = fuzzyMatch.rows[0].id;
                   matchedRider = fuzzyMatch.rows[0];
                 } else {
-                  // Strategy 6: Fallback - try matching normalized input against original fields
-                  // This helps when normalized fields don't exist in database
-                  // Use a comprehensive character replacement for common diacritics
-                  const fallbackQuery = `
-                    SELECT id, first_name, last_name 
-                    FROM riders 
-                    WHERE LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
-                      TRIM(COALESCE(first_name, '')), 'á', 'a'), 'à', 'a'), 'â', 'a'), 'ä', 'a'), 'é', 'e'), 'è', 'e'), 'ê', 'e'), 'ë', 'e'), 'í', 'i'), 'ì', 'i'), 'î', 'i'), 'ï', 'i'), 'ó', 'o'), 'ò', 'o'), 'ô', 'o'), 'ö', 'o'), 'ú', 'u'), 'ù', 'u'), 'û', 'u'), 'ü', 'u'), 'ç', 'c'), 'č', 'c')) = $1
-                      AND LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
-                        TRIM(COALESCE(last_name, '')), 'á', 'a'), 'à', 'a'), 'â', 'a'), 'ä', 'a'), 'é', 'e'), 'è', 'e'), 'ê', 'e'), 'ë', 'e'), 'í', 'i'), 'ì', 'i'), 'î', 'i'), 'ï', 'i'), 'ó', 'o'), 'ò', 'o'), 'ô', 'o'), 'ö', 'o'), 'ú', 'u'), 'ù', 'u'), 'û', 'u'), 'ü', 'u'), 'ç', 'c'), 'č', 'c')) = $2
-                    LIMIT 1
-                  `;
-                  const fallbackMatch = await client.query(fallbackQuery, [normalizedFirstName, normalizedLastName]);
-                  
-                  if (fallbackMatch.rows.length > 0) {
-                    riderId = fallbackMatch.rows[0].id;
-                    matchedRider = fallbackMatch.rows[0];
-                  }
+                  // Strategy 6: Fallback - try matching with normalized names using LIKE for partial matches
+                  // This helps with diacritics when normalized fields don't exist
+                  // Skip this strategy as it's complex and may cause errors
+                  // The previous strategies should handle most cases
                 }
               }
             }

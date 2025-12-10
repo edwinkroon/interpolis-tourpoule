@@ -93,6 +93,34 @@ document.addEventListener('DOMContentLoaded', async function() {
         })
       });
 
+      // Check if response is ok
+      if (!response.ok) {
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch (e) {
+          errorData = { error: `Server error: ${response.status} ${response.statusText}` };
+        }
+        
+        validationResults.style.display = 'block';
+        validationSuccess.style.display = 'none';
+        validationErrors.style.display = 'block';
+        
+        const errorsList = document.getElementById('validation-errors-list');
+        if (errorsList) {
+          errorsList.innerHTML = '';
+          const errorItem = document.createElement('div');
+          errorItem.className = 'validation-error-item';
+          errorItem.innerHTML = `
+            <div class="validation-error-message">Fout bij valideren: ${sanitizeInput(errorData.error || 'Onbekende fout')}</div>
+            ${errorData.hint ? `<div class="validation-error-message" style="font-size: 12px; margin-top: 0.5rem; color: #668494;">${sanitizeInput(errorData.hint)}</div>` : ''}
+            ${errorData.details ? `<div class="validation-error-message" style="font-size: 11px; margin-top: 0.5rem; color: #9ca3af; font-family: monospace;">${sanitizeInput(errorData.details)}</div>` : ''}
+          `;
+          errorsList.appendChild(errorItem);
+        }
+        return;
+      }
+
       const result = await response.json();
 
       validationResults.style.display = 'block';

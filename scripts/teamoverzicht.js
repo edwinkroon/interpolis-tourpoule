@@ -479,6 +479,12 @@ async function loadTeamRanking(participantId) {
       return;
     }
     
+    // Show ranking element
+    const rankingElement = document.getElementById('team-ranking');
+    if (rankingElement) {
+      rankingElement.style.display = 'flex';
+    }
+    
     // Update ranking value
     const rankingValueElement = document.querySelector('#team-ranking .ranking-value');
     if (rankingValueElement) {

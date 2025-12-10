@@ -363,31 +363,47 @@ function renderStageInfo(stageInfo) {
   `;
 }
 
-function renderStandings(standings) {
+function renderStandings(standings, limit = null) {
   const standingsList = document.getElementById('standings-list');
   if (!standingsList) return;
 
   standingsList.innerHTML = '';
 
-  standings.forEach((team) => {
+  // Limit to first 5 teams if limit is specified
+  const teamsToRender = limit ? standings.slice(0, limit) : standings;
+
+  if (teamsToRender.length === 0) {
+    const emptyMessage = document.createElement('div');
+    emptyMessage.className = 'no-data';
+    emptyMessage.textContent = 'Nog geen stand beschikbaar';
+    standingsList.appendChild(emptyMessage);
+    return;
+  }
+
+  teamsToRender.forEach((team) => {
     const teamItem = document.createElement('div');
     teamItem.className = 'standing-item';
     
-    // Rank change indicator (always show)
+    // Position change indicator
     let changeIndicator = '';
-    const rankChange = team.rankChange !== null && team.rankChange !== undefined ? team.rankChange : 0;
+    const positionChange = team.positionChange !== null && team.positionChange !== undefined ? team.positionChange : null;
     
-    if (rankChange > 0) {
+    if (positionChange === null) {
+      // No previous ranking available
+      changeIndicator = `<div class="standing-change standing-change-neutral">
+        <span class="standing-change-value">-</span>
+      </div>`;
+    } else if (positionChange > 0) {
       // Gestegen - groen met pijl omhoog
       changeIndicator = `<div class="standing-change standing-change-up">
-        <span class="standing-change-value">${rankChange}</span>
+        <span class="standing-change-value">+${positionChange}</span>
         <svg class="standing-change-arrow" width="6" height="6" viewBox="0 0 6 6" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M3 0L6 6L0 6Z" fill="#18AA2E"/>
         </svg>
       </div>`;
-    } else if (rankChange < 0) {
+    } else if (positionChange < 0) {
       // Gedaald - rood met pijl naar beneden
-      const absChange = Math.abs(rankChange);
+      const absChange = Math.abs(positionChange);
       changeIndicator = `<div class="standing-change standing-change-down">
         <span class="standing-change-value">${absChange}</span>
         <svg class="standing-change-arrow" width="6" height="6" viewBox="0 0 6 6" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -404,13 +420,31 @@ function renderStandings(standings) {
     
     teamItem.innerHTML = `
       <div class="standing-rank">${team.rank}</div>
-      <div class="standing-name">${sanitizeInput(team.name)}</div>
+      <div class="standing-name">${sanitizeInput(team.teamName)}</div>
       <div class="standing-points">${sanitizeInput(String(team.totalPoints))}</div>
       ${changeIndicator}
     `;
     
     standingsList.appendChild(teamItem);
   });
+}
+
+async function loadStandings() {
+  try {
+    const response = await fetch('/.netlify/functions/get-standings');
+    const result = await response.json();
+    
+    if (!result.ok || !result.standings) {
+      renderStandings([]);
+      return;
+    }
+    
+    return result.standings;
+  } catch (error) {
+    console.error('Error loading standings:', error);
+    renderStandings([]);
+    return [];
+  }
 }
 
 function renderPrikbord(prikbordItems) {
@@ -722,7 +756,15 @@ async function loadDashboardData() {
       console.error('Error loading day winner photos:', error);
     });
     
-    renderStandings(dashboardData.standings || []);
+    // Load standings from API
+    loadStandings().then(standings => {
+      if (standings && standings.length > 0) {
+        renderStandings(standings, 5); // Show only first 5 on home
+      } else {
+        renderStandings([]);
+      }
+    });
+    
     renderPrikbord(dashboardData.prikbord || []);
   } catch (error) {
     console.error('Error loading dashboard data:', error);
@@ -754,6 +796,11 @@ async function loadDashboardData() {
   
   // Add click handler for volledige stand button
   const standingsButton = document.querySelector('.standings-button');
+  if (standingsButton) {
+    standingsButton.addEventListener('click', function() {
+      window.location.href = 'stand.html';
+    });
+  }
   if (standingsButton) {
     standingsButton.addEventListener('click', function() {
       // TODO: Navigate to full standings page when it's created

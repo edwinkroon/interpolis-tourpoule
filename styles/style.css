@@ -16,8 +16,8 @@ h1 {
   font-weight: bold;
 }
 h2 {
-  font-size: 28px;
-  font-weight: 500;
+  font-size: 20px;
+  font-weight: bold;
 }
 /* Header */
 .header {
@@ -104,8 +104,8 @@ h2 {
   margin-bottom: 2rem;
 }
 .form-title {
-  font-size: 28px;
-  font-weight: 500;
+  font-size: 20px;
+  font-weight: bold;
   color: #00334e;
   margin-bottom: 1rem;
 }
@@ -390,7 +390,7 @@ button[aria-busy="true"] {
     padding: 1.5rem;
   }
   .form-title {
-    font-size: 18px;
+    font-size: 20px;
   }
   .form-description {
     font-size: 14px;
@@ -425,7 +425,7 @@ button[aria-busy="true"] {
     padding: 1rem;
   }
   .form-title {
-    font-size: 16px;
+    font-size: 20px;
   }
   .form-description {
     font-size: 12px;
@@ -688,7 +688,8 @@ button[aria-busy="true"] {
   flex-direction: column;
   min-height: 0;
 }
-.standings-section .dashboard-section-title {
+.standings-section .dashboard-section-title,
+.standings-full-section .dashboard-section-title {
   font-size: 20px;
   font-weight: 700;
   text-transform: none;
@@ -700,6 +701,17 @@ button[aria-busy="true"] {
   gap: 0;
   flex: 1;
   margin-bottom: 1rem;
+}
+.standings-full-section {
+  background: #fff;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 16px rgba(0, 51, 78, 0.16);
+}
+.standings-full-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 .standing-item {
   display: flex;
@@ -1207,8 +1219,8 @@ button[aria-busy="true"] {
   box-shadow: 0 2px 8px rgba(0, 51, 78, 0.1);
 }
 .rules-title {
-  font-size: 28px;
-  font-weight: 500;
+  font-size: 20px;
+  font-weight: bold;
   color: #00334e;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
@@ -1229,7 +1241,7 @@ button[aria-busy="true"] {
 }
 .points-subtitle {
   font-size: 20px;
-  font-weight: 500;
+  font-weight: bold;
   color: #00334e;
   margin-bottom: 1rem;
 }
@@ -1281,10 +1293,10 @@ button[aria-busy="true"] {
     padding: 1.5rem;
   }
   .rules-title {
-    font-size: 24px;
+    font-size: 20px;
   }
   .points-subtitle {
-    font-size: 18px;
+    font-size: 20px;
   }
   .points-table {
     font-size: 12px;

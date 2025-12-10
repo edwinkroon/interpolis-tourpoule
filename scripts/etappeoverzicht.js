@@ -99,6 +99,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   }
   
+  // Update dag uitslag link with stage parameter
+  updateDagUitslagLink();
+  
   // Note: My riders and points are now loaded dynamically in loadStageData
   // Other cards (day standings, jerseys) still use dummy data for now
   
@@ -312,29 +315,74 @@ function renderMyRiders(riders) {
   });
 }
 
-function renderDayStandings(standings) {
+async function loadDayStandings(stageNumber) {
+  try {
+    const response = await fetch(`/.netlify/functions/get-stage-team-points?stage_number=${stageNumber}`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (data.ok && data.teams && data.teams.length > 0) {
+      // Show only top 3 teams
+      const top3Teams = data.teams.slice(0, 3);
+      renderDayStandings(top3Teams);
+    } else {
+      const list = document.getElementById('day-standings-list');
+      if (list) {
+        showNoData('day-standings-list', 'Geen teams gevonden voor deze etappe.');
+      }
+    }
+  } catch (error) {
+    console.error('Error loading day standings:', error);
+    const list = document.getElementById('day-standings-list');
+    if (list) {
+      showNoData('day-standings-list', 'Fout bij laden van teams.');
+    }
+  }
+}
+
+function renderDayStandings(teams) {
   const list = document.getElementById('day-standings-list');
   if (!list) return;
 
   list.innerHTML = '';
   
-  if (!standings || standings.length === 0) {
-    list.innerHTML = '<li class="no-data">Geen stand beschikbaar</li>';
+  if (!teams || teams.length === 0) {
+    list.innerHTML = '<li class="no-data">Geen teams beschikbaar</li>';
     return;
   }
   
-  standings.forEach(item => {
+  teams.forEach(team => {
     const li = document.createElement('li');
     li.className = 'standings-item';
     
     li.innerHTML = `
-      <span class="standings-position">${item.position}.</span>
-      <span class="standings-name">${sanitizeInput(item.team)}</span>
-      <span class="standings-points">${item.points}</span>
+      <span class="standings-position">${team.rank}.</span>
+      <span class="standings-name">${sanitizeInput(team.teamName)}</span>
+      <span class="standings-points">${team.points}</span>
     `;
     
     list.appendChild(li);
   });
+}
+
+function updateDagUitslagLink() {
+  const link = document.getElementById('dag-uitslag-link');
+  if (link && currentStage) {
+    const url = new URL('daguitslag.html', window.location.origin);
+    url.searchParams.set('stage', currentStage.stage_number);
+    link.href = url.toString();
+  }
+}
+
+function showNoData(elementId, message) {
+  const element = document.getElementById(elementId);
+  if (element) {
+    element.innerHTML = `<li class="no-data">${message}</li>`;
+  }
 }
 
 function renderStageResults(results) {
@@ -439,6 +487,7 @@ function hideLoading(elementId) {
 async function loadStageData(stage) {
   // Show loading indicators
   showLoading('my-riders-list');
+  showLoading('day-standings-list');
   showLoading('stage-results-list');
   showLoading('jerseys-list');
   
@@ -469,10 +518,16 @@ async function loadStageData(stage) {
   // Load stage results
   await loadStageResults(stage.stage_number);
   
+  // Load day standings (top 3 teams)
+  await loadDayStandings(stage.stage_number);
+  
   // Update URL without reload
   const newUrl = new URL(window.location);
   newUrl.searchParams.set('stage', stage.stage_number);
   window.history.pushState({ stage: stage.stage_number }, '', newUrl);
+  
+  // Update dag uitslag link
+  updateDagUitslagLink();
 }
 
 function setupNavigation() {

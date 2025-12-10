@@ -497,6 +497,13 @@ button[aria-busy="true"] {
   margin-bottom: 1.5rem;
   text-transform: none;
 }
+.dag-uitslag-section .dashboard-section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #00334e;
+  margin-bottom: 1.5rem;
+  text-transform: none;
+}
 .points-value {
   font-weight: 400;
 }
@@ -696,6 +703,12 @@ button[aria-busy="true"] {
   min-height: 0;
 }
 .standings-section .dashboard-section-title,
+.standings-full-section .dashboard-section-title {
+  font-size: 20px;
+  font-weight: 700;
+  text-transform: none;
+  margin-bottom: 1.5rem;
+}
 .standings-full-section .dashboard-section-title {
   font-size: 20px;
   font-weight: 700;

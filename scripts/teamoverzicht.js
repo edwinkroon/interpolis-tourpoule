@@ -125,57 +125,73 @@ async function loadTeamRiders() {
     const response = await fetch(`/.netlify/functions/get-team-riders?userId=${encodeURIComponent(userId)}`);
     const result = await response.json();
     
-    const ridersContainer = document.getElementById('riders-list-container');
-    const noRidersMessage = document.getElementById('no-riders-message');
-    
-    if (!ridersContainer) return;
-    
-    if (result.ok && result.riders && result.riders.length > 0) {
-      // Hide no riders message
-      if (noRidersMessage) {
-        noRidersMessage.style.display = 'none';
-      }
-      
-      // Clear container
-      ridersContainer.innerHTML = '';
-      
-      // Render riders
-      result.riders.forEach(rider => {
-        const riderItem = document.createElement('div');
-        riderItem.className = 'team-rider-item';
-        
-        // Get initials for placeholder
-        const initials = rider.first_name && rider.last_name
-          ? `${rider.first_name[0]}${rider.last_name[0]}`.toUpperCase()
-          : rider.last_name ? rider.last_name.substring(0, 2).toUpperCase() : 'R';
-        
-        riderItem.innerHTML = `
-          <div class="rider-avatar">
-            <img src="${rider.photo_url || ''}" alt="${sanitizeInput(rider.first_name || '')} ${sanitizeInput(rider.last_name || '')}" class="rider-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-            <div class="rider-avatar-placeholder" style="display: none;">${sanitizeInput(initials)}</div>
-          </div>
-          <div class="rider-info">
-            <div class="rider-name">${sanitizeInput(rider.first_name || '')} ${sanitizeInput(rider.last_name || '')}</div>
-            <div class="rider-team">${sanitizeInput(rider.team_name || '')}</div>
-          </div>
-        `;
-        
-        ridersContainer.appendChild(riderItem);
-      });
-    } else {
-      // Show no riders message
-      if (noRidersMessage) {
-        noRidersMessage.style.display = 'block';
-      }
-      ridersContainer.innerHTML = '';
+    if (!result.ok || !result.riders) {
+      renderRidersList([], 'main');
+      renderRidersList([], 'reserve');
+      return;
     }
+    
+    // Separate riders by slot_type
+    const mainRiders = result.riders.filter(rider => rider.slot_type === 'main');
+    const reserveRiders = result.riders.filter(rider => rider.slot_type === 'reserve');
+    
+    // Render both lists
+    renderRidersList(mainRiders, 'main');
+    renderRidersList(reserveRiders, 'reserve');
   } catch (error) {
     console.error('Error loading team riders:', error);
-    // Show no riders message on error
-    const noRidersMessage = document.getElementById('no-riders-message');
+    renderRidersList([], 'main');
+    renderRidersList([], 'reserve');
+  }
+}
+
+function renderRidersList(riders, type) {
+  const containerId = type === 'main' ? 'main-riders-list-container' : 'reserve-riders-list-container';
+  const messageId = type === 'main' ? 'no-main-riders-message' : 'no-reserve-riders-message';
+  
+  const ridersContainer = document.getElementById(containerId);
+  const noRidersMessage = document.getElementById(messageId);
+  
+  if (!ridersContainer) return;
+  
+  if (riders.length > 0) {
+    // Hide no riders message
+    if (noRidersMessage) {
+      noRidersMessage.style.display = 'none';
+    }
+    
+    // Clear container
+    ridersContainer.innerHTML = '';
+    
+    // Render riders
+    riders.forEach(rider => {
+      const riderItem = document.createElement('div');
+      riderItem.className = 'team-rider-item';
+      
+      // Get initials for placeholder
+      const initials = rider.first_name && rider.last_name
+        ? `${rider.first_name[0]}${rider.last_name[0]}`.toUpperCase()
+        : rider.last_name ? rider.last_name.substring(0, 2).toUpperCase() : 'R';
+      
+      riderItem.innerHTML = `
+        <div class="rider-avatar">
+          <img src="${rider.photo_url || ''}" alt="${sanitizeInput(rider.first_name || '')} ${sanitizeInput(rider.last_name || '')}" class="rider-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+          <div class="rider-avatar-placeholder" style="display: none;">${sanitizeInput(initials)}</div>
+        </div>
+        <div class="rider-info">
+          <div class="rider-name">${sanitizeInput(rider.first_name || '')} ${sanitizeInput(rider.last_name || '')}</div>
+          <div class="rider-team">${sanitizeInput(rider.team_name || '')}</div>
+        </div>
+      `;
+      
+      ridersContainer.appendChild(riderItem);
+    });
+  } else {
+    // Show no riders message
     if (noRidersMessage) {
       noRidersMessage.style.display = 'block';
     }
+    ridersContainer.innerHTML = '';
   }
 }
 
@@ -183,13 +199,20 @@ async function loadTeamRiders() {
 let allRiders = [];
 let filteredRiders = [];
 let selectedRiderIds = new Set();
+let currentSlotType = null; // 'main' or 'reserve' - determines which slot type to prioritize
 
 // Setup modal handlers
 function setupModalHandlers() {
-  // Open modal when clicking "aanpassen" button in Renners card
-  const editButton = document.getElementById('riders-edit-button');
-  if (editButton) {
-    editButton.addEventListener('click', openRiderModal);
+  // Open modal when clicking "renner toevoegen" button in Basisrenners card
+  const mainEditButton = document.getElementById('main-riders-edit-button');
+  if (mainEditButton) {
+    mainEditButton.addEventListener('click', () => openRiderModal('main'));
+  }
+  
+  // Open modal when clicking "renner toevoegen" button in Reserverenners card
+  const reserveEditButton = document.getElementById('reserve-riders-edit-button');
+  if (reserveEditButton) {
+    reserveEditButton.addEventListener('click', () => openRiderModal('reserve'));
   }
   
   // Close modal handlers
@@ -222,9 +245,12 @@ function setupModalHandlers() {
 }
 
 // Open rider selection modal
-async function openRiderModal() {
+async function openRiderModal(slotType = null) {
   const modalOverlay = document.getElementById('rider-modal-overlay');
   if (!modalOverlay) return;
+  
+  // Store the slot type for this modal session
+  currentSlotType = slotType;
   
   // Reset state
   selectedRiderIds.clear();
@@ -240,7 +266,7 @@ async function openRiderModal() {
   await loadAllRiders();
   
   // Render riders
-  renderRidersList();
+  renderModalRidersList();
 }
 
 // Close rider selection modal
@@ -252,6 +278,7 @@ function closeRiderModal() {
   
   // Reset state
   selectedRiderIds.clear();
+  currentSlotType = null;
   const searchInput = document.getElementById('rider-search-input');
   if (searchInput) {
     searchInput.value = '';
@@ -297,11 +324,11 @@ function handleSearch(e) {
     });
   }
   
-  renderRidersList();
+  renderModalRidersList();
 }
 
 // Render riders list in modal
-function renderRidersList() {
+function renderModalRidersList() {
   const ridersList = document.getElementById('modal-riders-list');
   if (!ridersList) return;
   

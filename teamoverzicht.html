@@ -159,16 +159,31 @@
 
           <!-- Right Column -->
           <div class="dashboard-column">
-            <!-- Renners Card -->
+            <!-- Basisrenners Card -->
             <div class="team-card">
-              <h2 class="team-card-title">Renners</h2>
-              <div class="riders-list-container" id="riders-list-container">
-                <!-- Riders will be loaded here -->
-                <div class="no-riders-message" id="no-riders-message" style="display: none;">
-                  Je hebt nog geen renners geselecteerd
+              <h2 class="team-card-title">Basisrenners</h2>
+              <div class="riders-list-container" id="main-riders-list-container">
+                <!-- Main riders will be loaded here -->
+                <div class="no-riders-message" id="no-main-riders-message" style="display: none;">
+                  Je hebt nog geen basisrenners geselecteerd
                 </div>
               </div>
-              <button class="team-edit-button" id="riders-edit-button" aria-label="Renner toevoegen">
+              <button class="team-edit-button" id="main-riders-edit-button" aria-label="Renner toevoegen">
+                <span>renner toevoegen</span>
+                <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
+              </button>
+            </div>
+
+            <!-- Reserverenners Card -->
+            <div class="team-card">
+              <h2 class="team-card-title">Reserverenners</h2>
+              <div class="riders-list-container" id="reserve-riders-list-container">
+                <!-- Reserve riders will be loaded here -->
+                <div class="no-riders-message" id="no-reserve-riders-message" style="display: none;">
+                  Je hebt nog geen reserverenners geselecteerd
+                </div>
+              </div>
+              <button class="team-edit-button" id="reserve-riders-edit-button" aria-label="Renner toevoegen">
                 <span>renner toevoegen</span>
                 <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
               </button>

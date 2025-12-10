@@ -47,14 +47,16 @@ exports.handler = async function(event) {
         r.first_name,
         r.last_name,
         r.photo_url,
-        tp.name as team_name
+        tp.name as team_name,
+        ftr.slot_type,
+        ftr.slot_number
       FROM fantasy_team_riders ftr
       INNER JOIN fantasy_teams ft ON ftr.fantasy_team_id = ft.id
       INNER JOIN participants p ON ft.participant_id = p.id
       INNER JOIN riders r ON ftr.rider_id = r.id
       LEFT JOIN teams_pro tp ON r.team_pro_id = tp.id
       WHERE p.user_id = $1
-      ORDER BY ftr.slot_number ASC, ftr.slot_type ASC
+      ORDER BY ftr.slot_type ASC, ftr.slot_number ASC
     `;
     
     const { rows } = await client.query(query, [userId]);
@@ -64,7 +66,9 @@ exports.handler = async function(event) {
       first_name: row.first_name,
       last_name: row.last_name,
       photo_url: row.photo_url,
-      team_name: row.team_name
+      team_name: row.team_name,
+      slot_type: row.slot_type,
+      slot_number: row.slot_number
     }));
 
     // Get total rider count and check if all slots are filled (15 total: 10 main + 5 reserve)

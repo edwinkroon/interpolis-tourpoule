@@ -77,35 +77,43 @@ async function loadStatistics() {
 // Load general statistics
 async function loadGeneralStats() {
   try {
-    // Get total riders count
-    const ridersResponse = await fetch('/.netlify/functions/get-all-riders');
-    if (ridersResponse.ok) {
-      const ridersData = await ridersResponse.json();
-      if (ridersData.ok && ridersData.riders) {
-        document.getElementById('stat-riders').textContent = ridersData.riders.length || 0;
-      }
-    }
-    
-    // Get stages count
-    const stagesResponse = await fetch('/.netlify/functions/get-stages');
-    if (stagesResponse.ok) {
-      const stagesData = await stagesResponse.json();
-      if (stagesData.ok && stagesData.stages) {
-        document.getElementById('stat-stages').textContent = stagesData.stages.length || 0;
-      }
-    }
-    
-    // Get teams count and total points from standings
-    const standingsResponse = await fetch('/.netlify/functions/get-standings');
-    if (standingsResponse.ok) {
-      const standingsData = await standingsResponse.json();
-      if (standingsData.ok && standingsData.standings) {
-        const teams = standingsData.standings;
-        document.getElementById('stat-teams').textContent = teams.length || 0;
+    const response = await fetch('/.netlify/functions/get-statistics-overview');
+    if (response.ok) {
+      const data = await response.json();
+      if (data.ok && data.statistics) {
+        const stats = data.statistics;
         
-        // Calculate total points
-        const totalPoints = teams.reduce((sum, team) => sum + (team.totalPoints || 0), 0);
-        document.getElementById('stat-points').textContent = totalPoints.toLocaleString('nl-NL');
+        // Riders: active / total
+        const ridersEl = document.getElementById('stat-riders');
+        const ridersLabelEl = document.getElementById('stat-riders-label');
+        if (ridersEl) {
+          ridersEl.textContent = `${stats.activeRiders} / ${stats.totalRiders}`;
+        }
+        if (ridersLabelEl) {
+          ridersLabelEl.textContent = 'Renners (actief / totaal)';
+        }
+        
+        // Stages: with results / total
+        const stagesEl = document.getElementById('stat-stages');
+        const stagesLabelEl = document.getElementById('stat-stages-label');
+        if (stagesEl) {
+          stagesEl.textContent = `${stats.stagesWithResults} / ${stats.totalStages}`;
+        }
+        if (stagesLabelEl) {
+          stagesLabelEl.textContent = 'Etappes (gereden / totaal)';
+        }
+        
+        // Teams count
+        const teamsEl = document.getElementById('stat-teams');
+        if (teamsEl) {
+          teamsEl.textContent = stats.teamsCount || 0;
+        }
+        
+        // Average points per team
+        const pointsEl = document.getElementById('stat-points');
+        if (pointsEl) {
+          pointsEl.textContent = Math.round(stats.averagePoints).toLocaleString('nl-NL');
+        }
       }
     }
   } catch (error) {
@@ -135,21 +143,32 @@ async function loadChartData() {
 // Top Riders Chart (Horizontal Bar)
 async function loadTopRidersChart() {
   try {
-    // For now, use sample data - replace with actual API call
-    const sampleData = {
-      labels: ['Tadej Pogačar', 'Jonas Vingegaard', 'Remco Evenepoel', 'Mathieu van der Poel', 'Wout van Aert'],
-      points: [342, 298, 267, 245, 223]
-    };
+    // Get data from API
+    const response = await fetch('/.netlify/functions/get-top-riders-stats');
+    let chartData = { labels: [], points: [] };
+    
+    if (response.ok) {
+      const data = await response.json();
+      if (data.ok && data.riders && data.riders.length > 0) {
+        chartData.labels = data.riders.map(rider => rider.name);
+        chartData.points = data.riders.map(rider => rider.points);
+      }
+    }
+    
+    // Fallback to empty if no data
+    if (chartData.labels.length === 0) {
+      chartData = { labels: ['Geen data beschikbaar'], points: [0] };
+    }
     
     const ctx = document.getElementById('topRidersChart').getContext('2d');
     
     new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: sampleData.labels,
+        labels: chartData.labels,
         datasets: [{
           label: 'Punten',
-          data: sampleData.points,
+          data: chartData.points,
           backgroundColor: createGradient(ctx, 'rgba(0, 202, 198, 0.8)', 'rgba(0, 202, 198, 0.2)'),
           borderColor: '#00cac6',
           borderWidth: 2,
@@ -221,34 +240,92 @@ async function loadTopRidersChart() {
 // Team Performance Chart (Line Chart)
 async function loadTeamPerformanceChart() {
   try {
-    const sampleData = {
-      labels: ['Etappe 1', 'Etappe 2', 'Etappe 3', 'Etappe 4', 'Etappe 5', 'Etappe 6'],
-      teams: [
-        {
-          label: 'UAE Team Emirates',
-          data: [120, 145, 180, 210, 245, 280],
-          borderColor: '#00cac6'
-        },
-        {
-          label: 'Team Visma-Lease a Bike',
-          data: [110, 135, 165, 195, 225, 260],
-          borderColor: '#00aa2e'
-        },
-        {
-          label: 'Alpecin-Deceuninck',
-          data: [105, 130, 160, 185, 215, 250],
-          borderColor: '#00334e'
+    // Get user's team data
+    const userId = await getUserId();
+    if (!userId) {
+      throw new Error('User ID not found');
+    }
+    
+    const userResponse = await fetch(`/.netlify/functions/get-user?userId=${encodeURIComponent(userId)}`);
+    const userResult = await userResponse.json();
+    
+    if (!userResult.ok || !userResult.exists) {
+      throw new Error('User not found');
+    }
+    
+    const myParticipantId = userResult.participant.id;
+    const myTeamName = userResult.participant.team_name;
+    
+    // Get all stages with results
+    const stagesResponse = await fetch('/.netlify/functions/get-stages-with-results');
+    const stagesResult = await stagesResponse.json();
+    
+    if (!stagesResult.ok || !stagesResult.stages || stagesResult.stages.length === 0) {
+      throw new Error('No stages with results');
+    }
+    
+    const stages = stagesResult.stages.sort((a, b) => a.stage_number - b.stage_number);
+    const labels = stages.map(s => `Etappe ${s.stage_number}`);
+    
+    // Get my team points per stage
+    const myTeamPoints = [];
+    for (const stage of stages) {
+      const pointsResponse = await fetch(`/.netlify/functions/get-stage-team-points?stageId=${stage.id}`);
+      const pointsResult = await pointsResponse.json();
+      
+      if (pointsResult.ok && pointsResult.teams) {
+        const myTeam = pointsResult.teams.find(t => t.participantId === myParticipantId);
+        myTeamPoints.push(myTeam ? myTeam.points : 0);
+      } else {
+        myTeamPoints.push(0);
+      }
+    }
+    
+    // Get top 3 other teams (excluding my team)
+    const standingsResponse = await fetch('/.netlify/functions/get-standings');
+    const standingsResult = await standingsResponse.json();
+    
+    const otherTeams = standingsResult.ok && standingsResult.standings 
+      ? standingsResult.standings.filter(t => t.participantId !== myParticipantId).slice(0, 3)
+      : [];
+    
+    const otherTeamsData = [];
+    for (const team of otherTeams) {
+      const teamPoints = [];
+      for (const stage of stages) {
+        const pointsResponse = await fetch(`/.netlify/functions/get-stage-team-points?stageId=${stage.id}`);
+        const pointsResult = await pointsResponse.json();
+        
+        if (pointsResult.ok && pointsResult.teams) {
+          const teamData = pointsResult.teams.find(t => t.participantId === team.participantId);
+          teamPoints.push(teamData ? teamData.points : 0);
+        } else {
+          teamPoints.push(0);
         }
-      ]
-    };
+      }
+      otherTeamsData.push({
+        label: team.teamName,
+        data: teamPoints,
+        borderColor: otherTeamsData.length === 0 ? '#00aa2e' : otherTeamsData.length === 1 ? '#00334e' : '#668494'
+      });
+    }
+    
+    const teams = [
+      {
+        label: myTeamName,
+        data: myTeamPoints,
+        borderColor: '#00cac6'
+      },
+      ...otherTeamsData
+    ];
     
     const ctx = document.getElementById('teamPerformanceChart').getContext('2d');
     
     new Chart(ctx, {
       type: 'line',
       data: {
-        labels: sampleData.labels,
-        datasets: sampleData.teams.map(team => ({
+        labels: labels,
+        datasets: teams.map(team => ({
           label: team.label,
           data: team.data,
           borderColor: team.borderColor,
@@ -327,19 +404,45 @@ async function loadTeamPerformanceChart() {
 // Points Distribution Chart (Doughnut)
 async function loadPointsDistributionChart() {
   try {
-    const sampleData = {
-      labels: ['0-50', '51-100', '101-150', '151-200', '201+'],
-      data: [5, 12, 18, 25, 40]
-    };
+    // Get standings data
+    const response = await fetch('/.netlify/functions/get-standings');
+    let chartData = { labels: ['0-50', '51-100', '101-150', '151-200', '201+'], data: [0, 0, 0, 0, 0] };
+    
+    if (response.ok) {
+      const data = await response.json();
+      if (data.ok && data.standings && data.standings.length > 0) {
+        const teams = data.standings;
+        
+        // Count teams in each points range
+        const distribution = [0, 0, 0, 0, 0]; // [0-50, 51-100, 101-150, 151-200, 201+]
+        
+        teams.forEach(team => {
+          const points = team.totalPoints || 0;
+          if (points <= 50) {
+            distribution[0]++;
+          } else if (points <= 100) {
+            distribution[1]++;
+          } else if (points <= 150) {
+            distribution[2]++;
+          } else if (points <= 200) {
+            distribution[3]++;
+          } else {
+            distribution[4]++;
+          }
+        });
+        
+        chartData.data = distribution;
+      }
+    }
     
     const ctx = document.getElementById('pointsDistributionChart').getContext('2d');
     
     new Chart(ctx, {
       type: 'doughnut',
       data: {
-        labels: sampleData.labels,
+        labels: chartData.labels,
         datasets: [{
-          data: sampleData.data,
+          data: chartData.data,
           backgroundColor: [
             'rgba(0, 202, 198, 0.8)',
             'rgba(0, 170, 46, 0.8)',
@@ -394,20 +497,32 @@ async function loadPointsDistributionChart() {
 // Stage Winners Chart (Bar Chart)
 async function loadStageWinnersChart() {
   try {
-    const sampleData = {
-      labels: ['Alpecin', 'UAE', 'Visma', 'Quick-Step', 'EF', 'Jayco'],
-      wins: [4, 3, 2, 2, 1, 1]
-    };
+    // Get data from API
+    const response = await fetch('/.netlify/functions/get-stage-winners-stats');
+    let chartData = { labels: [], wins: [] };
+    
+    if (response.ok) {
+      const data = await response.json();
+      if (data.ok && data.teamWins && data.teamWins.length > 0) {
+        chartData.labels = data.teamWins.map(team => team.team);
+        chartData.wins = data.teamWins.map(team => team.wins);
+      }
+    }
+    
+    // Fallback to empty if no data
+    if (chartData.labels.length === 0) {
+      chartData = { labels: ['Geen data beschikbaar'], wins: [0] };
+    }
     
     const ctx = document.getElementById('stageWinnersChart').getContext('2d');
     
     new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: sampleData.labels,
+        labels: chartData.labels,
         datasets: [{
           label: 'Etappe Overwinningen',
-          data: sampleData.wins,
+          data: chartData.wins,
           backgroundColor: createGradient(ctx, 'rgba(0, 170, 46, 0.8)', 'rgba(0, 202, 198, 0.8)'),
           borderColor: '#00aa2e',
           borderWidth: 2,
@@ -476,6 +591,44 @@ async function loadStageWinnersChart() {
   }
 }
 
+// Setup info popup handlers
+function setupInfoPopupHandlers() {
+  const infoButtons = document.querySelectorAll('.info-icon-button');
+  
+  infoButtons.forEach(button => {
+    button.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const popupId = this.id.replace('-button', '-popup');
+      const popup = document.getElementById(popupId);
+      
+      if (popup) {
+        // Close all other popups
+        document.querySelectorAll('.info-popup').forEach(p => {
+          if (p.id !== popupId) {
+            p.style.display = 'none';
+          }
+        });
+        
+        // Toggle current popup
+        if (popup.style.display === 'none' || !popup.style.display) {
+          popup.style.display = 'block';
+        } else {
+          popup.style.display = 'none';
+        }
+      }
+    });
+  });
+  
+  // Close popups when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.info-icon-button') && !e.target.closest('.info-popup')) {
+      document.querySelectorAll('.info-popup').forEach(popup => {
+        popup.style.display = 'none';
+      });
+    }
+  });
+}
+
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', async function() {
   // Wait for Chart.js to be loaded
@@ -488,6 +641,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         clearInterval(checkChart);
         configureChartDefaults();
         loadStatistics();
+        setupInfoPopupHandlers();
       } else if (attempts > 50) {
         clearInterval(checkChart);
         console.error('Chart.js failed to load after 5 seconds');
@@ -496,6 +650,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   } else {
     configureChartDefaults();
     await loadStatistics();
+    setupInfoPopupHandlers();
   }
 });
 

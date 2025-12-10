@@ -51,11 +51,11 @@
             <div class="stats-cards-row">
               <div class="stat-card">
                 <div class="stat-value" id="stat-riders">-</div>
-                <div class="stat-label">Totaal aantal renners</div>
+                <div class="stat-label" id="stat-riders-label">Renners</div>
               </div>
               <div class="stat-card">
                 <div class="stat-value" id="stat-stages">-</div>
-                <div class="stat-label">Etappes</div>
+                <div class="stat-label" id="stat-stages-label">Etappes</div>
               </div>
               <div class="stat-card">
                 <div class="stat-value" id="stat-teams">-</div>
@@ -63,7 +63,7 @@
               </div>
               <div class="stat-card">
                 <div class="stat-value" id="stat-points">-</div>
-                <div class="stat-label">Totaal aantal punten</div>
+                <div class="stat-label">Gemiddeld punten per team</div>
               </div>
             </div>
           </div>
@@ -72,7 +72,21 @@
           <div class="dashboard-column">
             <!-- Top Renners Chart -->
             <div class="dashboard-section chart-tile">
-              <h2 class="dashboard-section-title">Top Renners</h2>
+              <div class="team-card-header">
+                <h2 class="dashboard-section-title">Top Renners</h2>
+                <button class="info-icon-button" id="top-riders-info-button" aria-label="Informatie over top renners">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    <text x="10" y="14" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">i</text>
+                  </svg>
+                </button>
+                <div class="info-popup" id="top-riders-info-popup" style="display: none;">
+                  <div class="info-popup-content">
+                    <h3>Top Renners</h3>
+                    <p>Hier zie je de top 10 renners met de meeste punten. De punten worden berekend op basis van etappe posities en truien die de renners hebben behaald tijdens alle etappes.</p>
+                  </div>
+                </div>
+              </div>
               <div class="chart-container">
                 <canvas id="topRidersChart"></canvas>
               </div>
@@ -80,7 +94,21 @@
 
             <!-- Team Performance Chart -->
             <div class="dashboard-section chart-tile">
-              <h2 class="dashboard-section-title">Team Prestaties</h2>
+              <div class="team-card-header">
+                <h2 class="dashboard-section-title">Team Prestaties</h2>
+                <button class="info-icon-button" id="team-performance-info-button" aria-label="Informatie over team prestaties">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    <text x="10" y="14" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">i</text>
+                  </svg>
+                </button>
+                <div class="info-popup" id="team-performance-info-popup" style="display: none;">
+                  <div class="info-popup-content">
+                    <h3>Team Prestaties</h3>
+                    <p>Hier zie je de ontwikkeling van jouw team punten per etappe vergeleken met de andere teams. De lijn toont hoe je team presteert ten opzichte van de concurrentie.</p>
+                  </div>
+                </div>
+              </div>
               <div class="chart-container">
                 <canvas id="teamPerformanceChart"></canvas>
               </div>
@@ -90,7 +118,21 @@
           <div class="dashboard-column">
             <!-- Points Distribution Chart -->
             <div class="dashboard-section chart-tile">
-              <h2 class="dashboard-section-title">Puntenverdeling</h2>
+              <div class="team-card-header">
+                <h2 class="dashboard-section-title">Puntenverdeling</h2>
+                <button class="info-icon-button" id="points-distribution-info-button" aria-label="Informatie over puntenverdeling">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    <text x="10" y="14" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">i</text>
+                  </svg>
+                </button>
+                <div class="info-popup" id="points-distribution-info-popup" style="display: none;">
+                  <div class="info-popup-content">
+                    <h3>Puntenverdeling</h3>
+                    <p>Deze grafiek toont hoe de punten verdeeld zijn over alle teams. Je ziet hoeveel teams in elke puntencategorie vallen, wat een beeld geeft van de competitie.</p>
+                  </div>
+                </div>
+              </div>
               <div class="chart-container">
                 <canvas id="pointsDistributionChart"></canvas>
               </div>

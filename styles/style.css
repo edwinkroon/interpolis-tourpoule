@@ -1937,13 +1937,19 @@ button[aria-busy="true"] {
   transform: rotate(0deg);
 }
 
-.stage-nav-button:hover {
+.stage-nav-button:hover:not(:disabled) {
   background: #f0f3f5;
   transform: scale(1.05);
 }
 
-.stage-nav-button:active {
+.stage-nav-button:active:not(:disabled) {
   transform: scale(0.95);
+}
+
+.stage-nav-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .stage-nav-info {

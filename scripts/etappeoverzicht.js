@@ -34,6 +34,10 @@ const stageData = {
   ]
 };
 
+// Global variable to store current stage
+let currentStage = null;
+let stagesWithResults = [];
+
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', async function() {
   // Check if user is authenticated and exists in database
@@ -49,19 +53,45 @@ document.addEventListener('DOMContentLoaded', async function() {
     console.log('Continuing with dummy data due to auth error');
   }
 
-  // Load latest stage from database
-  const latestStage = await loadLatestStage();
+  // Get stage number from URL parameter, or use latest stage
+  const urlParams = new URLSearchParams(window.location.search);
+  const stageNumberParam = urlParams.get('stage');
   
-  // Load stage results for the latest stage
-  if (latestStage && latestStage.stage_number) {
-    await loadStageResults(latestStage.stage_number);
+  // Load all stages with results
+  stagesWithResults = await loadStagesWithResults();
+  
+  // Determine which stage to load
+  let stageToLoad = null;
+  if (stageNumberParam) {
+    const stageNum = parseInt(stageNumberParam, 10);
+    stageToLoad = stagesWithResults.find(s => s.stage_number === stageNum);
+  }
+  
+  // If no valid stage from URL, use latest stage
+  if (!stageToLoad && stagesWithResults.length > 0) {
+    stageToLoad = stagesWithResults[stagesWithResults.length - 1]; // Last one is latest
+  }
+  
+  if (stageToLoad) {
+    currentStage = stageToLoad;
+    await loadStageData(stageToLoad);
+  } else {
+    // Fallback to latest stage
+    const latestStage = await loadLatestStage();
+    if (latestStage && latestStage.stage_number) {
+      currentStage = latestStage;
+      await loadStageData(latestStage);
+    }
   }
   
   // Render the page with dummy data for other cards
   renderStageInfo(stageData);
   
-  // Setup navigation buttons
+  // Setup navigation buttons (this will also call updateNavigationButtons)
   setupNavigation();
+  
+  // Update navigation buttons after stages are loaded
+  updateNavigationButtons();
 });
 
 async function loadLatestStage() {
@@ -277,21 +307,133 @@ function renderJerseys(jerseys) {
   });
 }
 
+async function loadStagesWithResults() {
+  try {
+    const response = await fetch('/.netlify/functions/get-stages-with-results');
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (data.ok && data.stages) {
+      return data.stages.sort((a, b) => a.stage_number - b.stage_number);
+    }
+    
+    return [];
+  } catch (error) {
+    console.error('Error loading stages with results:', error);
+    return [];
+  }
+}
+
+async function loadStageData(stage) {
+  // Update stage number
+  const stageNumberElement = document.getElementById('stage-number');
+  if (stageNumberElement) {
+    stageNumberElement.textContent = stage.name || `Etappe ${stage.stage_number}`;
+  }
+
+  // Update stage route
+  const routeElement = document.getElementById('stage-route');
+  if (routeElement) {
+    if (stage.route_text) {
+      routeElement.textContent = stage.route_text;
+    } else if (stage.start_location && stage.end_location) {
+      const distance = stage.distance_km 
+        ? ` (${parseFloat(stage.distance_km).toFixed(0)}km)`
+        : '';
+      routeElement.textContent = `${stage.start_location} - ${stage.end_location}${distance}`;
+    }
+  }
+  
+  // Load stage results
+  await loadStageResults(stage.stage_number);
+  
+  // Update URL without reload
+  const newUrl = new URL(window.location);
+  newUrl.searchParams.set('stage', stage.stage_number);
+  window.history.pushState({ stage: stage.stage_number }, '', newUrl);
+}
+
 function setupNavigation() {
   const prevButton = document.getElementById('prev-stage');
   const nextButton = document.getElementById('next-stage');
   
   if (prevButton) {
-    prevButton.addEventListener('click', () => {
-      // TODO: Navigate to previous stage
-      console.log('Navigate to previous stage');
+    prevButton.addEventListener('click', async () => {
+      if (!currentStage || stagesWithResults.length === 0) return;
+      
+      const currentIndex = stagesWithResults.findIndex(s => s.stage_number === currentStage.stage_number);
+      if (currentIndex > 0) {
+        const prevStage = stagesWithResults[currentIndex - 1];
+        currentStage = prevStage;
+        await loadStageData(prevStage);
+        updateNavigationButtons();
+      }
     });
   }
   
   if (nextButton) {
-    nextButton.addEventListener('click', () => {
-      // TODO: Navigate to next stage
-      console.log('Navigate to next stage');
+    nextButton.addEventListener('click', async () => {
+      if (!currentStage || stagesWithResults.length === 0) return;
+      
+      const currentIndex = stagesWithResults.findIndex(s => s.stage_number === currentStage.stage_number);
+      if (currentIndex < stagesWithResults.length - 1) {
+        const nextStage = stagesWithResults[currentIndex + 1];
+        currentStage = nextStage;
+        await loadStageData(nextStage);
+        updateNavigationButtons();
+      }
     });
+  }
+  
+  // Initial button state
+  updateNavigationButtons();
+}
+
+function updateNavigationButtons() {
+  const prevButton = document.getElementById('prev-stage');
+  const nextButton = document.getElementById('next-stage');
+  
+  if (!currentStage || stagesWithResults.length === 0) {
+    if (prevButton) {
+      prevButton.disabled = true;
+      prevButton.style.opacity = '0.5';
+    }
+    if (nextButton) {
+      nextButton.disabled = true;
+      nextButton.style.opacity = '0.5';
+    }
+    return;
+  }
+  
+  const currentIndex = stagesWithResults.findIndex(s => s.stage_number === currentStage.stage_number);
+  
+  // Enable/disable previous button (links pijltje)
+  if (prevButton) {
+    if (currentIndex > 0) {
+      // Er is een vorige etappe
+      prevButton.disabled = false;
+      prevButton.style.opacity = '1';
+    } else {
+      // Geen vorige etappe
+      prevButton.disabled = true;
+      prevButton.style.opacity = '0.5';
+    }
+  }
+  
+  // Enable/disable next button (rechts pijltje)
+  if (nextButton) {
+    if (currentIndex < stagesWithResults.length - 1) {
+      // Er is een volgende etappe
+      nextButton.disabled = false;
+      nextButton.style.opacity = '1';
+    } else {
+      // Geen volgende etappe
+      nextButton.disabled = true;
+      nextButton.style.opacity = '0.5';
+    }
   }
 }

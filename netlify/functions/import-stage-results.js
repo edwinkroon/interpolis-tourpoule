@@ -1,5 +1,209 @@
 const { Client } = require('pg');
 
+// Helper function to calculate stage points (shared with calculate-stage-points.js)
+async function calculateStagePoints(client, stageId) {
+  console.log('=== calculateStagePoints FUNCTION CALLED ===');
+  console.log('Stage ID:', stageId);
+  console.log('Client available:', client ? 'yes' : 'no');
+  
+  if (!client) {
+    throw new Error('Database client is not available');
+  }
+  
+  // Step 1: Get all scoring rules for stage positions
+  const scoringRules = await client.query(
+    `SELECT rule_type, condition_json, points 
+     FROM scoring_rules 
+     WHERE rule_type = 'stage_position'`
+  );
+  
+  console.log('Found scoring rules for stage positions:', scoringRules.rows.length);
+
+  // Create a map of position -> points
+  const positionPointsMap = new Map();
+  scoringRules.rows.forEach(rule => {
+    const condition = rule.condition_json;
+    if (condition && condition.position) {
+      positionPointsMap.set(condition.position, rule.points);
+    }
+  });
+  
+  console.log('Position points map:', Array.from(positionPointsMap.entries()));
+
+  // Step 2: Get all stage results for this stage
+  const stageResults = await client.query(
+    `SELECT rider_id, position 
+     FROM stage_results 
+     WHERE stage_id = $1 
+     ORDER BY position`,
+    [stageId]
+  );
+  
+  console.log('Found stage results:', stageResults.rows.length);
+
+  // Step 3: Get all fantasy teams with their riders
+  const fantasyTeams = await client.query(
+    `SELECT 
+       ft.id as fantasy_team_id,
+       ft.participant_id,
+       ftr.rider_id,
+       ftr.slot_type,
+       ftr.active
+     FROM fantasy_teams ft
+     JOIN fantasy_team_riders ftr ON ft.id = ftr.fantasy_team_id
+     WHERE ftr.active = true`
+  );
+  
+  console.log('Found fantasy teams with riders:', fantasyTeams.rows.length);
+
+  // Step 4: Get jersey wearers for this stage and their points
+  const jerseyRules = await client.query(
+    `SELECT rule_type, condition_json, points 
+     FROM scoring_rules 
+     WHERE rule_type = 'jersey'`
+  );
+
+  // Create a map of jersey type -> points
+  const jerseyPointsMap = new Map();
+  jerseyRules.rows.forEach(rule => {
+    const condition = rule.condition_json;
+    if (condition && condition.jersey_type) {
+      jerseyPointsMap.set(condition.jersey_type, rule.points);
+    }
+  });
+
+  // Get jersey wearers for this stage
+  const jerseyWearers = await client.query(
+    `SELECT 
+       sjw.rider_id,
+       j.type as jersey_type
+     FROM stage_jersey_wearers sjw
+     JOIN jerseys j ON sjw.jersey_id = j.id
+     WHERE sjw.stage_id = $1`,
+    [stageId]
+  );
+  
+  console.log('Found jersey wearers:', jerseyWearers.rows.length);
+  if (jerseyWearers.rows.length === 0) {
+    console.log('No jersey wearers for this stage - all participants will get 0 jersey points');
+  }
+
+  // Create a map of rider_id -> jersey points
+  const riderJerseyPointsMap = new Map();
+  jerseyWearers.rows.forEach(jersey => {
+    const points = jerseyPointsMap.get(jersey.jersey_type) || 0;
+    riderJerseyPointsMap.set(jersey.rider_id, points);
+  });
+
+  // Step 5: Calculate points per participant
+  // Group fantasy teams by participant
+  const participantTeamsMap = new Map();
+  fantasyTeams.rows.forEach(team => {
+    if (!participantTeamsMap.has(team.participant_id)) {
+      participantTeamsMap.set(team.participant_id, []);
+    }
+    participantTeamsMap.get(team.participant_id).push(team);
+  });
+  
+  console.log('Participants with teams:', participantTeamsMap.size);
+  
+  if (participantTeamsMap.size === 0) {
+    console.warn('WARNING: No fantasy teams found with active riders! Points will be 0 for all participants.');
+  }
+
+  // Calculate points for each participant
+  const participantPoints = new Map();
+
+  participantTeamsMap.forEach((teams, participantId) => {
+    let pointsStage = 0;
+    let pointsJerseys = 0;
+
+    // Calculate points from stage positions
+    teams.forEach(team => {
+      const stageResult = stageResults.rows.find(sr => sr.rider_id === team.rider_id);
+      if (stageResult) {
+        const positionPoints = positionPointsMap.get(stageResult.position) || 0;
+        pointsStage += positionPoints;
+      }
+    });
+
+    // Calculate points from jerseys
+    teams.forEach(team => {
+      const jerseyPoints = riderJerseyPointsMap.get(team.rider_id) || 0;
+      pointsJerseys += jerseyPoints;
+    });
+
+    participantPoints.set(participantId, {
+      points_stage: pointsStage,
+      points_jerseys: pointsJerseys,
+      points_bonus: 0 // Can be extended later
+    });
+  });
+
+  // Step 6: Insert or update fantasy_stage_points
+  console.log('=== INSERTING POINTS INTO DATABASE ===');
+  console.log('Participants with calculated points:', participantPoints.size);
+  
+  let insertedCount = 0;
+  for (const [participantId, points] of participantPoints) {
+    try {
+      console.log(`Inserting points for participant ${participantId}: stage=${points.points_stage}, jerseys=${points.points_jerseys}, bonus=${points.points_bonus}`);
+      const result = await client.query(
+        `INSERT INTO fantasy_stage_points 
+         (stage_id, participant_id, points_stage, points_jerseys, points_bonus)
+         VALUES ($1, $2, $3, $4, $5)
+         ON CONFLICT (stage_id, participant_id)
+         DO UPDATE SET
+           points_stage = EXCLUDED.points_stage,
+           points_jerseys = EXCLUDED.points_jerseys,
+           points_bonus = EXCLUDED.points_bonus`,
+        [stageId, participantId, points.points_stage, points.points_jerseys, points.points_bonus]
+      );
+      insertedCount++;
+      console.log(`  ✓ Inserted/updated points for participant ${participantId}`);
+    } catch (insertError) {
+      console.error(`  ✗ Failed to insert points for participant ${participantId}:`, insertError.message);
+      throw insertError;
+    }
+  }
+  
+  console.log(`Successfully inserted/updated points for ${insertedCount} participants`);
+
+  // Also create entries for participants without teams (with 0 points)
+  console.log('=== CREATING ENTRIES FOR PARTICIPANTS WITHOUT TEAMS ===');
+  const allParticipants = await client.query('SELECT id FROM participants');
+  console.log('Total participants in database:', allParticipants.rows.length);
+  
+  let participantsWithoutTeams = 0;
+  for (const participant of allParticipants.rows) {
+    if (!participantPoints.has(participant.id)) {
+      participantsWithoutTeams++;
+      try {
+        await client.query(
+          `INSERT INTO fantasy_stage_points 
+           (stage_id, participant_id, points_stage, points_jerseys, points_bonus)
+           VALUES ($1, $2, 0, 0, 0)
+           ON CONFLICT (stage_id, participant_id)
+           DO UPDATE SET
+             points_stage = 0,
+             points_jerseys = 0,
+             points_bonus = 0`,
+          [stageId, participant.id]
+        );
+      } catch (insertError) {
+        console.error(`Failed to insert 0 points for participant ${participant.id}:`, insertError.message);
+        throw insertError;
+      }
+    }
+  }
+  
+  console.log('Participants without teams (0 points):', participantsWithoutTeams);
+  console.log('Total entries created/updated:', participantPoints.size + participantsWithoutTeams);
+  console.log('=== POINTS CALCULATION COMPLETE ===');
+
+  return { participantsCalculated: participantPoints.size };
+}
+
 exports.handler = async function(event) {
   if (event.httpMethod !== 'POST') {
     return {
@@ -157,7 +361,55 @@ exports.handler = async function(event) {
 
       // Commit transaction
       await client.query('COMMIT');
+      console.log('Transaction committed successfully');
+      
+      // Calculate fantasy stage points after importing results
+      // This is done after commit to avoid long-running transactions
+      let pointsCalculated = false;
+      let pointsError = null;
+      let participantsCalculated = 0;
+      
+      try {
+        console.log('=== STARTING POINTS CALCULATION ===');
+        console.log('Stage ID:', stageId);
+        console.log('Client connected:', client ? 'yes' : 'no');
+        
+        const pointsResult = await calculateStagePoints(client, stageId);
+        pointsCalculated = true;
+        participantsCalculated = pointsResult.participantsCalculated;
+        
+        console.log('=== POINTS CALCULATION SUCCESS ===');
+        console.log('Stage ID:', stageId);
+        console.log('Participants calculated:', participantsCalculated);
+        
+        // Verify that points were actually inserted
+        const verifyQuery = await client.query(
+          'SELECT COUNT(*) as count FROM fantasy_stage_points WHERE stage_id = $1',
+          [stageId]
+        );
+        const actualCount = parseInt(verifyQuery.rows[0].count, 10);
+        console.log('Actual entries in fantasy_stage_points:', actualCount);
+        
+        if (actualCount === 0) {
+          console.warn('WARNING: Points calculation reported success but no entries were created!');
+        }
+        
+      } catch (err) {
+        // Don't fail the import if points calculation fails, but log the error thoroughly
+        pointsError = err;
+        console.error('=== POINTS CALCULATION FAILED ===');
+        console.error('Stage ID:', stageId);
+        console.error('Error message:', err.message);
+        console.error('Error stack:', err.stack);
+        console.error('Error name:', err.name);
+        console.error('Error code:', err.code);
+        console.error('Error detail:', err.detail);
+        console.error('Error hint:', err.hint);
+        console.error('Full error object:', JSON.stringify(err, Object.getOwnPropertyNames(err)));
+      }
+      
       await client.end();
+      console.log('Database connection closed');
 
       return {
         statusCode: 200,
@@ -170,7 +422,10 @@ exports.handler = async function(event) {
           message: 'Stage results imported successfully',
           count: results.length,
           replacedExisting: hasExistingResults,
-          existingCount: existingCount
+          existingCount: existingCount,
+          pointsCalculated: pointsCalculated,
+          participantsCalculated: participantsCalculated,
+          pointsError: pointsError ? pointsError.message : null
         })
       };
     } catch (err) {

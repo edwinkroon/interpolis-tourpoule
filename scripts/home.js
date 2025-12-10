@@ -225,35 +225,77 @@ function renderPoints(points) {
   }
 }
 
-function renderPointsRiders(pointsRiders) {
+async function loadMyPointsRiders() {
+  try {
+    const userId = await getUserId();
+    if (!userId) {
+      return { riders: [], totalPoints: 0, route: '' };
+    }
+
+    const response = await fetch(`/.netlify/functions/get-my-points-riders?userId=${encodeURIComponent(userId)}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    if (data.ok) {
+      return {
+        riders: data.riders || [],
+        totalPoints: data.totalPoints || 0,
+        route: data.route || ''
+      };
+    } else {
+      return { riders: [], totalPoints: 0, route: '' };
+    }
+  } catch (error) {
+    console.error('Error loading my points riders:', error);
+    return { riders: [], totalPoints: 0, route: '' };
+  }
+}
+
+function renderPointsRiders(pointsRiders, route = '') {
   const pointsRidersList = document.getElementById('points-riders-list');
   if (!pointsRidersList) return;
 
   pointsRidersList.innerHTML = '';
 
+  if (!pointsRiders || pointsRiders.length === 0) {
+    pointsRidersList.innerHTML = '<div class="no-data">Geen punten beschikbaar</div>';
+    return;
+  }
+
   // Avatar colors for riders (fallback when no photo)
-  const avatarColors = ['#cdd7dc', '#0095db'];
+  const avatarColors = ['#cdd7dc', '#0095db', '#668494'];
   
   pointsRiders.forEach((rider, index) => {
     const riderItem = document.createElement('div');
     riderItem.className = 'points-rider-item';
     
-    const avatarColor = avatarColors[index] || '#cdd7dc';
+    const avatarColor = avatarColors[index % avatarColors.length];
     
-    // Use photo if available, otherwise use colored avatar
+    // Get initials for placeholder
+    const initials = rider.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    
+    // Use photo if available, otherwise use colored avatar with initials
     let avatarHtml = '';
     if (rider.photoUrl) {
       avatarHtml = `<img src="${sanitizeInput(rider.photoUrl)}" alt="${sanitizeInput(rider.name)}" class="points-rider-avatar-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-        <div class="points-rider-avatar" style="background-color: ${avatarColor}; display: none;"></div>`;
+        <div class="points-rider-avatar" style="background-color: ${avatarColor}; display: none;">
+          <span class="points-rider-avatar-initials">${sanitizeInput(initials)}</span>
+        </div>`;
     } else {
-      avatarHtml = `<div class="points-rider-avatar" style="background-color: ${avatarColor};"></div>`;
+      avatarHtml = `<div class="points-rider-avatar" style="background-color: ${avatarColor};">
+        <span class="points-rider-avatar-initials">${sanitizeInput(initials)}</span>
+      </div>`;
     }
+    
+    // Use route from rider if available, otherwise use passed route
+    const displayRoute = rider.route || route;
     
     riderItem.innerHTML = `
       ${avatarHtml}
       <div class="points-rider-info">
         <div class="points-rider-name">${sanitizeInput(rider.name)}</div>
-        ${rider.team ? `<div class="points-rider-team">${sanitizeInput(rider.team)}</div>` : ''}
+        ${displayRoute ? `<div class="points-rider-route">${sanitizeInput(displayRoute)}</div>` : ''}
       </div>
       <div class="points-rider-points">${sanitizeInput(String(rider.points || 0))}</div>
     `;
@@ -794,22 +836,14 @@ async function loadDashboardData() {
     // Load team status and update tile
     await loadTeamStatus();
     
-    // TODO: Replace with actual backend API call
+    // Load my points riders dynamically
+    const pointsData = await loadMyPointsRiders();
+    renderPoints({ total: pointsData.totalPoints });
+    renderPointsRiders(pointsData.riders, pointsData.route);
+    
+    // TODO: Replace with actual backend API call for achievements
     // For now, use stub data
     const dashboardData = stubDashboardData;
-    
-    renderPoints(dashboardData.points);
-    
-    // Render riders first without photos (immediate display)
-    renderPointsRiders(dashboardData.pointsRiders || []);
-    
-    // Then load photos in background and update
-    loadRiderPhotos(dashboardData.pointsRiders || []).then(pointsRidersWithPhotos => {
-      renderPointsRiders(pointsRidersWithPhotos);
-    }).catch(error => {
-      console.error('Error loading rider photos:', error);
-    });
-    
     renderAchievements(dashboardData.achievements);
     
     // Load day winners dynamically from latest stage
@@ -964,4 +998,42 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   // Setup button click handlers
   setupButtonHandlers();
+  
+  // Setup info popup handlers
+  setupInfoPopupHandlers();
 });
+
+// Setup info popup handlers
+function setupInfoPopupHandlers() {
+  const pointsInfoButton = document.getElementById('points-info-button');
+  const pointsPopup = document.getElementById('points-info-popup');
+  
+  if (pointsInfoButton && pointsPopup) {
+    pointsInfoButton.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const isOpen = pointsPopup.style.display !== 'none';
+      
+      // Close all popups first
+      closeAllInfoPopups();
+      
+      // Toggle this popup
+      if (!isOpen) {
+        pointsPopup.style.display = 'block';
+      }
+    });
+  }
+  
+  // Close popups when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.info-icon-button') && !e.target.closest('.info-popup')) {
+      closeAllInfoPopups();
+    }
+  });
+}
+
+function closeAllInfoPopups() {
+  const popups = document.querySelectorAll('.info-popup');
+  popups.forEach(popup => {
+    popup.style.display = 'none';
+  });
+}

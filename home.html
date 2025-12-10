@@ -91,9 +91,23 @@
 
             <!-- Mijn Punten Section -->
             <div class="dashboard-section points-section">
-              <h2 class="dashboard-section-title">
-                Mijn punten <span class="points-value" id="points-display">(27)</span>
-              </h2>
+              <div class="team-card-header">
+                <h2 class="dashboard-section-title">
+                  Mijn punten <span class="points-value" id="points-display">(27)</span>
+                </h2>
+                <button class="info-icon-button" id="points-info-button" aria-label="Informatie over mijn punten">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    <text x="10" y="14" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">i</text>
+                  </svg>
+                </button>
+                <div class="info-popup" id="points-info-popup" style="display: none;">
+                  <div class="info-popup-content">
+                    <h3>Mijn punten</h3>
+                    <p>Hier zie je de renners die punten hebben gehaald. Als je vandaag punten hebt gehaald, worden deze getoond. Anders zie je de laatste drie renners die punten voor je hebben gehaald.</p>
+                  </div>
+                </div>
+              </div>
               <div class="points-riders-list" id="points-riders-list">
                 <!-- Riders with points will be rendered here -->
               </div>

@@ -127,35 +127,37 @@ async function loadLatestStage() {
             ? ` (${parseFloat(data.stage.distance_km).toFixed(0)}km)`
             : '';
           routeElement.textContent = `${data.stage.start_location} - ${data.stage.end_location}${distance}`;
+        } else {
+          routeElement.textContent = '';
         }
       }
       
       return data.stage; // Return stage data for use in other functions
     } else {
-      console.warn('No latest stage found, using fallback');
-      // Fallback to default
+      console.warn('No latest stage found');
+      // Don't show fallback text, leave empty until data is loaded
       const stageNumberElement = document.getElementById('stage-number');
       if (stageNumberElement) {
-        stageNumberElement.textContent = 'Etappe 1';
+        stageNumberElement.textContent = '';
       }
       const routeElement = document.getElementById('stage-route');
       if (routeElement) {
-        routeElement.textContent = 'Lille - Lille (185km)';
+        routeElement.textContent = '';
       }
-      return { stage_number: 1 };
+      return null;
     }
   } catch (error) {
     console.error('Error loading latest stage:', error);
-    // Fallback to default
+    // Don't show fallback text, leave empty
     const stageNumberElement = document.getElementById('stage-number');
     if (stageNumberElement) {
-      stageNumberElement.textContent = 'Etappe 1';
+      stageNumberElement.textContent = '';
     }
     const routeElement = document.getElementById('stage-route');
     if (routeElement) {
-      routeElement.textContent = 'Lille - Lille (185km)';
+      routeElement.textContent = '';
     }
-    return { stage_number: 1 };
+    return null;
   }
 }
 
@@ -431,15 +433,15 @@ async function loadStageData(stage) {
   showLoading('stage-results-list');
   showLoading('jerseys-list');
   
-  // Update stage number
+  // Update stage number (only if stage data is available)
   const stageNumberElement = document.getElementById('stage-number');
-  if (stageNumberElement) {
+  if (stageNumberElement && stage) {
     stageNumberElement.textContent = stage.name || `Etappe ${stage.stage_number}`;
   }
 
-  // Update stage route
+  // Update stage route (only if stage data is available)
   const routeElement = document.getElementById('stage-route');
-  if (routeElement) {
+  if (routeElement && stage) {
     if (stage.route_text) {
       routeElement.textContent = stage.route_text;
     } else if (stage.start_location && stage.end_location) {
@@ -447,6 +449,8 @@ async function loadStageData(stage) {
         ? ` (${parseFloat(stage.distance_km).toFixed(0)}km)`
         : '';
       routeElement.textContent = `${stage.start_location} - ${stage.end_location}${distance}`;
+    } else {
+      routeElement.textContent = '';
     }
   }
   

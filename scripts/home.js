@@ -974,6 +974,31 @@ async function loadDashboardData() {
   });
 }
 
+// Setup button click handlers for action buttons
+function setupButtonHandlers() {
+  // Add click handler for spelregels and statistieken buttons
+  const actionButtons = document.querySelectorAll('.action-button');
+  actionButtons.forEach(button => {
+    const buttonText = button.querySelector('span');
+    if (buttonText) {
+      const text = buttonText.textContent.trim();
+      if (text === 'Spelregels') {
+        button.addEventListener('click', function() {
+          window.location.href = 'rules.html';
+        });
+      } else if (text === 'Statistieken') {
+        button.addEventListener('click', function() {
+          window.location.href = 'statistieken.html';
+        });
+      } else if (text === 'Etappe toevoegen') {
+        button.addEventListener('click', function() {
+          window.location.href = 'etappetoevoegen.html';
+        });
+      }
+    }
+  });
+}
+
 async function loadUserData() {
   const userId = await getUserId();
   
@@ -1047,6 +1072,31 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 // Flag to track if document click listener has been added
 let infoPopupDocumentListenerAdded = false;
+
+// Setup button click handlers for action buttons
+function setupButtonHandlers() {
+  // Add click handler for spelregels and statistieken buttons
+  const actionButtons = document.querySelectorAll('.action-button');
+  actionButtons.forEach(button => {
+    const buttonText = button.querySelector('span');
+    if (buttonText) {
+      const text = buttonText.textContent.trim();
+      if (text === 'Spelregels') {
+        button.addEventListener('click', function() {
+          window.location.href = 'rules.html';
+        });
+      } else if (text === 'Statistieken') {
+        button.addEventListener('click', function() {
+          window.location.href = 'statistieken.html';
+        });
+      } else if (text === 'Etappe toevoegen') {
+        button.addEventListener('click', function() {
+          window.location.href = 'etappetoevoegen.html';
+        });
+      }
+    }
+  });
+}
 
 // Setup info popup handlers
 function setupInfoPopupHandlers() {

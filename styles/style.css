@@ -1359,57 +1359,134 @@ button[aria-busy="true"] {
   }
 }
 /* Statistics Page Styles */
-.stats-grid {
+.statistics-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
-  margin-bottom: 2rem;
 }
+
+.stats-cards-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
 .stat-card {
-  background: linear-gradient(135deg, #00cac6 0%, #00aa2e 100%);
-  border-radius: 12px;
+  background: #fff;
+  border-radius: 20px;
   padding: 2rem;
   text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 51, 78, 0.15);
+  box-shadow: 0 8px 16px rgba(0, 51, 78, 0.16);
+  filter: drop-shadow(0 8px 16px rgba(0, 51, 78, 0.161));
   transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
 }
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #00cac6 0%, #00aa2e 100%);
+}
+
 .stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 16px rgba(0, 51, 78, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(0, 51, 78, 0.2);
 }
+
 .stat-value {
   font-size: 48px;
   font-weight: 700;
-  color: #fff;
+  color: #00334e;
   margin-bottom: 0.5rem;
   line-height: 1;
 }
+
 .stat-label {
   font-size: 14px;
-  font-weight: 500;
-  color: #fff;
-  opacity: 0.95;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-weight: 400;
+  color: #668494;
+  text-transform: none;
+  letter-spacing: 0;
 }
+
+/* Chart Tiles */
+.chart-tile {
+  background: #fff;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 16px rgba(0, 51, 78, 0.16);
+  filter: drop-shadow(0 8px 16px rgba(0, 51, 78, 0.161));
+  display: flex;
+  flex-direction: column;
+  min-height: 400px;
+}
+
+.chart-tile .dashboard-section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #00334e;
+  margin-bottom: 1.5rem;
+  text-transform: none;
+}
+
+.chart-container {
+  flex: 1;
+  position: relative;
+  height: 300px;
+  min-height: 300px;
+}
+
 @media (max-width: 768px) {
-  .stats-grid {
+  .statistics-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .stats-cards-row {
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
   }
+  
   .stat-card {
     padding: 1.5rem;
   }
+  
   .stat-value {
     font-size: 36px;
   }
+  
   .stat-label {
-    font-size: 12px;
+    font-size: 13px;
+  }
+  
+  .chart-tile {
+    padding: 1.5rem;
+    min-height: 350px;
+  }
+  
+  .chart-container {
+    height: 250px;
+    min-height: 250px;
   }
 }
+
 @media (max-width: 480px) {
-  .stats-grid {
+  .stats-cards-row {
     grid-template-columns: 1fr;
+  }
+  
+  .chart-tile {
+    min-height: 300px;
+  }
+  
+  .chart-container {
+    height: 200px;
+    min-height: 200px;
   }
 }
 /* Stages Overview Page Styles */

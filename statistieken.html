@@ -6,6 +6,7 @@
   <title>Interpolis Tourspel - Statistieken</title>
   <link rel="stylesheet" href="styles/grid.css">
   <link rel="stylesheet" href="styles/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="scripts/auth0-spa-js.production.js"></script>
   <script src="scripts/auth-config.js"></script>
   <script src="scripts/auth.js"></script>
@@ -19,7 +20,13 @@
     <div class="header-content page">
       <div class="grid">
         <div class="col-12">
-          <div class="header-title">Interpolis tourspel</div>
+          <div class="header-top">
+            <a href="home.html" class="back-link">
+              <img src="assets/arrow.svg" alt="" class="back-arrow" aria-hidden="true">
+              <span>Terug</span>
+            </a>
+            <div class="header-title">Interpolis tourspel</div>
+          </div>
         </div>
         <div class="col-12">
           <div class="header-welcome-section">
@@ -37,277 +44,72 @@
   <main class="main-content page">
     <div class="grid">
       <div class="col-12">
-        <div class="rules-container">
-          <section class="rules-section">
-            <h2 class="rules-title">Algemene Statistieken</h2>
-            
-            <div class="stats-grid">
+        <!-- Statistics Cards Grid -->
+        <div class="dashboard-grid statistics-grid">
+          <!-- Stat Cards Row -->
+          <div class="dashboard-column col-12">
+            <div class="stats-cards-row">
               <div class="stat-card">
-                <div class="stat-value">184</div>
+                <div class="stat-value" id="stat-riders">-</div>
                 <div class="stat-label">Totaal aantal renners</div>
               </div>
               <div class="stat-card">
-                <div class="stat-value">23</div>
+                <div class="stat-value" id="stat-stages">-</div>
                 <div class="stat-label">Etappes</div>
               </div>
               <div class="stat-card">
-                <div class="stat-value">20</div>
+                <div class="stat-value" id="stat-teams">-</div>
                 <div class="stat-label">Teams</div>
               </div>
               <div class="stat-card">
-                <div class="stat-value">1,247</div>
+                <div class="stat-value" id="stat-points">-</div>
                 <div class="stat-label">Totaal aantal punten</div>
               </div>
             </div>
-          </section>
+          </div>
 
-          <section class="rules-section">
-            <h2 class="rules-title">Top Renners</h2>
-            
-            <div class="points-table-container">
-              <table class="points-table">
-                <thead>
-                  <tr>
-                    <th>Positie</th>
-                    <th>Renner</th>
-                    <th>Team</th>
-                    <th>Punten</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>1</td>
-                    <td>Tadej Pogačar</td>
-                    <td>UAE Team Emirates</td>
-                    <td>342</td>
-                  </tr>
-                  <tr>
-                    <td>2</td>
-                    <td>Jonas Vingegaard</td>
-                    <td>Team Visma-Lease a Bike</td>
-                    <td>298</td>
-                  </tr>
-                  <tr>
-                    <td>3</td>
-                    <td>Remco Evenepoel</td>
-                    <td>Soudal Quick-Step</td>
-                    <td>267</td>
-                  </tr>
-                  <tr>
-                    <td>4</td>
-                    <td>Mathieu van der Poel</td>
-                    <td>Alpecin-Deceuninck</td>
-                    <td>245</td>
-                  </tr>
-                  <tr>
-                    <td>5</td>
-                    <td>Wout van Aert</td>
-                    <td>Team Visma-Lease a Bike</td>
-                    <td>223</td>
-                  </tr>
-                  <tr>
-                    <td>6</td>
-                    <td>Jasper Philipsen</td>
-                    <td>Alpecin-Deceuninck</td>
-                    <td>198</td>
-                  </tr>
-                  <tr>
-                    <td>7</td>
-                    <td>Simon Yates</td>
-                    <td>Team Jayco AlUla</td>
-                    <td>187</td>
-                  </tr>
-                  <tr>
-                    <td>8</td>
-                    <td>Ben Healy</td>
-                    <td>EF Education-EasyPost</td>
-                    <td>176</td>
-                  </tr>
-                  <tr>
-                    <td>9</td>
-                    <td>Tim Merlier</td>
-                    <td>Soudal Quick-Step</td>
-                    <td>165</td>
-                  </tr>
-                  <tr>
-                    <td>10</td>
-                    <td>Primož Roglič</td>
-                    <td>Bora-Hansgrohe</td>
-                    <td>154</td>
-                  </tr>
-                </tbody>
-              </table>
+          <!-- Chart Tiles -->
+          <div class="dashboard-column">
+            <!-- Top Renners Chart -->
+            <div class="dashboard-section chart-tile">
+              <h2 class="dashboard-section-title">Top Renners</h2>
+              <div class="chart-container">
+                <canvas id="topRidersChart"></canvas>
+              </div>
             </div>
-          </section>
 
-          <section class="rules-section">
-            <h2 class="rules-title">Etappe Winnaars</h2>
-            
-            <div class="points-table-container">
-              <table class="points-table">
-                <thead>
-                  <tr>
-                    <th>Etappe</th>
-                    <th>Winnaar</th>
-                    <th>Team</th>
-                    <th>Afstand</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>1</td>
-                    <td>Jasper Philipsen</td>
-                    <td>Alpecin-Deceuninck</td>
-                    <td>185 km</td>
-                  </tr>
-                  <tr>
-                    <td>2</td>
-                    <td>Mathieu van der Poel</td>
-                    <td>Alpecin-Deceuninck</td>
-                    <td>212 km</td>
-                  </tr>
-                  <tr>
-                    <td>3</td>
-                    <td>Tim Merlier</td>
-                    <td>Soudal Quick-Step</td>
-                    <td>178 km</td>
-                  </tr>
-                  <tr>
-                    <td>5</td>
-                    <td>Tadej Pogačar</td>
-                    <td>UAE Team Emirates</td>
-                    <td>33 km (ITT)</td>
-                  </tr>
-                  <tr>
-                    <td>6</td>
-                    <td>Ben Healy</td>
-                    <td>EF Education-EasyPost</td>
-                    <td>201 km</td>
-                  </tr>
-                  <tr>
-                    <td>9</td>
-                    <td>Tim Merlier</td>
-                    <td>Soudal Quick-Step</td>
-                    <td>170 km</td>
-                  </tr>
-                  <tr>
-                    <td>10</td>
-                    <td>Simon Yates</td>
-                    <td>Team Jayco AlUla</td>
-                    <td>163 km</td>
-                  </tr>
-                  <tr>
-                    <td>12</td>
-                    <td>Tadej Pogačar</td>
-                    <td>UAE Team Emirates</td>
-                    <td>180.6 km</td>
-                  </tr>
-                  <tr>
-                    <td>15</td>
-                    <td>Tim Wellens</td>
-                    <td>UAE Team Emirates</td>
-                    <td>-</td>
-                  </tr>
-                  <tr>
-                    <td>16</td>
-                    <td>Valentin Paret Peintre</td>
-                    <td>Decathlon AG2R La Mondiale Team</td>
-                    <td>171.5 km</td>
-                  </tr>
-                  <tr>
-                    <td>19</td>
-                    <td>Thymen Arensman</td>
-                    <td>INEOS Grenadiers</td>
-                    <td>-</td>
-                  </tr>
-                  <tr>
-                    <td>20</td>
-                    <td>Kaden Groves</td>
-                    <td>Alpecin-Deceuninck</td>
-                    <td>184.2 km</td>
-                  </tr>
-                  <tr>
-                    <td>21</td>
-                    <td>Wout van Aert</td>
-                    <td>Team Visma-Lease a Bike</td>
-                    <td>132.3 km</td>
-                  </tr>
-                </tbody>
-              </table>
+            <!-- Team Performance Chart -->
+            <div class="dashboard-section chart-tile">
+              <h2 class="dashboard-section-title">Team Prestaties</h2>
+              <div class="chart-container">
+                <canvas id="teamPerformanceChart"></canvas>
+              </div>
             </div>
-          </section>
+          </div>
 
-          <section class="rules-section">
-            <h2 class="rules-title">Team Statistieken</h2>
-            
-            <div class="points-table-container">
-              <table class="points-table">
-                <thead>
-                  <tr>
-                    <th>Team</th>
-                    <th>Totaal Punten</th>
-                    <th>Etappe Overwinningen</th>
-                    <th>Top 10 Finishes</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>UAE Team Emirates</td>
-                    <td>1,247</td>
-                    <td>3</td>
-                    <td>28</td>
-                  </tr>
-                  <tr>
-                    <td>Team Visma-Lease a Bike</td>
-                    <td>1,189</td>
-                    <td>2</td>
-                    <td>25</td>
-                  </tr>
-                  <tr>
-                    <td>Alpecin-Deceuninck</td>
-                    <td>1,156</td>
-                    <td>4</td>
-                    <td>22</td>
-                  </tr>
-                  <tr>
-                    <td>Soudal Quick-Step</td>
-                    <td>1,098</td>
-                    <td>2</td>
-                    <td>20</td>
-                  </tr>
-                  <tr>
-                    <td>EF Education-EasyPost</td>
-                    <td>987</td>
-                    <td>1</td>
-                    <td>18</td>
-                  </tr>
-                  <tr>
-                    <td>Team Jayco AlUla</td>
-                    <td>945</td>
-                    <td>1</td>
-                    <td>16</td>
-                  </tr>
-                  <tr>
-                    <td>Bora-Hansgrohe</td>
-                    <td>923</td>
-                    <td>0</td>
-                    <td>15</td>
-                  </tr>
-                  <tr>
-                    <td>INEOS Grenadiers</td>
-                    <td>901</td>
-                    <td>1</td>
-                    <td>14</td>
-                  </tr>
-                </tbody>
-              </table>
+          <div class="dashboard-column">
+            <!-- Points Distribution Chart -->
+            <div class="dashboard-section chart-tile">
+              <h2 class="dashboard-section-title">Puntenverdeling</h2>
+              <div class="chart-container">
+                <canvas id="pointsDistributionChart"></canvas>
+              </div>
             </div>
-          </section>
+
+            <!-- Stage Winners Chart -->
+            <div class="dashboard-section chart-tile">
+              <h2 class="dashboard-section-title">Etappe Winnaars</h2>
+              <div class="chart-container">
+                <canvas id="stageWinnersChart"></canvas>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </main>
 
+  <script src="scripts/statistieken.js" defer></script>
   <script>
     document.addEventListener('DOMContentLoaded', async function() {
       // Check if user is authenticated and exists in database
@@ -319,5 +121,3 @@
   </script>
 </body>
 </html>
-
-

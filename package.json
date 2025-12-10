@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "version:increment": "node increment-version.js"
+  },
   "devDependencies": {
     "prisma": "^6.19.0"
   },

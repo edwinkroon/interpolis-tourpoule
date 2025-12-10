@@ -1,16 +1,57 @@
 // Statistics Page Script
 
-// Chart.js default configuration
-Chart.defaults.font.family = "'Open Sans', system-ui, sans-serif";
-Chart.defaults.font.size = 12;
-Chart.defaults.color = '#00334e';
-Chart.defaults.plugins.legend.display = true;
-Chart.defaults.plugins.legend.position = 'bottom';
-Chart.defaults.plugins.legend.labels.usePointStyle = true;
-Chart.defaults.plugins.legend.labels.padding = 15;
-Chart.defaults.plugins.legend.labels.font.size = 13;
-Chart.defaults.animation.duration = 1000;
-Chart.defaults.animation.easing = 'easeOutQuart';
+// Chart.js default configuration - only set if Chart is available
+function configureChartDefaults() {
+  if (typeof Chart === 'undefined') {
+    console.error('Chart.js is not loaded');
+    return false;
+  }
+  
+  try {
+    // Set font defaults safely
+    if (Chart.defaults) {
+      if (!Chart.defaults.font) {
+        Chart.defaults.font = {};
+      }
+      Chart.defaults.font.family = "'Open Sans', system-ui, sans-serif";
+      Chart.defaults.font.size = 12;
+      
+      Chart.defaults.color = '#00334e';
+      
+      // Set animation defaults
+      if (!Chart.defaults.animation) {
+        Chart.defaults.animation = {};
+      }
+      Chart.defaults.animation.duration = 1000;
+      Chart.defaults.animation.easing = 'easeOutQuart';
+      
+      // Set plugin defaults safely
+      if (!Chart.defaults.plugins) {
+        Chart.defaults.plugins = {};
+      }
+      if (!Chart.defaults.plugins.legend) {
+        Chart.defaults.plugins.legend = {};
+      }
+      Chart.defaults.plugins.legend.display = true;
+      Chart.defaults.plugins.legend.position = 'bottom';
+      
+      if (!Chart.defaults.plugins.legend.labels) {
+        Chart.defaults.plugins.legend.labels = {};
+      }
+      Chart.defaults.plugins.legend.labels.usePointStyle = true;
+      Chart.defaults.plugins.legend.labels.padding = 15;
+      
+      if (!Chart.defaults.plugins.legend.labels.font) {
+        Chart.defaults.plugins.legend.labels.font = {};
+      }
+      Chart.defaults.plugins.legend.labels.font.size = 13;
+    }
+    return true;
+  } catch (error) {
+    console.error('Error configuring Chart.js defaults:', error);
+    return false;
+  }
+}
 
 // Gradient helper function
 function createGradient(ctx, colorStart, colorEnd) {
@@ -437,6 +478,24 @@ async function loadStageWinnersChart() {
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', async function() {
-  await loadStatistics();
+  // Wait for Chart.js to be loaded
+  if (typeof Chart === 'undefined') {
+    // Try to wait a bit for Chart.js to load
+    let attempts = 0;
+    const checkChart = setInterval(() => {
+      attempts++;
+      if (typeof Chart !== 'undefined') {
+        clearInterval(checkChart);
+        configureChartDefaults();
+        loadStatistics();
+      } else if (attempts > 50) {
+        clearInterval(checkChart);
+        console.error('Chart.js failed to load after 5 seconds');
+      }
+    }, 100);
+  } else {
+    configureChartDefaults();
+    await loadStatistics();
+  }
 });
 

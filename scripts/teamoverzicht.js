@@ -199,16 +199,21 @@ function renderRidersList(riders, type, statusInfo = null) {
     }
   }
   
-  if (riders.length > 0) {
-    // Hide no riders message
-    if (noRidersMessage) {
+  // Hide/show no riders message
+  if (noRidersMessage) {
+    if (riders.length > 0) {
       noRidersMessage.style.display = 'none';
+    } else {
+      noRidersMessage.style.display = 'block';
     }
-    
-    // Clear container
-    ridersContainer.innerHTML = '';
-    
-    // Render riders
+  }
+  
+  // Clear existing rider items (but not the no-riders-message)
+  const existingRiderItems = ridersContainer.querySelectorAll('.team-rider-item');
+  existingRiderItems.forEach(item => item.remove());
+  
+  // Render riders if there are any
+  if (riders.length > 0) {
     riders.forEach(rider => {
       const riderItem = document.createElement('div');
       riderItem.className = 'team-rider-item';
@@ -231,12 +236,6 @@ function renderRidersList(riders, type, statusInfo = null) {
       
       ridersContainer.appendChild(riderItem);
     });
-  } else {
-    // Show no riders message
-    if (noRidersMessage) {
-      noRidersMessage.style.display = 'block';
-    }
-    ridersContainer.innerHTML = '';
   }
 }
 

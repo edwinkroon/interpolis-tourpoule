@@ -48,3 +48,4 @@ else:
     print("⚠️  File doesn't appear to contain SQL")
     exit(1)
 
+

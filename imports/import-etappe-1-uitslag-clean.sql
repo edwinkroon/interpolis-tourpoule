@@ -252,3 +252,4 @@ SELECT
 FROM stage_results
 WHERE stage_id = (SELECT id FROM stages WHERE stage_number = 1);
 
+

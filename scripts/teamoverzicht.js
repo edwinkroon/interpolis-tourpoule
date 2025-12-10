@@ -30,6 +30,254 @@ document.addEventListener('DOMContentLoaded', async function() {
   
   // Setup delete rider handlers
   setupDeleteRiderHandlers();
+  
+  // Setup jersey modal handlers
+  setupJerseyModalHandlers();
+}
+
+// Setup jersey modal handlers
+function setupJerseyModalHandlers() {
+  // Close jersey modal handlers
+  const jerseyModalOverlay = document.getElementById('jersey-modal-overlay');
+  const jerseyModalClose = document.getElementById('jersey-modal-close');
+  
+  if (jerseyModalClose) {
+    jerseyModalClose.addEventListener('click', closeJerseyModal);
+  }
+  
+  if (jerseyModalOverlay) {
+    jerseyModalOverlay.addEventListener('click', function(e) {
+      if (e.target === jerseyModalOverlay) {
+        closeJerseyModal();
+      }
+    });
+  }
+  
+  // Save button handler
+  const saveJerseysButton = document.getElementById('save-jerseys-button');
+  if (saveJerseysButton) {
+    saveJerseysButton.addEventListener('click', handleSaveJerseys);
+  }
+}
+
+// Jersey modal state
+let teamRiders = []; // Riders in the fantasy team
+let jerseyAssignments = {}; // Map of jersey_id -> rider_id
+
+// Open jersey selection modal
+async function openJerseyModal() {
+  const modalOverlay = document.getElementById('jersey-modal-overlay');
+  if (!modalOverlay) return;
+  
+  // Reset state
+  jerseyAssignments = {};
+  
+  // Load team riders
+  const userId = await getUserId();
+  if (userId) {
+    try {
+      const response = await fetch(`/.netlify/functions/get-team-riders?userId=${encodeURIComponent(userId)}`);
+      const result = await response.json();
+      
+      if (result.ok && result.riders) {
+        teamRiders = result.riders;
+      } else {
+        teamRiders = [];
+      }
+    } catch (error) {
+      console.error('Error loading team riders:', error);
+      teamRiders = [];
+    }
+  }
+  
+  // Load current jersey assignments
+  try {
+    const response = await fetch(`/.netlify/functions/get-team-jerseys?userId=${encodeURIComponent(userId)}`);
+    const result = await response.json();
+    
+    if (result.ok && result.jerseys) {
+      result.jerseys.forEach(jersey => {
+        if (jersey.assigned && jersey.assigned.rider_id) {
+          jerseyAssignments[jersey.id] = jersey.assigned.rider_id;
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Error loading jersey assignments:', error);
+  }
+  
+  // Show modal
+  modalOverlay.style.display = 'flex';
+  
+  // Render jersey assignments (async)
+  await renderJerseyAssignments();
+}
+
+// Close jersey selection modal
+function closeJerseyModal() {
+  const modalOverlay = document.getElementById('jersey-modal-overlay');
+  if (modalOverlay) {
+    modalOverlay.style.display = 'none';
+  }
+}
+
+// Render jersey assignments in modal
+async function renderJerseyAssignments() {
+  const container = document.getElementById('jersey-assignments');
+  if (!container) return;
+  
+  // Fetch available jerseys from API
+  let jerseys = [];
+  const userId = await getUserId();
+  
+  if (userId) {
+    try {
+      const response = await fetch(`/.netlify/functions/get-team-jerseys?userId=${encodeURIComponent(userId)}`);
+      const result = await response.json();
+      
+      if (result.ok && result.jerseys) {
+        jerseys = result.jerseys;
+      }
+    } catch (error) {
+      console.error('Error loading jerseys:', error);
+    }
+  }
+  
+  // If no jerseys loaded, use default list
+  if (jerseys.length === 0) {
+    jerseys = [
+      { id: 1, type: 'geel', name: 'Gele trui' },
+      { id: 2, type: 'groen', name: 'Groene trui' },
+      { id: 3, type: 'bolletjes', name: 'Bolkentrui' },
+      { id: 4, type: 'wit', name: 'Witte trui' }
+    ];
+  }
+  
+  container.innerHTML = '';
+  
+  jerseys.forEach(jersey => {
+    const assignmentDiv = document.createElement('div');
+    assignmentDiv.className = 'jersey-assignment-item';
+    
+    const jerseyClassMap = {
+      'geel': 'jersey-geel',
+      'groen': 'jersey-groen',
+      'bolletjes': 'jersey-bolletjes',
+      'wit': 'jersey-wit'
+    };
+    
+    const jerseyClass = jerseyClassMap[jersey.type] || 'jersey-geel';
+    const jerseyName = jersey.name || (jersey.type === 'geel' ? 'Gele trui' : 
+                      jersey.type === 'groen' ? 'Groene trui' :
+                      jersey.type === 'bolletjes' ? 'Bolkentrui' :
+                      jersey.type === 'wit' ? 'Witte trui' : 'Trui');
+    
+    assignmentDiv.innerHTML = `
+      <div class="jersey-assignment-header">
+        <div class="jersey-icon ${jerseyClass}" title="${sanitizeInput(jerseyName)}"></div>
+        <label for="jersey-${jersey.id}-select" class="jersey-assignment-label">${sanitizeInput(jerseyName)}</label>
+      </div>
+      <select 
+        id="jersey-${jersey.id}-select" 
+        class="jersey-rider-select" 
+        data-jersey-id="${jersey.id}"
+        aria-label="Selecteer renner voor ${sanitizeInput(jerseyName)}"
+      >
+        <option value="">-- Geen renner geselecteerd --</option>
+      </select>
+    `;
+    
+    container.appendChild(assignmentDiv);
+    
+    // Populate select with team riders
+    const select = assignmentDiv.querySelector(`#jersey-${jersey.id}-select`);
+    teamRiders.forEach(rider => {
+      const option = document.createElement('option');
+      option.value = rider.id;
+      const riderName = `${rider.first_name || ''} ${rider.last_name || ''}`.trim();
+      option.textContent = riderName || 'Naamloos';
+      if (jerseyAssignments[jersey.id] === rider.id) {
+        option.selected = true;
+      }
+      select.appendChild(option);
+    });
+    
+    // Add change handler to update assignments
+    select.addEventListener('change', function() {
+      const jerseyId = parseInt(this.dataset.jerseyId);
+      const riderId = this.value ? parseInt(this.value) : null;
+      
+      if (riderId) {
+        jerseyAssignments[jerseyId] = riderId;
+      } else {
+        delete jerseyAssignments[jerseyId];
+      }
+    });
+  });
+}
+
+// Handle save jersey assignments
+async function handleSaveJerseys() {
+  const saveButton = document.getElementById('save-jerseys-button');
+  const buttonSpan = saveButton?.querySelector('span');
+  
+  if (saveButton) {
+    saveButton.disabled = true;
+    if (buttonSpan) {
+      buttonSpan.textContent = 'opslaan...';
+    }
+  }
+  
+  try {
+    const userId = await getUserId();
+    if (!userId) {
+      throw new Error('User ID not found');
+    }
+    
+    // Convert assignments to array format
+    const assignments = Object.keys(jerseyAssignments).map(jerseyId => ({
+      jerseyId: parseInt(jerseyId),
+      riderId: jerseyAssignments[jerseyId]
+    }));
+    
+    const response = await fetch('/.netlify/functions/save-team-jerseys', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        userId: userId,
+        assignments: assignments
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.ok) {
+      // Close modal
+      closeJerseyModal();
+      
+      // Reload team jerseys to show the updated list
+      await loadTeamJerseys();
+      
+      // Show success message (optional)
+      console.log('Jersey assignments saved successfully');
+    } else {
+      console.error('Error saving jersey assignments:', result);
+      const errorMsg = result.error || 'Onbekende fout';
+      alert('Er is een fout opgetreden bij het opslaan van truien: ' + errorMsg);
+    }
+  } catch (error) {
+    console.error('Error saving jersey assignments:', error);
+    alert('Er is een fout opgetreden bij het opslaan van truien. Probeer het opnieuw.');
+  } finally {
+    if (saveButton) {
+      saveButton.disabled = false;
+      if (buttonSpan) {
+        buttonSpan.textContent = 'opslaan';
+      }
+    }
+  }
 });
 
 async function loadTeamData() {
@@ -388,6 +636,12 @@ function setupModalHandlers() {
   const reserveEditButton = document.getElementById('reserve-riders-edit-button');
   if (reserveEditButton) {
     reserveEditButton.addEventListener('click', () => openRiderModal('reserve'));
+  }
+  
+  // Open jersey modal when clicking jerseys edit button
+  const jerseysEditButton = document.getElementById('jerseys-edit-button');
+  if (jerseysEditButton) {
+    jerseysEditButton.addEventListener('click', openJerseyModal);
   }
   
   // Close modal handlers

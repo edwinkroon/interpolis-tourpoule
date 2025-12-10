@@ -2587,6 +2587,64 @@ button[aria-busy="true"] {
   margin: 0;
 }
 
+/* Jersey Assignment Modal Styles */
+.jersey-assignments {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem 0;
+}
+
+.jersey-assignment-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.jersey-assignment-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.jersey-assignment-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.jersey-rider-select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 16px;
+  font-weight: 400;
+  color: #1a1a1a;
+  background-color: #ffffff;
+  border: 1.5px solid #d0d8dc;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23668494' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+}
+
+.jersey-rider-select:hover {
+  border-color: #668494;
+}
+
+.jersey-rider-select:focus {
+  outline: none;
+  border-color: #0066cc;
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+}
+
+.jersey-rider-select option {
+  padding: 0.5rem;
+}
+
 .team-rider-item {
   display: flex;
   align-items: center;

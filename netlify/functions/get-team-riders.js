@@ -58,8 +58,6 @@ exports.handler = async function(event) {
     `;
     
     const { rows } = await client.query(query, [userId]);
-    
-    await client.end();
 
     const riders = rows.map(row => ({
       id: row.id,
@@ -69,6 +67,33 @@ exports.handler = async function(event) {
       team_name: row.team_name
     }));
 
+    // Get total rider count and check if all slots are filled (15 total: 10 main + 5 reserve)
+    const totalRiders = riders.length;
+    const maxRiders = 15;
+    const allRidersSelected = totalRiders >= maxRiders;
+
+    // Check jersey assignments (assuming jerseys need to be assigned to team riders)
+    // For now, we'll check if there are any jersey assignments needed
+    // This might need to be extended based on actual jersey assignment logic
+    // For now, we assume jerseys are complete if we have all riders
+    // This can be extended to actually check jersey assignments if that feature exists
+    const allJerseysAssigned = allRidersSelected; // Simplified for now
+    
+    await client.end();
+
+    // Determine team status
+    // Status 1: No riders (0 riders)
+    // Status 2: Has riders but incomplete (1-14 riders or jerseys not assigned)
+    // Status 3: Complete (15 riders and all jerseys assigned)
+    let teamStatus = 1; // Default to status 1
+    if (totalRiders === 0) {
+      teamStatus = 1;
+    } else if (totalRiders > 0 && (totalRiders < maxRiders || !allJerseysAssigned)) {
+      teamStatus = 2;
+    } else if (totalRiders >= maxRiders && allJerseysAssigned) {
+      teamStatus = 3;
+    }
+
     return {
       statusCode: 200,
       headers: { 
@@ -77,7 +102,14 @@ exports.handler = async function(event) {
       },
       body: JSON.stringify({ 
         ok: true, 
-        riders: riders
+        riders: riders,
+        status: {
+          teamStatus: teamStatus,
+          totalRiders: totalRiders,
+          maxRiders: maxRiders,
+          allRidersSelected: allRidersSelected,
+          allJerseysAssigned: allJerseysAssigned
+        }
       })
     };
   } catch (err) {
@@ -105,4 +137,5 @@ exports.handler = async function(event) {
     };
   }
 };
+
 

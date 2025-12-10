@@ -608,10 +608,95 @@ async function loadLatestStage() {
   }
 }
 
+async function loadTeamStatus() {
+  const userId = await getUserId();
+  
+  if (!userId) {
+    // If no user ID, show status 1 (no riders)
+    updateChooseRidersTile(1);
+    return;
+  }
+
+  try {
+    const response = await fetch(`/.netlify/functions/get-team-riders?userId=${encodeURIComponent(userId)}`);
+    const result = await response.json();
+    
+    if (result.ok && result.status) {
+      updateChooseRidersTile(result.status.teamStatus, result.status);
+    } else {
+      // Default to status 1 on error
+      updateChooseRidersTile(1);
+    }
+  } catch (error) {
+    console.error('Error loading team status:', error);
+    // Default to status 1 on error
+    updateChooseRidersTile(1);
+  }
+}
+
+function updateChooseRidersTile(status, statusInfo = null) {
+  const chooseRidersSection = document.querySelector('.choose-riders-section');
+  if (!chooseRidersSection) return;
+  
+  const titleElement = chooseRidersSection.querySelector('.dashboard-section-title');
+  const textElement = chooseRidersSection.querySelector('.choose-riders-text');
+  const buttonElement = chooseRidersSection.querySelector('.choose-riders-button');
+  const buttonSpan = buttonElement ? buttonElement.querySelector('span') : null;
+  
+  // Status 3: Hide the tile completely
+  if (status === 3) {
+    chooseRidersSection.style.display = 'none';
+    return;
+  }
+  
+  // Show the tile for status 1 and 2
+  chooseRidersSection.style.display = 'block';
+  
+  if (status === 1) {
+    // Status 1: No riders yet
+    if (titleElement) {
+      titleElement.textContent = 'Kies renners voor je team';
+    }
+    if (textElement) {
+      textElement.textContent = 'Je moet nog renners kiezen voor je team';
+    }
+    if (buttonSpan) {
+      buttonSpan.textContent = 'Kies renners';
+    }
+  } else if (status === 2) {
+    // Status 2: Has riders but incomplete
+    if (titleElement) {
+      titleElement.textContent = 'Voltooi je team samenstelling';
+    }
+    if (textElement) {
+      const totalRiders = statusInfo?.totalRiders || 0;
+      const maxRiders = statusInfo?.maxRiders || 15;
+      const allRidersSelected = statusInfo?.allRidersSelected || false;
+      const allJerseysAssigned = statusInfo?.allJerseysAssigned || false;
+      
+      let message = '';
+      if (!allRidersSelected) {
+        message = `Je hebt al ${totalRiders} renner${totalRiders !== 1 ? 's' : ''} in je team, maar je moet nog renners toevoegen tot je team compleet is (${maxRiders} renners).`;
+      } else if (!allJerseysAssigned) {
+        message = 'Je hebt alle renners geselecteerd, maar je moet nog alle truien toekennen aan je renners.';
+      } else {
+        message = 'Je team samenstelling is nog niet compleet. Controleer je team instellingen.';
+      }
+      textElement.textContent = message;
+    }
+    if (buttonSpan) {
+      buttonSpan.textContent = 'Team samenstellen';
+    }
+  }
+}
+
 async function loadDashboardData() {
   try {
     // Load latest stage route info
     const latestStageRoute = await loadLatestStage();
+    
+    // Load team status and update tile
+    await loadTeamStatus();
     
     // TODO: Replace with actual backend API call
     // For now, use stub data

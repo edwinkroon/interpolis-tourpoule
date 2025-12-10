@@ -1,4 +1,4 @@
-const { Client } = require('pg');
+const { getDbClient, handleDbError, missingDbConfigResponse } = require('./_shared/db');
 
 // Helper function to calculate stage points (shared with calculate-stage-points.js)
 async function calculateStagePoints(client, stageId) {
@@ -189,8 +189,6 @@ exports.handler = async function(event) {
     };
   }
 
-  const { getDbClient, handleDbError, missingDbConfigResponse } = require('./_shared/db');
-  
   let client;
   try {
     if (!process.env.NEON_DATABASE_URL) {
@@ -397,5 +395,7 @@ exports.handler = async function(event) {
     return await handleDbError(err, client);
   }
 };
+
+
 
 

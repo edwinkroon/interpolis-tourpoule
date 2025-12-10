@@ -253,10 +253,17 @@ function renderRiders(riders, containerId, otherTeamRiders = []) {
     return;
   }
   
+  // Sort riders by total points (descending)
+  const sortedRiders = [...riders].sort((a, b) => {
+    const pointsA = a.totalPoints || 0;
+    const pointsB = b.totalPoints || 0;
+    return pointsB - pointsA;
+  });
+  
   // Create map of other team rider IDs for comparison
   const otherTeamRiderIds = new Set(otherTeamRiders.map(r => r.id));
   
-  riders.forEach(rider => {
+  sortedRiders.forEach(rider => {
     const riderItem = document.createElement('div');
     const isShared = otherTeamRiderIds.has(rider.id);
     const slotType = rider.slotType || 'main';
@@ -282,11 +289,21 @@ function renderRiders(riders, containerId, otherTeamRiders = []) {
     const name = `${rider.firstName || ''} ${rider.lastName || ''}`.trim();
     const initials = getRiderInitials(rider.firstName, rider.lastName);
     
-    // Build jersey badges (only show if rider has jerseys)
+    // Build jersey badges (only show if rider has jerseys) - use same circles as in jersey tile
     let jerseyBadges = '';
     if (rider.jerseys && rider.jerseys.length > 0) {
+      const jerseyClassMap = {
+        'geel': 'jersey-geel',
+        'groen': 'jersey-groen',
+        'bolletjes': 'jersey-bolletjes',
+        'wit': 'jersey-wit'
+      };
+      
       jerseyBadges = rider.jerseys.map(jersey => {
-        return `<span class="team-compare-rider-jersey-badge" title="${sanitizeInput(jersey.name)}">${jersey.icon || '🏆'}</span>`;
+        const jerseyType = jersey.type || '';
+        const jerseyClass = jerseyClassMap[jerseyType] || 'jersey-geel';
+        const jerseyName = jersey.name || 'Trui';
+        return `<div class="jersey-icon ${jerseyClass}" title="${sanitizeInput(jerseyName)}"></div>`;
       }).join('');
     }
     

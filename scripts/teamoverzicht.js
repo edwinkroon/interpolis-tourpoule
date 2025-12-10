@@ -270,10 +270,23 @@ function renderJerseys(jerseys, allJerseysAssigned) {
   const jerseysList = document.getElementById('jerseys-list');
   const jerseysButton = document.getElementById('jerseys-edit-button');
   const jerseysButtonText = document.getElementById('jerseys-button-text');
+  const noJerseysMessage = document.getElementById('no-jerseys-message');
   
   if (!jerseysList) return;
   
   jerseysList.innerHTML = '';
+  
+  // Check if any jerseys are assigned
+  const hasAssignedJerseys = jerseys.some(j => j.assigned !== null);
+  
+  // Show/hide encouragement message
+  if (noJerseysMessage) {
+    if (!hasAssignedJerseys && jerseys.length > 0) {
+      noJerseysMessage.style.display = 'block';
+    } else {
+      noJerseysMessage.style.display = 'none';
+    }
+  }
   
   // Map jersey type to class name and title
   const jerseyClassMap = {

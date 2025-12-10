@@ -2575,6 +2575,18 @@ button[aria-busy="true"] {
   text-align: left;
 }
 
+.no-jerseys-message {
+  font-size: 16px;
+  font-weight: 400;
+  color: #668494;
+  text-align: left;
+  margin-top: 1rem;
+}
+
+.no-jerseys-message p {
+  margin: 0;
+}
+
 .team-rider-item {
   display: flex;
   align-items: center;

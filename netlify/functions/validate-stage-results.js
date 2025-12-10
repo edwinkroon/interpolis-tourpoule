@@ -417,6 +417,40 @@ exports.handler = async function(event) {
           nameMatch = await client.query(nameQuery, [result.firstName, result.lastName]);
         }
         
+        // If still no match and we have normalized names, try matching with normalized names on original fields
+        if (nameMatch.rows.length === 0 && normalizedFirstName && normalizedLastName) {
+          try {
+            // Get candidates by matching first few characters, then match by normalized names in JavaScript
+            const firstChar = normalizedLastName.substring(0, 4);
+            const candidatesQuery = `
+              SELECT id, first_name, last_name 
+              FROM riders 
+              WHERE LOWER(SUBSTRING(TRIM(last_name), 1, 4)) = $1
+                 OR LOWER(SUBSTRING(TRIM(first_name), 1, 4)) = $2
+              LIMIT 30
+            `;
+            const candidates = await client.query(candidatesQuery, [
+              firstChar,
+              normalizedFirstName.substring(0, 4)
+            ]);
+            
+            // Match by normalized names in JavaScript
+            for (const candidate of candidates.rows) {
+              const candidateFirstNorm = normalizeName(candidate.first_name || '');
+              const candidateLastNorm = normalizeName(candidate.last_name || '');
+              
+              // Try both orders: normal and reversed (for cases like "Wærenskjold Søren" vs "Soren Waerenskjold")
+              if ((candidateFirstNorm === normalizedFirstName && candidateLastNorm === normalizedLastName) ||
+                  (candidateFirstNorm === normalizedLastName && candidateLastNorm === normalizedFirstName)) {
+                nameMatch = { rows: [candidate] };
+                break;
+              }
+            }
+          } catch (queryErr) {
+            // Ignore - this is a fallback strategy
+          }
+        }
+        
         if (nameMatch.rows.length > 0) {
           riderId = nameMatch.rows[0].id;
           matchedRider = nameMatch.rows[0];
@@ -467,14 +501,42 @@ exports.handler = async function(event) {
                   LIMIT 1
                 `;
                 const normalizedReversedMatch = await client.query(normalizedReversedQuery, [
-                  normalizedLastName,
-                  normalizedFirstName
+                  normalizedFirstName,  // Input firstName should match db first_name (reversed: "Søren" -> "Soren")
+                  normalizedLastName   // Input lastName should match db last_name (reversed: "Wærenskjold" -> "Waerenskjold")
                 ]);
                 if (normalizedReversedMatch.rows.length > 0) {
                   reversedMatch = normalizedReversedMatch;
                 }
               } catch (queryErr) {
-                // Ignore - normalized columns might not exist
+                // If normalized columns don't exist, try matching with normalized names on original fields
+                try {
+                  // Get candidates by matching first few characters
+                  const candidatesQuery = `
+                    SELECT id, first_name, last_name 
+                    FROM riders 
+                    WHERE LOWER(SUBSTRING(TRIM(last_name), 1, 4)) = $1
+                       OR LOWER(SUBSTRING(TRIM(first_name), 1, 4)) = $2
+                    LIMIT 30
+                  `;
+                  const candidates = await client.query(candidatesQuery, [
+                    normalizedLastName.substring(0, 4),
+                    normalizedFirstName.substring(0, 4)
+                  ]);
+                  
+                  // Match by normalized names in JavaScript (reversed: input firstName -> db first_name, input lastName -> db last_name)
+                  for (const candidate of candidates.rows) {
+                    const candidateFirstNorm = normalizeName(candidate.first_name || '');
+                    const candidateLastNorm = normalizeName(candidate.last_name || '');
+                    
+                    // Reversed match: input firstName should match db first_name, input lastName should match db last_name
+                    if (candidateFirstNorm === normalizedFirstName && candidateLastNorm === normalizedLastName) {
+                      reversedMatch = { rows: [candidate] };
+                      break;
+                    }
+                  }
+                } catch (fallbackErr) {
+                  // Ignore - this is a fallback strategy
+                }
               }
             }
           }

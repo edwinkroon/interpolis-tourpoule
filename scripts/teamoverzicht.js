@@ -278,7 +278,7 @@ async function handleSaveJerseys() {
       }
     }
   }
-});
+}
 
 async function loadTeamData() {
   const userId = await getUserId();

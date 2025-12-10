@@ -1204,7 +1204,7 @@ button[aria-busy="true"] {
   font-weight: 300;
   font-style: italic;
   color: #00334e;
-  text-align: right;
+  text-align: left;
 }
 
 .day-winners-list {

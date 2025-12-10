@@ -102,6 +102,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Update dag uitslag link with stage parameter
   updateDagUitslagLink();
   
+  // Setup mijn team button
+  setupMijnTeamButton();
+  
   // Note: My riders and points are now loaded dynamically in loadStageData
   // Other cards (day standings, jerseys) still use dummy data for now
   
@@ -375,6 +378,16 @@ function updateDagUitslagLink() {
     const url = new URL('daguitslag.html', window.location.origin);
     url.searchParams.set('stage', currentStage.stage_number);
     link.href = url.toString();
+  }
+}
+
+function setupMijnTeamButton() {
+  const mijnTeamLink = document.querySelector('.points-section .card-link');
+  if (mijnTeamLink) {
+    mijnTeamLink.addEventListener('click', function(e) {
+      e.preventDefault();
+      window.location.href = 'teamoverzicht.html';
+    });
   }
 }
 

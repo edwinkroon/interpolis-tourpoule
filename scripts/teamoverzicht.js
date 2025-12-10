@@ -442,9 +442,95 @@ async function loadTeamData() {
           avatarPlaceholder.style.display = 'block';
         }
       }
+      
+      // Load team ranking (use participant database ID, not Auth0 user_id)
+      if (participant.id) {
+        await loadTeamRanking(participant.id);
+      }
     }
   } catch (error) {
     console.error('Error loading team data:', error);
+  }
+}
+
+async function loadTeamRanking(participantId) {
+  try {
+    const response = await fetch('/.netlify/functions/get-standings');
+    const result = await response.json();
+    
+    if (!result.ok || !result.standings) {
+      // Hide ranking if no standings available
+      const rankingElement = document.getElementById('team-ranking');
+      if (rankingElement) {
+        rankingElement.style.display = 'none';
+      }
+      return;
+    }
+    
+    // Find current team in standings (participantId is the database ID)
+    const currentTeam = result.standings.find(team => team.participantId === participantId);
+    
+    if (!currentTeam) {
+      // Hide ranking if team not found in standings
+      const rankingElement = document.getElementById('team-ranking');
+      if (rankingElement) {
+        rankingElement.style.display = 'none';
+      }
+      return;
+    }
+    
+    // Update ranking value
+    const rankingValueElement = document.querySelector('#team-ranking .ranking-value');
+    if (rankingValueElement) {
+      rankingValueElement.textContent = currentTeam.rank || '-';
+    }
+    
+    // Update ranking change indicator
+    const rankingChangeElement = document.querySelector('#team-ranking .ranking-change');
+    if (rankingChangeElement) {
+      const rankingChangeValueElement = rankingChangeElement.querySelector('.ranking-change-value');
+      const svgElement = rankingChangeElement.querySelector('svg');
+      
+      // Remove existing classes
+      rankingChangeElement.classList.remove('ranking-up', 'ranking-down');
+      
+      if (currentTeam.positionChange === null || currentTeam.positionChange === undefined) {
+        // No previous ranking - hide change indicator
+        rankingChangeElement.style.display = 'none';
+      } else if (currentTeam.positionChange > 0) {
+        // Moved up - green with up arrow
+        rankingChangeElement.classList.add('ranking-up');
+        rankingChangeElement.style.display = 'flex';
+        if (rankingChangeValueElement) {
+          rankingChangeValueElement.textContent = currentTeam.positionChange;
+        }
+        if (svgElement) {
+          // Up arrow
+          svgElement.innerHTML = '<path d="M6 3L1 8H11L6 3Z" fill="currentColor"/>';
+        }
+      } else if (currentTeam.positionChange < 0) {
+        // Moved down - red with down arrow
+        rankingChangeElement.classList.add('ranking-down');
+        rankingChangeElement.style.display = 'flex';
+        if (rankingChangeValueElement) {
+          rankingChangeValueElement.textContent = Math.abs(currentTeam.positionChange);
+        }
+        if (svgElement) {
+          // Down arrow
+          svgElement.innerHTML = '<path d="M6 9L1 4H11L6 9Z" fill="currentColor"/>';
+        }
+      } else {
+        // No change - hide indicator
+        rankingChangeElement.style.display = 'none';
+      }
+    }
+  } catch (error) {
+    console.error('Error loading team ranking:', error);
+    // Hide ranking on error
+    const rankingElement = document.getElementById('team-ranking');
+    if (rankingElement) {
+      rankingElement.style.display = 'none';
+    }
   }
 }
 

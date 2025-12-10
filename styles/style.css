@@ -2524,6 +2524,41 @@ button[aria-busy="true"] {
   filter: brightness(0) invert(1);
 }
 
+.team-card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.team-delete-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  color: #00334e;
+  font-size: 16px;
+  font-family: 'Open Sans', system-ui, sans-serif;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 0;
+  width: 100%;
+  transition: color 0.2s;
+}
+
+.team-delete-button:hover {
+  color: #ff0000;
+}
+
+.team-delete-button .action-arrow {
+  width: 9px;
+  height: 12px;
+  display: block;
+  flex-shrink: 0;
+  transform: rotate(0deg);
+}
+
 /* Riders List Container */
 .riders-list-container {
   display: flex;

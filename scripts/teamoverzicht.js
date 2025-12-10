@@ -24,6 +24,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   
   // Setup info popup handlers
   setupInfoPopupHandlers();
+  
+  // Setup delete rider handlers
+  setupDeleteRiderHandlers();
 });
 
 async function loadTeamData() {
@@ -211,6 +214,11 @@ let allRiders = [];
 let filteredRiders = [];
 let selectedRiderIds = new Set();
 let currentSlotType = null; // 'main' or 'reserve' - determines which slot type to prioritize
+
+// Delete modal state
+let deleteSelectedRiderIds = new Set();
+let currentDeleteSlotType = null; // 'main' or 'reserve'
+let currentDeleteRiders = []; // Current riders in the delete modal
 
 // Setup modal handlers
 function setupModalHandlers() {
@@ -595,5 +603,270 @@ function closeAllInfoPopups() {
   popups.forEach(popup => {
     popup.style.display = 'none';
   });
+}
+
+// Delete modal state
+let deleteSelectedRiderIds = new Set();
+let currentDeleteSlotType = null; // 'main' or 'reserve'
+let currentDeleteRiders = []; // Current riders in the delete modal
+
+// Setup delete rider handlers
+function setupDeleteRiderHandlers() {
+  const mainDeleteButton = document.getElementById('main-riders-delete-button');
+  const reserveDeleteButton = document.getElementById('reserve-riders-delete-button');
+  const deleteModalOverlay = document.getElementById('delete-rider-modal-overlay');
+  const deleteModalClose = document.getElementById('delete-rider-modal-close');
+  const deleteRiderButton = document.getElementById('delete-rider-button');
+  
+  // Open delete modal for main riders
+  if (mainDeleteButton) {
+    mainDeleteButton.addEventListener('click', () => openDeleteRiderModal('main'));
+  }
+  
+  // Open delete modal for reserve riders
+  if (reserveDeleteButton) {
+    reserveDeleteButton.addEventListener('click', () => openDeleteRiderModal('reserve'));
+  }
+  
+  // Close modal handlers
+  if (deleteModalClose) {
+    deleteModalClose.addEventListener('click', closeDeleteRiderModal);
+  }
+  
+  if (deleteModalOverlay) {
+    deleteModalOverlay.addEventListener('click', function(e) {
+      if (e.target === deleteModalOverlay) {
+        closeDeleteRiderModal();
+      }
+    });
+  }
+  
+  // Delete button handler
+  if (deleteRiderButton) {
+    deleteRiderButton.addEventListener('click', handleDeleteRiders);
+  }
+}
+
+// Open delete rider modal
+async function openDeleteRiderModal(slotType) {
+  const deleteModalOverlay = document.getElementById('delete-rider-modal-overlay');
+  const deleteModalTitle = document.getElementById('delete-rider-modal-title');
+  
+  if (!deleteModalOverlay) return;
+  
+  currentDeleteSlotType = slotType;
+  deleteSelectedRiderIds.clear();
+  
+  // Update title
+  if (deleteModalTitle) {
+    const title = slotType === 'main' ? 'Basisrenner verwijderen' : 'Reserverenner verwijderen';
+    deleteModalTitle.textContent = title;
+  }
+  
+  // Load current riders for this slot type
+  const userId = await getUserId();
+  if (!userId) {
+    console.error('Cannot open delete modal: user not authenticated');
+    return;
+  }
+  
+  try {
+    const response = await fetch(`/.netlify/functions/get-team-riders?userId=${encodeURIComponent(userId)}`);
+    const result = await response.json();
+    
+    if (result.ok && result.riders) {
+      currentDeleteRiders = result.riders.filter(rider => rider.slot_type === slotType);
+      renderDeleteRiderList(currentDeleteRiders);
+    } else {
+      currentDeleteRiders = [];
+      renderDeleteRiderList([]);
+    }
+  } catch (error) {
+    console.error('Error loading riders for delete:', error);
+    currentDeleteRiders = [];
+    renderDeleteRiderList([]);
+  }
+  
+  // Show modal
+  deleteModalOverlay.style.display = 'flex';
+  updateDeleteButton();
+}
+
+// Close delete rider modal
+function closeDeleteRiderModal() {
+  const deleteModalOverlay = document.getElementById('delete-rider-modal-overlay');
+  if (deleteModalOverlay) {
+    deleteModalOverlay.style.display = 'none';
+  }
+  
+  // Reset state
+  deleteSelectedRiderIds.clear();
+  currentDeleteSlotType = null;
+  currentDeleteRiders = [];
+}
+
+// Render delete rider list
+function renderDeleteRiderList(riders) {
+  const deleteRiderList = document.getElementById('delete-rider-list');
+  if (!deleteRiderList) return;
+  
+  deleteRiderList.innerHTML = '';
+  
+  if (riders.length === 0) {
+    const emptyMessage = document.createElement('div');
+    emptyMessage.className = 'no-riders-message';
+    emptyMessage.textContent = 'Geen renners beschikbaar om te verwijderen';
+    deleteRiderList.appendChild(emptyMessage);
+    return;
+  }
+  
+  riders.forEach(rider => {
+    const riderItem = document.createElement('div');
+    riderItem.className = 'modal-rider-item';
+    
+    // Get initials for placeholder
+    const initials = rider.first_name && rider.last_name
+      ? `${rider.first_name[0]}${rider.last_name[0]}`.toUpperCase()
+      : rider.last_name ? rider.last_name.substring(0, 2).toUpperCase() : 'R';
+    
+    const isSelected = deleteSelectedRiderIds.has(rider.id);
+    
+    riderItem.innerHTML = `
+      <div class="rider-avatar">
+        <img src="${rider.photo_url || ''}" alt="${sanitizeInput(rider.first_name || '')} ${sanitizeInput(rider.last_name || '')}" class="rider-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+        <div class="rider-avatar-placeholder" style="display: none;">${sanitizeInput(initials)}</div>
+      </div>
+      <div class="rider-info">
+        <div class="rider-name">${sanitizeInput(rider.first_name || '')} ${sanitizeInput(rider.last_name || '')}</div>
+        <div class="rider-team">${sanitizeInput(rider.team_name || '')}</div>
+      </div>
+      <input 
+        type="checkbox" 
+        class="modal-rider-checkbox" 
+        data-rider-id="${rider.id}"
+        ${isSelected ? 'checked' : ''}
+        aria-label="Selecteer ${sanitizeInput(rider.first_name || '')} ${sanitizeInput(rider.last_name || '')} om te verwijderen"
+      >
+    `;
+    
+    // Add click handler for checkbox
+    const checkbox = riderItem.querySelector('.modal-rider-checkbox');
+    checkbox.addEventListener('change', function() {
+      if (this.checked) {
+        deleteSelectedRiderIds.add(rider.id);
+      } else {
+        deleteSelectedRiderIds.delete(rider.id);
+      }
+      updateDeleteButton();
+    });
+    
+    // Make entire item clickable
+    riderItem.addEventListener('click', function(e) {
+      if (e.target !== checkbox) {
+        checkbox.checked = !checkbox.checked;
+        checkbox.dispatchEvent(new Event('change'));
+      }
+    });
+    
+    deleteRiderList.appendChild(riderItem);
+  });
+  
+  updateDeleteButton();
+}
+
+// Update delete button state
+function updateDeleteButton() {
+  const deleteRiderButton = document.getElementById('delete-rider-button');
+  if (deleteRiderButton) {
+    deleteRiderButton.disabled = deleteSelectedRiderIds.size === 0;
+  }
+}
+
+// Handle delete riders
+async function handleDeleteRiders() {
+  if (deleteSelectedRiderIds.size === 0) {
+    return;
+  }
+  
+  const userId = await getUserId();
+  if (!userId) {
+    console.error('Cannot delete riders: user not authenticated');
+    alert('Je moet ingelogd zijn om renners te verwijderen.');
+    return;
+  }
+  
+  const deleteRiderButton = document.getElementById('delete-rider-button');
+  const buttonSpan = deleteRiderButton ? deleteRiderButton.querySelector('span') : null;
+  
+  if (deleteRiderButton) {
+    deleteRiderButton.disabled = true;
+    if (buttonSpan) {
+      buttonSpan.textContent = 'Verwijderen...';
+    }
+  }
+  
+  // Convert Set to Array
+  const riderIdsArray = Array.from(deleteSelectedRiderIds).map(id => {
+    const numId = typeof id === 'string' ? parseInt(id, 10) : id;
+    if (isNaN(numId)) {
+      console.error('Invalid rider ID:', id);
+      return null;
+    }
+    return numId;
+  }).filter(id => id !== null);
+  
+  if (riderIdsArray.length === 0) {
+    console.error('No valid rider IDs to delete');
+    alert('Geen geldige renners geselecteerd.');
+    if (deleteRiderButton) {
+      deleteRiderButton.disabled = false;
+      if (buttonSpan) {
+        buttonSpan.textContent = 'verwijder';
+      }
+    }
+    return;
+  }
+  
+  const requestBody = {
+    userId: userId,
+    riderIds: riderIdsArray
+  };
+  
+  try {
+    const response = await fetch('/.netlify/functions/delete-team-riders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
+    });
+    
+    const result = await response.json();
+    
+    if (result.ok) {
+      // Close modal
+      closeDeleteRiderModal();
+      
+      // Reload team riders to show the updated list
+      await loadTeamRiders();
+      
+      // Show success message
+      console.log(`Successfully deleted ${result.deleted || riderIdsArray.length} rider(s) from team`);
+    } else {
+      console.error('Error deleting riders:', result);
+      const errorMsg = result.error || 'Onbekende fout';
+      alert('Er is een fout opgetreden bij het verwijderen van renners: ' + errorMsg);
+    }
+  } catch (error) {
+    console.error('Error deleting riders:', error);
+    alert('Er is een fout opgetreden bij het verwijderen van renners. Probeer het opnieuw.');
+  } finally {
+    if (deleteRiderButton) {
+      deleteRiderButton.disabled = false;
+      if (buttonSpan) {
+        buttonSpan.textContent = 'verwijder';
+      }
+    }
+  }
 }
 

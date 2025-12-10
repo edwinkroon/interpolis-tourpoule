@@ -196,10 +196,16 @@
                   Je moet nog basisrenners kiezen voor je team
                 </div>
               </div>
-              <button class="team-edit-button" id="main-riders-edit-button" aria-label="Renner toevoegen">
-                <span>renner toevoegen</span>
-                <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
-              </button>
+              <div class="team-card-actions">
+                <button class="team-edit-button" id="main-riders-edit-button" aria-label="Renner toevoegen">
+                  <span>renner toevoegen</span>
+                  <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
+                </button>
+                <button class="team-delete-button" id="main-riders-delete-button" aria-label="Renner verwijderen">
+                  <span>renner verwijderen</span>
+                  <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
+                </button>
+              </div>
             </div>
 
             <!-- Reserverenners Card -->
@@ -225,10 +231,16 @@
                   Je moet nog reserverenners kiezen voor je team
                 </div>
               </div>
-              <button class="team-edit-button" id="reserve-riders-edit-button" aria-label="Renner toevoegen">
-                <span>renner toevoegen</span>
-                <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
-              </button>
+              <div class="team-card-actions">
+                <button class="team-edit-button" id="reserve-riders-edit-button" aria-label="Renner toevoegen">
+                  <span>renner toevoegen</span>
+                  <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
+                </button>
+                <button class="team-delete-button" id="reserve-riders-delete-button" aria-label="Renner verwijderen">
+                  <span>renner verwijderen</span>
+                  <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
+                </button>
+              </div>
             </div>
 
             <!-- Compare Team Card -->
@@ -284,6 +296,35 @@
       <div class="modal-footer">
         <button class="modal-add-button" id="modal-add-button" aria-label="Voeg toe">
           <span>voeg toe</span>
+          <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Riders Modal -->
+  <div class="modal-overlay" id="delete-rider-modal-overlay" style="display: none;">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2 class="modal-title" id="delete-rider-modal-title">Renner verwijderen</h2>
+        <button class="modal-close" id="delete-rider-modal-close" aria-label="Sluit modal">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      
+      <div class="modal-content">
+        <!-- Riders List -->
+        <div class="modal-riders-list" id="delete-rider-list">
+          <!-- Riders will be loaded here -->
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <button class="modal-add-button" id="delete-rider-button" aria-label="Verwijder">
+          <span>verwijder</span>
           <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
         </button>
       </div>

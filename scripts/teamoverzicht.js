@@ -132,8 +132,8 @@ async function loadTeamRiders() {
     const result = await response.json();
     
     if (!result.ok || !result.riders) {
-      renderRidersList([], 'main');
-      renderRidersList([], 'reserve');
+      renderRidersList([], 'main', result.status);
+      renderRidersList([], 'reserve', result.status);
       return;
     }
     
@@ -142,16 +142,16 @@ async function loadTeamRiders() {
     const reserveRiders = result.riders.filter(rider => rider.slot_type === 'reserve');
     
     // Render both lists
-    renderRidersList(mainRiders, 'main');
-    renderRidersList(reserveRiders, 'reserve');
+    renderRidersList(mainRiders, 'main', result.status);
+    renderRidersList(reserveRiders, 'reserve', result.status);
   } catch (error) {
     console.error('Error loading team riders:', error);
-    renderRidersList([], 'main');
-    renderRidersList([], 'reserve');
+    renderRidersList([], 'main', null);
+    renderRidersList([], 'reserve', null);
   }
 }
 
-function renderRidersList(riders, type) {
+function renderRidersList(riders, type, statusInfo = null) {
   const containerId = type === 'main' ? 'main-riders-list-container' : 'reserve-riders-list-container';
   const messageId = type === 'main' ? 'no-main-riders-message' : 'no-reserve-riders-message';
   
@@ -164,6 +164,41 @@ function renderRidersList(riders, type) {
   if (titleElement) {
     const baseTitle = type === 'main' ? 'Basisrenners' : 'Reserverenners';
     titleElement.textContent = `${baseTitle} (${riders.length})`;
+  }
+  
+  // Determine if buttons should be shown
+  const totalRiders = statusInfo?.totalRiders || riders.length;
+  const maxRiders = statusInfo?.maxRiders || 15;
+  const allRidersSelected = statusInfo?.allRidersSelected || totalRiders >= maxRiders;
+  
+  const maxForType = type === 'main' ? 10 : 5;
+  const canAddMore = !allRidersSelected && riders.length < maxForType;
+  const canDelete = riders.length > 0;
+  
+  // Show/hide add button
+  const addButtonId = type === 'main' ? 'main-riders-edit-button' : 'reserve-riders-edit-button';
+  const addButton = document.getElementById(addButtonId);
+  if (addButton) {
+    const actionsContainer = addButton.closest('.team-card-actions');
+    if (actionsContainer) {
+      actionsContainer.style.display = 'flex';
+    }
+    if (canAddMore) {
+      addButton.style.display = 'flex';
+    } else {
+      addButton.style.display = 'none';
+    }
+  }
+  
+  // Show/hide delete button
+  const deleteButtonId = type === 'main' ? 'main-riders-delete-button' : 'reserve-riders-delete-button';
+  const deleteButton = document.getElementById(deleteButtonId);
+  if (deleteButton) {
+    if (canDelete) {
+      deleteButton.style.display = 'flex';
+    } else {
+      deleteButton.style.display = 'none';
+    }
   }
   
   if (!ridersContainer) return;

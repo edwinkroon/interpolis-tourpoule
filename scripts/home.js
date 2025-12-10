@@ -551,13 +551,11 @@ async function loadRiderPhotos(pointsRiders) {
       
       // Check local mappings first (works locally)
       if (localPhotoMappings[rider.name]) {
-        console.log(`Using local photo for ${rider.name}: ${localPhotoMappings[rider.name]}`);
         return { ...rider, photoUrl: localPhotoMappings[rider.name] };
       }
       
       // Check by team name if available
       if (rider.team && localPhotoMappings[rider.team]) {
-        console.log(`Using local photo for ${rider.name} (team: ${rider.team}): ${localPhotoMappings[rider.team]}`);
         return { ...rider, photoUrl: localPhotoMappings[rider.team] };
       }
       
@@ -575,14 +573,11 @@ async function loadRiderPhotos(pointsRiders) {
         const result = await response.json();
         
         if (result.ok && result.photoUrl) {
-          console.log(`Photo found for ${rider.name}: ${result.photoUrl}`);
           return { ...rider, photoUrl: result.photoUrl };
         } else {
-          console.log(`No photo found for ${rider.name}`);
         }
       } catch (error) {
         // Silently fail if Netlify function is not available (local testing)
-        console.log(`Netlify function not available (local testing?): ${rider.name}`);
       }
       
       // Return rider without photo (will use colored avatar)
@@ -762,7 +757,6 @@ async function loadDashboardData() {
   if (standingsButton) {
     standingsButton.addEventListener('click', function() {
       // TODO: Navigate to full standings page when it's created
-      console.log('Navigate to volledige stand page');
       // window.location.href = 'standings.html';
     });
   }
@@ -772,7 +766,6 @@ async function loadDashboardData() {
   if (prikbordButton) {
     prikbordButton.addEventListener('click', function() {
       // TODO: Navigate to prikbord page when it's created
-      console.log('Navigate to prikbord page');
       // window.location.href = 'prikbord.html';
     });
   }

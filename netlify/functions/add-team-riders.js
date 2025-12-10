@@ -58,8 +58,6 @@ exports.handler = async function(event) {
 
     await client.connect();
 
-    console.log('Connected to database');
-    console.log('Request data:', { userId, riderIds, riderIdsCount: riderIds.length });
 
     // Start transaction
     await client.query('BEGIN');
@@ -75,7 +73,6 @@ exports.handler = async function(event) {
       
       const participantResult = await client.query(participantQuery, [userId]);
       
-      console.log('Participant query result:', participantResult.rows);
       
       if (participantResult.rows.length === 0) {
         await client.query('ROLLBACK');
@@ -94,11 +91,9 @@ exports.handler = async function(event) {
       const participantId = participantResult.rows[0].participant_id;
       let fantasyTeamId = participantResult.rows[0].fantasy_team_id;
       
-      console.log('Participant ID:', participantId, 'Fantasy Team ID:', fantasyTeamId);
 
       // Create fantasy team if it doesn't exist
       if (!fantasyTeamId) {
-        console.log('Creating new fantasy team for participant:', participantId);
         const createTeamQuery = `
           INSERT INTO fantasy_teams (participant_id, created_at)
           VALUES ($1, NOW())
@@ -106,7 +101,6 @@ exports.handler = async function(event) {
         `;
         const createResult = await client.query(createTeamQuery, [participantId]);
         fantasyTeamId = createResult.rows[0].id;
-        console.log('Created fantasy team with ID:', fantasyTeamId);
       }
 
       // Get existing riders in team to avoid duplicates
@@ -204,22 +198,16 @@ exports.handler = async function(event) {
         const insertResult = await client.query(insertQuery, [fantasyTeamId, riderId, slotType, slotNumber]);
         
         if (insertResult.rows.length > 0) {
-          console.log(`Added rider ${riderId} to team ${fantasyTeamId} in slot ${slotType} ${slotNumber}`);
           addedCount++;
-        } else {
-          console.log(`Rider ${riderId} already exists in team (conflict)`);
         }
         slotIndex++;
       }
 
       // Commit transaction
       await client.query('COMMIT');
-      console.log('Transaction committed successfully');
-      console.log(`Added ${addedCount} riders, skipped ${riderIds.length - newRiderIds.length}`);
       
       // Close client connection
       await client.end();
-      console.log('Database connection closed');
 
       return {
         statusCode: 200,

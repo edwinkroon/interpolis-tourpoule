@@ -50,7 +50,6 @@ document.addEventListener('DOMContentLoaded', async function() {
   } catch (error) {
     console.error('Auth check failed:', error);
     // For development: still try to load data
-    console.log('Continuing with dummy data due to auth error');
   }
 
   // Get stage number from URL parameter, or use latest stage

@@ -107,7 +107,6 @@ exports.handler = async function(event) {
       // If table doesn't exist (error code 42P01), ignore the error
       // Otherwise, log it but don't fail the entire operation
       if (jerseyErr.code !== '42P01') {
-        console.log('Note: Could not delete jersey assignments (table may not exist):', jerseyErr.message);
       }
     }
 

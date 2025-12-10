@@ -4,7 +4,6 @@
   padding: 0;
   box-sizing: border-box;
 }
-
 body {
   font-family: 'Open Sans', system-ui, -apple-system, sans-serif;
   background: linear-gradient(180deg, #f0f3f5 0%, #cdd7dc 100%);
@@ -12,17 +11,14 @@ body {
   color: #00334e;
   line-height: 1.5;
 }
-
 h1 {
   font-size: 40px;
   font-weight: bold;
 }
-
 h2 {
   font-size: 28px;
   font-weight: 500;
 }
-
 /* Header */
 .header {
   background-color: #00cac6;
@@ -33,11 +29,9 @@ h2 {
   z-index: 100;
   padding-bottom: 4.5rem; /* Extra space for navigation bar overlay */
 }
-
 .header-content {
   position: relative;
 }
-
 .header-title {
   color: #fff;
   font-size: 20px;
@@ -45,7 +39,6 @@ h2 {
   text-align: right;
   margin-bottom: 1rem;
 }
-
 /* Header Welcome Section */
 .header-welcome-section {
   position: relative;
@@ -53,7 +46,6 @@ h2 {
   padding-bottom: 4.5rem; /* Space for navigation bar overlay */
   min-height: 200px;
 }
-
 .header-user-info {
   display: flex;
   align-items: center;
@@ -61,11 +53,9 @@ h2 {
   position: relative;
   z-index: 2;
 }
-
 .header-avatar-container {
   flex-shrink: 0;
 }
-
 .header-avatar-img {
   width: 60px;
   height: 60px;
@@ -74,7 +64,6 @@ h2 {
   border: 2px solid #fff;
   box-shadow: 0 2px 4px rgba(0, 51, 78, 0.2);
 }
-
 .welcome-heading {
   font-size: 40px;
   font-weight: bold;
@@ -83,7 +72,6 @@ h2 {
   z-index: 2;
   margin: 0;
 }
-
 /* Header Illustration */
 .header-illustration {
   position: absolute;
@@ -95,13 +83,11 @@ h2 {
   z-index: 101;
   overflow: visible;
 }
-
 .illustration-svg {
   width: 100%;
   height: auto;
   display: block;
 }
-
 /* Main Content */
 .main-content {
   padding: 2rem 0;
@@ -109,7 +95,6 @@ h2 {
   position: relative;
   z-index: 1;
 }
-
 /* Form Card */
 .form-card {
   background: #fff;
@@ -118,26 +103,22 @@ h2 {
   box-shadow: 0 8px 16px rgba(0, 51, 78, 0.16);
   margin-bottom: 2rem;
 }
-
 .form-title {
   font-size: 28px;
   font-weight: 500;
   color: #00334e;
   margin-bottom: 1rem;
 }
-
 .form-description {
   font-size: 16px;
   color: #00334e;
   margin-bottom: 2rem;
   line-height: 1.6;
 }
-
 /* Form Groups */
 .form-group {
   margin-bottom: 0;
 }
-
 .form-label {
   display: block;
   font-size: 12px;
@@ -145,7 +126,6 @@ h2 {
   margin-bottom: 0.5rem;
   font-weight: 400;
 }
-
 .form-input {
   width: 100%;
   padding: 1rem;
@@ -157,21 +137,17 @@ h2 {
   font-family: 'Open Sans', system-ui, sans-serif;
   transition: border-color 0.2s;
 }
-
 .form-input:focus {
   outline: none;
   border-color: #00cac6;
 }
-
 .form-input::placeholder {
   color: #00334e;
 }
-
 .form-input.error {
   border-color: #d32f2f;
   background-color: #fff5f5;
 }
-
 .error-message {
   display: none;
   color: #d32f2f;
@@ -179,7 +155,6 @@ h2 {
   margin-top: 0.5rem;
   min-height: 1.5rem;
 }
-
 .success-message {
   display: block;
   color: #00aa2e;
@@ -190,14 +165,12 @@ h2 {
   border-radius: 8px;
   margin-bottom: 1rem;
 }
-
 button:disabled,
 button[aria-busy="true"] {
   opacity: 0.6;
   cursor: not-allowed;
   pointer-events: none;
 }
-
 /* Avatar Section */
 .avatar-section {
   display: flex;
@@ -206,11 +179,9 @@ button[aria-busy="true"] {
   margin-bottom: 2rem;
   padding: 1rem 0;
 }
-
 .avatar-circle {
   flex-shrink: 0;
 }
-
 .avatar-placeholder {
   width: 60px;
   height: 60px;
@@ -223,29 +194,24 @@ button[aria-busy="true"] {
   cursor: pointer;
   transition: background-color 0.2s;
 }
-
 .avatar-placeholder:hover {
   background: #e0e8ec;
 }
-
 .avatar-icon {
   font-size: 24px;
   color: #00334e;
   font-weight: 300;
   line-height: 1;
 }
-
 .avatar-preview {
   width: 100%;
   height: 100%;
   object-fit: cover;
   border-radius: 50%;
 }
-
 .avatar-info {
   flex: 1;
 }
-
 .avatar-link {
   display: inline-block;
   font-size: 14px;
@@ -254,18 +220,15 @@ button[aria-busy="true"] {
   margin-bottom: 0.25rem;
   cursor: pointer;
 }
-
 .avatar-link:hover {
   color: #00cac6;
 }
-
 .avatar-tip {
   font-size: 12px;
   color: #00334e;
   font-weight: 300;
   line-height: 1.5;
 }
-
 /* Checkbox */
 .checkbox-group {
   display: flex;
@@ -273,7 +236,6 @@ button[aria-busy="true"] {
   gap: 0.75rem;
   margin-bottom: 2rem;
 }
-
 .checkbox-input {
   width: 20px;
   height: 20px;
@@ -284,12 +246,10 @@ button[aria-busy="true"] {
   position: relative;
   flex-shrink: 0;
 }
-
 .checkbox-input:checked {
   background-color: #00aa2e;
   border-color: #00aa2e;
 }
-
 .checkbox-input:checked::after {
   content: '✓';
   position: absolute;
@@ -300,13 +260,11 @@ button[aria-busy="true"] {
   font-size: 14px;
   font-weight: bold;
 }
-
 .checkbox-label {
   font-size: 14px;
   color: #00334e;
   cursor: pointer;
 }
-
 /* Navigation Buttons */
 .navigation-buttons {
   display: flex;
@@ -314,15 +272,12 @@ button[aria-busy="true"] {
   gap: 1rem;
   margin-top: 2rem;
 }
-
 .navigation-buttons .nav-button-next:only-child {
   margin-left: auto;
 }
-
 .navigation-buttons .nav-button-prev:only-child {
   margin-right: auto;
 }
-
 .nav-button {
   display: flex;
   align-items: center;
@@ -336,37 +291,30 @@ button[aria-busy="true"] {
   padding: 0.5rem 1rem;
   transition: color 0.2s;
 }
-
 .nav-button:hover {
   color: #00cac6;
 }
-
 .nav-arrow {
   width: 9px;
   height: 12px;
   display: block;
   flex-shrink: 0;
 }
-
 .nav-arrow-left {
   transform: rotate(-180deg);
 }
-
 .nav-arrow-right {
   transform: rotate(0deg);
 }
-
 .nav-button-prev .nav-arrow {
   order: -1;
 }
-
 /* Action Buttons */
 .action-buttons {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
-
 .action-button {
   display: flex;
   align-items: center;
@@ -383,16 +331,13 @@ button[aria-busy="true"] {
   transition: background-color 0.2s, transform 0.1s;
   box-shadow: 0 2px 4px rgba(0, 51, 78, 0.1);
 }
-
 .action-button:hover {
   background: #f0f3f5;
   transform: translateY(-1px);
 }
-
 .action-button:active {
   transform: translateY(0);
 }
-
 .action-arrow {
   width: 9px;
   height: 12px;
@@ -400,42 +345,34 @@ button[aria-busy="true"] {
   flex-shrink: 0;
   transform: rotate(0deg);
 }
-
 /* Responsive Design */
 @media (max-width: 768px) {
   .main-content {
     padding: 1rem 10px;
   }
-
   .header {
     padding: 1rem 0 0;
   }
-
   .header-title {
     text-align: center;
     font-size: 20px;
   }
-
   .header-welcome-section {
     padding-bottom: 2rem;
     min-height: auto;
   }
-
   .header-user-info {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.75rem;
   }
-
   .header-avatar-img {
     width: 50px;
     height: 50px;
   }
-
   .welcome-heading {
     font-size: 24px;
   }
-
   .header-illustration {
     position: relative;
     width: 100%;
@@ -443,97 +380,77 @@ button[aria-busy="true"] {
     margin-top: 1rem;
     margin-bottom: 1rem;
   }
-
   .action-buttons {
     order: 2;
   }
-
   .form-card {
     order: 1;
   }
-
   .form-card {
     padding: 1.5rem;
   }
-
   .form-title {
     font-size: 18px;
   }
-
   .form-description {
     font-size: 14px;
   }
-
   .avatar-section {
     flex-direction: column;
     align-items: center;
     text-align: center;
   }
-
   .avatar-info {
     text-align: center;
   }
-
   .nav-button {
     justify-content: center;
   }
 }
-
 @media (max-width: 480px) {
   .header-welcome-section {
     padding-bottom: 1.5rem;
   }
-
   .header-avatar-img {
     width: 40px;
     height: 40px;
   }
-
   .welcome-heading {
     font-size: 20px;
   }
-
   .header-illustration {
     margin-top: 0.5rem;
   }
-
   .form-card {
     padding: 1rem;
   }
-
   .form-title {
     font-size: 16px;
   }
-
   .form-description {
     font-size: 12px;
   }
-
   .form-input {
     padding: 0.75rem;
     font-size: 14px;
   }
 }
-
 /* Dashboard Styles */
 .dashboard-content {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
-
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
 }
-
 .dashboard-column {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
-
 .dashboard-section {
   background: #fff;
   border-radius: 20px;
@@ -541,7 +458,6 @@ button[aria-busy="true"] {
   box-shadow: 0 8px 16px rgba(0, 51, 78, 0.16);
   filter: drop-shadow(0 8px 16px rgba(0, 51, 78, 0.161));
 }
-
 .dashboard-section-title {
   font-size: 16px;
   font-weight: 400;
@@ -552,25 +468,21 @@ button[aria-busy="true"] {
   align-items: center;
   gap: 0.5rem;
 }
-
 .dashboard-section-title .section-arrow {
   flex-shrink: 0;
   transform: rotate(90deg);
   width: 10px;
   height: 10px;
 }
-
 .dashboard-section-title span {
   display: inline-block;
 }
-
 /* Points Section */
 .points-section {
   display: flex;
   flex-direction: column;
   min-height: 0;
 }
-
 .points-section .dashboard-section-title {
   font-size: 19px;
   font-weight: 700;
@@ -578,11 +490,9 @@ button[aria-busy="true"] {
   margin-bottom: 1.5rem;
   text-transform: none;
 }
-
 .points-value {
   font-weight: 400;
 }
-
 .points-riders-list {
   display: flex;
   flex-direction: column;
@@ -590,7 +500,6 @@ button[aria-busy="true"] {
   flex: 1;
   margin-bottom: 1rem;
 }
-
 .points-rider-item {
   display: flex;
   align-items: center;
@@ -599,11 +508,9 @@ button[aria-busy="true"] {
   border-bottom: 1px solid #cdd7dc;
   position: relative;
 }
-
 .points-rider-item:last-child {
   border-bottom: none;
 }
-
 .points-rider-avatar {
   width: 38px;
   height: 38px;
@@ -612,7 +519,6 @@ button[aria-busy="true"] {
   flex-shrink: 0;
   background-color: #cdd7dc;
 }
-
 .points-rider-avatar-img {
   width: 38px;
   height: 38px;
@@ -622,12 +528,10 @@ button[aria-busy="true"] {
   object-fit: cover;
   background-color: #cdd7dc;
 }
-
 .points-rider-info {
   flex: 1;
   min-width: 0;
 }
-
 .points-rider-name {
   font-size: 15px;
   color: #00334e;
@@ -635,14 +539,12 @@ button[aria-busy="true"] {
   line-height: 1.4;
   font-weight: 400;
 }
-
 .points-rider-team {
   font-size: 13px;
   font-weight: 300;
   color: #668494;
   line-height: 1.4;
 }
-
 .points-rider-points {
   font-size: 15px;
   color: #00334e;
@@ -655,7 +557,6 @@ button[aria-busy="true"] {
   align-items: center;
   justify-content: flex-end;
 }
-
 .points-team-button {
   display: flex;
   align-items: center;
@@ -672,11 +573,9 @@ button[aria-busy="true"] {
   transition: color 0.2s;
   text-transform: lowercase;
 }
-
 .points-team-button:hover {
   color: #00cac6;
 }
-
 .points-team-button .action-arrow {
   width: 9px;
   height: 12px;
@@ -684,18 +583,15 @@ button[aria-busy="true"] {
   flex-shrink: 0;
   transform: rotate(0deg);
 }
-
 .points-value {
   font-weight: 700;
 }
-
 /* Team Section */
 .team-list {
   display: flex;
   flex-direction: column;
   gap: 0;
 }
-
 .team-member {
   display: flex;
   align-items: center;
@@ -704,11 +600,9 @@ button[aria-busy="true"] {
   border-bottom: 1px solid #cdd7dc;
   position: relative;
 }
-
 .team-member:last-child {
   border-bottom: none;
 }
-
 .team-member-avatar {
   width: 38px;
   height: 38px;
@@ -717,12 +611,10 @@ button[aria-busy="true"] {
   flex-shrink: 0;
   background-color: #cdd7dc;
 }
-
 .team-member-info {
   flex: 1;
   min-width: 0;
 }
-
 .team-member-name {
   font-size: 15px;
   color: #00334e;
@@ -730,26 +622,22 @@ button[aria-busy="true"] {
   line-height: 1.4;
   font-weight: 400;
 }
-
 .team-member-team {
   font-size: 13px;
   font-weight: 300;
   color: #668494;
   line-height: 1.4;
 }
-
 .trophy-icon {
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-
 .trophy-icon svg {
   width: 20px;
   height: 20px;
 }
-
 .team-points {
   font-size: 15px;
   color: #00334e;
@@ -758,7 +646,6 @@ button[aria-busy="true"] {
   min-width: 50px;
   padding-right: 0.5rem;
 }
-
 /* Achievements Section */
 .achievements-section .dashboard-section-title {
   font-size: 20px;
@@ -766,13 +653,11 @@ button[aria-busy="true"] {
   text-transform: none;
   margin-bottom: 1.5rem;
 }
-
 .achievements-list {
   display: flex;
   flex-direction: column;
   gap: 0;
 }
-
 .achievement-item {
   padding: 1rem 0;
   display: flex;
@@ -781,11 +666,9 @@ button[aria-busy="true"] {
   border-bottom: 1px solid #cdd7dc;
   position: relative;
 }
-
 .achievement-item:last-child {
   border-bottom: none;
 }
-
 .achievement-trophy {
   flex-shrink: 0;
   width: 48px;
@@ -794,27 +677,23 @@ button[aria-busy="true"] {
   align-items: center;
   justify-content: center;
 }
-
 .achievement-trophy-icon {
   width: 40px;
   height: 40px;
   object-fit: contain;
 }
-
 /* Standings Section */
 .standings-section {
   display: flex;
   flex-direction: column;
   min-height: 0;
 }
-
 .standings-section .dashboard-section-title {
   font-size: 20px;
   font-weight: 700;
   text-transform: none;
   margin-bottom: 1.5rem;
 }
-
 .standings-list {
   display: flex;
   flex-direction: column;
@@ -822,7 +701,6 @@ button[aria-busy="true"] {
   flex: 1;
   margin-bottom: 1rem;
 }
-
 .standing-item {
   display: flex;
   align-items: center;
@@ -831,11 +709,9 @@ button[aria-busy="true"] {
   border-bottom: 1px solid #cdd7dc;
   position: relative;
 }
-
 .standing-item:last-child {
   border-bottom: none;
 }
-
 .standing-rank {
   font-size: 15px;
   color: #00334e;
@@ -843,7 +719,6 @@ button[aria-busy="true"] {
   min-width: 30px;
   flex-shrink: 0;
 }
-
 .standing-name {
   flex: 1;
   min-width: 0;
@@ -852,7 +727,6 @@ button[aria-busy="true"] {
   font-weight: 400;
   line-height: 1.4;
 }
-
 .standing-points {
   font-size: 15px;
   color: #00334e;
@@ -863,7 +737,6 @@ button[aria-busy="true"] {
   display: block;
   font-variant-numeric: tabular-nums;
 }
-
 .standing-change {
   display: flex;
   align-items: center;
@@ -872,39 +745,31 @@ button[aria-busy="true"] {
   width: 50px;
   justify-content: flex-end;
 }
-
 .standing-change-value {
   font-size: 13px;
   font-weight: 400;
 }
-
 .standing-change-up .standing-change-value {
   color: #18AA2E;
 }
-
 .standing-change-down .standing-change-value {
   color: #ff0000;
 }
-
 .standing-change-neutral .standing-change-value {
   color: #668494;
 }
-
 .standing-change-neutral .standing-change-arrow {
   filter: brightness(0) saturate(100%) invert(45%) sepia(8%) saturate(800%) hue-rotate(170deg) brightness(95%) contrast(85%);
 }
-
 .standing-change-arrow {
   flex-shrink: 0;
   width: 9px;
   height: 12px;
   display: block;
 }
-
 .standing-change-arrow-left {
   transform: rotate(180deg);
 }
-
 .standings-button {
   display: flex;
   align-items: center;
@@ -921,11 +786,9 @@ button[aria-busy="true"] {
   transition: color 0.2s;
   text-transform: lowercase;
 }
-
 .standings-button:hover {
   color: #00cac6;
 }
-
 .standings-button .action-arrow {
   width: 9px;
   height: 12px;
@@ -933,14 +796,12 @@ button[aria-busy="true"] {
   flex-shrink: 0;
   transform: rotate(0deg);
 }
-
 /* Prikbord Section */
 .prikbord-section {
   display: flex;
   flex-direction: column;
   min-height: 0;
 }
-
 .prikbord-section .dashboard-section-title {
   font-size: 20px;
   font-weight: 700;
@@ -950,11 +811,9 @@ button[aria-busy="true"] {
   align-items: center;
   gap: 0.5rem;
 }
-
 .prikbord-dot {
   display: inline-block;
 }
-
 .prikbord-dot-indicator {
   display: inline-block;
   width: 8px;
@@ -962,7 +821,6 @@ button[aria-busy="true"] {
   border-radius: 50%;
   background-color: #18AA2E;
 }
-
 .prikbord-list {
   display: flex;
   flex-direction: column;
@@ -970,20 +828,16 @@ button[aria-busy="true"] {
   flex: 1;
   margin-bottom: 1rem;
 }
-
 .prikbord-item {
   padding: 1rem 0;
   border-bottom: 1px solid #cdd7dc;
 }
-
 .prikbord-item:last-child {
   border-bottom: none;
 }
-
 .prikbord-reply {
   padding-left: 2rem;
 }
-
 .prikbord-message {
   font-size: 15px;
   color: #00334e;
@@ -991,7 +845,6 @@ button[aria-busy="true"] {
   line-height: 1.4;
   margin-bottom: 0.5rem;
 }
-
 .prikbord-meta {
   display: flex;
   gap: 0.5rem;
@@ -999,15 +852,12 @@ button[aria-busy="true"] {
   color: #668494;
   font-weight: 300;
 }
-
 .prikbord-author {
   color: #668494;
 }
-
 .prikbord-date {
   color: #668494;
 }
-
 .prikbord-button {
   display: flex;
   align-items: center;
@@ -1024,11 +874,9 @@ button[aria-busy="true"] {
   transition: color 0.2s;
   text-transform: lowercase;
 }
-
 .prikbord-button:hover {
   color: #00cac6;
 }
-
 .prikbord-button .action-arrow {
   width: 9px;
   height: 12px;
@@ -1036,28 +884,24 @@ button[aria-busy="true"] {
   flex-shrink: 0;
   transform: rotate(0deg);
 }
-
 .achievement-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
-
 .achievement-stage {
   font-size: 14px;
   font-weight: 300;
   color: #00334e;
   line-height: 1.4;
 }
-
 .achievement-route {
   font-size: 16px;
   color: #00334e;
   font-weight: 400;
   line-height: 1.4;
 }
-
 .achievement-type {
   font-size: 14px;
   font-weight: 300;
@@ -1065,39 +909,33 @@ button[aria-busy="true"] {
   line-height: 1.4;
   margin-top: 0.25rem;
 }
-
 /* Stage Info Section */
 .stage-section .dashboard-section-title {
   font-size: 16px;
   font-weight: 400;
 }
-
 .stage-details {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
 }
-
 .stage-name {
   font-size: 14px;
   font-weight: 300;
   color: #00334e;
 }
-
 .stage-route {
   font-size: 16px;
   color: #00334e;
   font-weight: 400;
 }
-
 .stage-meta {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
   margin-top: 0.5rem;
 }
-
 .stage-date,
 .stage-distance,
 .stage-type {
@@ -1105,7 +943,6 @@ button[aria-busy="true"] {
   color: #668494;
   font-weight: 300;
 }
-
 .stage-info-button {
   display: flex;
   align-items: center;
@@ -1122,28 +959,23 @@ button[aria-busy="true"] {
   transition: color 0.2s;
   text-transform: lowercase;
 }
-
 .stage-info-button:hover {
   color: #00cac6;
 }
-
 .stage-info-button .button-arrow {
   flex-shrink: 0;
   transform: rotate(90deg);
   width: 10px;
   height: 10px;
 }
-
 .stage-section {
   display: flex;
   flex-direction: column;
   min-height: 0;
 }
-
 .stage-info {
   flex: 1;
 }
-
 /* Day Winners Section */
 /* Choose Riders Section */
 .choose-riders-section .dashboard-section-title {
@@ -1152,7 +984,6 @@ button[aria-busy="true"] {
   text-transform: none;
   margin-bottom: 1rem;
 }
-
 .choose-riders-text {
   font-size: 16px;
   font-weight: 400;
@@ -1160,7 +991,6 @@ button[aria-busy="true"] {
   margin-bottom: 1.5rem;
   line-height: 1.5;
 }
-
 .choose-riders-button {
   display: flex;
   align-items: center;
@@ -1175,11 +1005,9 @@ button[aria-busy="true"] {
   padding: 0;
   margin-top: auto;
 }
-
 .choose-riders-button:hover {
   color: #00cac6;
 }
-
 .choose-riders-button .action-arrow {
   width: 9px;
   height: 12px;
@@ -1187,18 +1015,15 @@ button[aria-busy="true"] {
   flex-shrink: 0;
   transform: rotate(0deg);
 }
-
 .day-winners-header {
   margin-bottom: 1.5rem;
 }
-
 .day-winners-section .dashboard-section-title {
   font-size: 20px;
   font-weight: 700;
   text-transform: none;
   margin-bottom: 0.5rem;
 }
-
 .day-winners-route {
   font-size: 14px;
   font-weight: 300;
@@ -1206,13 +1031,11 @@ button[aria-busy="true"] {
   color: #00334e;
   text-align: left;
 }
-
 .day-winners-list {
   display: flex;
   flex-direction: column;
   gap: 0;
 }
-
 .day-winner-item {
   display: flex;
   align-items: center;
@@ -1222,11 +1045,9 @@ button[aria-busy="true"] {
   position: relative;
   width: 100%;
 }
-
 .day-winner-item:last-child {
   border-bottom: none;
 }
-
 .day-winner-avatar {
   width: 38px;
   height: 38px;
@@ -1238,19 +1059,16 @@ button[aria-busy="true"] {
   align-items: center;
   justify-content: center;
 }
-
 .day-winner-avatar-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   border-radius: 50%;
 }
-
 .day-winner-info {
   flex: 1;
   min-width: 0;
 }
-
 .day-winner-name {
   font-size: 15px;
   color: #00334e;
@@ -1258,14 +1076,12 @@ button[aria-busy="true"] {
   line-height: 1.4;
   font-weight: 400;
 }
-
 .day-winner-team {
   font-size: 13px;
   font-weight: 300;
   color: #668494;
   line-height: 1.4;
 }
-
 .day-winner-medal {
   flex-shrink: 0;
   display: flex;
@@ -1274,13 +1090,11 @@ button[aria-busy="true"] {
   width: 30px;
   height: 30px;
 }
-
 .day-winner-medal-icon {
   width: 20px;
   height: 27px;
   object-fit: contain;
 }
-
 .day-winner-points {
   font-size: 15px;
   color: #00334e;
@@ -1294,7 +1108,6 @@ button[aria-busy="true"] {
   justify-content: flex-end;
   margin-left: auto;
 }
-
 .day-winners-button {
   display: flex;
   align-items: center;
@@ -1311,11 +1124,9 @@ button[aria-busy="true"] {
   transition: color 0.2s;
   text-transform: lowercase;
 }
-
 .day-winners-button:hover {
   color: #00cac6;
 }
-
 .day-winners-button .action-arrow {
   width: 9px;
   height: 12px;
@@ -1323,89 +1134,71 @@ button[aria-busy="true"] {
   flex-shrink: 0;
   transform: rotate(0deg);
 }
-
 .day-winners-section {
   display: flex;
   flex-direction: column;
   min-height: 0;
 }
-
 .day-winners-list {
   flex: 1;
 }
-
 /* Responsive Dashboard */
 @media (max-width: 768px) {
   .dashboard-grid {
     grid-template-columns: 1fr;
   }
-
   .dashboard-section {
     padding: 1.5rem;
   }
-
   .dashboard-section-title {
     font-size: 14px;
   }
-
   .etappe-import-section .dashboard-section-title {
     font-size: 20px !important;
     font-weight: 700 !important;
   }
-
   .points-display {
     font-size: 18px;
   }
-
   .team-member-name {
     font-size: 14px;
   }
-
   .team-member-team {
     font-size: 12px;
   }
-
   .achievement-route {
     font-size: 14px;
   }
-
   .stage-route {
     font-size: 14px;
   }
 }
-
 @media (max-width: 480px) {
   .dashboard-content {
     gap: 1.5rem;
   }
-
   .dashboard-section {
     padding: 1rem;
   }
-
   .points-section {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
   }
-
   .team-member {
     flex-wrap: wrap;
   }
-
   .stage-meta {
     flex-direction: column;
     gap: 0.25rem;
   }
 }
-
 /* Rules Page Styles */
 .rules-container {
   max-width: 900px;
   margin: 0 auto;
   padding: 2rem 0;
 }
-
 .rules-section {
   background: #fff;
   border-radius: 12px;
@@ -1413,7 +1206,6 @@ button[aria-busy="true"] {
   margin-bottom: 2rem;
   box-shadow: 0 2px 8px rgba(0, 51, 78, 0.1);
 }
-
 .rules-title {
   font-size: 28px;
   font-weight: 500;
@@ -1422,36 +1214,29 @@ button[aria-busy="true"] {
   padding-bottom: 1rem;
   border-bottom: 2px solid #00cac6;
 }
-
 .rules-list {
   list-style: decimal;
   padding-left: 1.5rem;
   color: #00334e;
   line-height: 1.8;
 }
-
 .rules-list li {
   margin-bottom: 1rem;
   padding-left: 0.5rem;
 }
-
 .rules-list li:last-child {
   margin-bottom: 0;
 }
-
-
 .points-subtitle {
   font-size: 20px;
   font-weight: 500;
   color: #00334e;
   margin-bottom: 1rem;
 }
-
 .points-table-container {
   margin-bottom: 1.5rem;
   overflow-x: auto;
 }
-
 .points-table {
   width: 100%;
   border-collapse: collapse;
@@ -1461,68 +1246,54 @@ button[aria-busy="true"] {
   overflow: hidden;
   box-shadow: 0 1px 4px rgba(0, 51, 78, 0.1);
 }
-
 .points-table thead {
   background: #00cac6;
   color: #fff;
 }
-
 .points-table th {
   padding: 0.75rem 1rem;
   text-align: left;
   font-weight: 600;
   font-size: 14px;
 }
-
 .points-table tbody tr {
   border-bottom: 1px solid #cdd7dc;
 }
-
 .points-table tbody tr:last-child {
   border-bottom: none;
 }
-
 .points-table td {
   padding: 0.75rem 1rem;
   color: #00334e;
   font-size: 14px;
 }
-
 .points-table tbody tr:nth-child(even) {
   background: #f8f9fa;
 }
-
 .points-table tbody tr:hover {
   background: #f0f3f5;
 }
-
 @media (max-width: 768px) {
   .rules-container {
     padding: 1rem;
   }
-
   .rules-section {
     padding: 1.5rem;
   }
-
   .rules-title {
     font-size: 24px;
   }
-
   .points-subtitle {
     font-size: 18px;
   }
-
   .points-table {
     font-size: 12px;
   }
-
   .points-table th,
   .points-table td {
     padding: 0.5rem;
   }
 }
-
 /* Statistics Page Styles */
 .stats-grid {
   display: grid;
@@ -1530,7 +1301,6 @@ button[aria-busy="true"] {
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
-
 .stat-card {
   background: linear-gradient(135deg, #00cac6 0%, #00aa2e 100%);
   border-radius: 12px;
@@ -1539,12 +1309,10 @@ button[aria-busy="true"] {
   box-shadow: 0 4px 12px rgba(0, 51, 78, 0.15);
   transition: transform 0.2s, box-shadow 0.2s;
 }
-
 .stat-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 6px 16px rgba(0, 51, 78, 0.2);
 }
-
 .stat-value {
   font-size: 48px;
   font-weight: 700;
@@ -1552,7 +1320,6 @@ button[aria-busy="true"] {
   margin-bottom: 0.5rem;
   line-height: 1;
 }
-
 .stat-label {
   font-size: 14px;
   font-weight: 500;
@@ -1561,32 +1328,26 @@ button[aria-busy="true"] {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-
 @media (max-width: 768px) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
   }
-
   .stat-card {
     padding: 1.5rem;
   }
-
   .stat-value {
     font-size: 36px;
   }
-
   .stat-label {
     font-size: 12px;
   }
 }
-
 @media (max-width: 480px) {
   .stats-grid {
     grid-template-columns: 1fr;
   }
 }
-
 /* Stages Overview Page Styles */
 .stages-grid-container {
   display: grid;
@@ -1594,7 +1355,6 @@ button[aria-busy="true"] {
   gap: 1.5rem;
   padding: 0;
 }
-
 .stage-tile {
   background: #fff;
   border-radius: 20px;
@@ -1608,26 +1368,22 @@ button[aria-busy="true"] {
   position: relative;
   min-height: 200px;
 }
-
 .stage-tile:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 24px rgba(0, 51, 78, 0.2);
 }
-
 .stage-tile-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 0.75rem;
 }
-
 .stage-tile-number {
   font-size: 24px;
   font-weight: 700;
   color: #00334e;
   line-height: 1.2;
 }
-
 .stage-tile-date {
   font-size: 14px;
   font-weight: 400;
@@ -1635,7 +1391,6 @@ button[aria-busy="true"] {
   text-align: right;
   line-height: 1.4;
 }
-
 .stage-tile-route {
   font-size: 18px;
   font-weight: 500;
@@ -1643,14 +1398,12 @@ button[aria-busy="true"] {
   line-height: 1.4;
   margin-bottom: 0.5rem;
 }
-
 .stage-tile-distance {
   font-size: 15px;
   font-weight: 400;
   color: #668494;
   margin-bottom: 1rem;
 }
-
 .stage-tile-winner {
   display: flex;
   flex-direction: column;
@@ -1659,7 +1412,6 @@ button[aria-busy="true"] {
   border-top: 1px solid #cdd7dc;
   margin-top: auto;
 }
-
 .stage-tile-winner-label {
   font-size: 12px;
   font-weight: 400;
@@ -1668,46 +1420,38 @@ button[aria-busy="true"] {
   letter-spacing: 0.5px;
   margin-bottom: 0.25rem;
 }
-
 .stage-tile-winner-name {
   font-size: 16px;
   font-weight: 500;
   color: #00334e;
   line-height: 1.4;
 }
-
 @media (max-width: 768px) {
   .stages-grid-container {
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 1rem;
   }
-  
   .stage-tile {
     padding: 1.25rem;
   }
-  
   .stage-tile-number {
     font-size: 18px;
   }
-  
   .stage-tile-route {
     font-size: 15px;
   }
 }
-
 /* Stage tile sections */
 .stage-tile-section {
   padding-top: 1rem;
   border-top: 1px solid #cdd7dc;
   margin-top: 0.5rem;
 }
-
 .stage-tile-section:first-of-type {
   border-top: none;
   padding-top: 0;
   margin-top: 0;
 }
-
 .stage-tile-section-title {
   font-size: 16px;
   font-weight: 700;
@@ -1715,7 +1459,6 @@ button[aria-busy="true"] {
   margin-bottom: 1rem;
   text-transform: none;
 }
-
 .stage-tile-riders-list,
 .stage-tile-standings-list,
 .stage-tile-results-list,
@@ -1727,14 +1470,12 @@ button[aria-busy="true"] {
   max-height: 200px;
   overflow-y: auto;
 }
-
 .stage-tile-rider-item,
 .stage-tile-jersey-item {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
-
 .stage-tile-rider-name,
 .stage-tile-jersey-name {
   font-size: 15px;
@@ -1742,7 +1483,6 @@ button[aria-busy="true"] {
   color: #00334e;
   line-height: 1.4;
 }
-
 .stage-tile-rider-team,
 .stage-tile-jersey-team {
   font-size: 13px;
@@ -1750,7 +1490,6 @@ button[aria-busy="true"] {
   color: #668494;
   line-height: 1.4;
 }
-
 .stage-tile-standing-item,
 .stage-tile-result-item {
   display: flex;
@@ -1758,7 +1497,6 @@ button[aria-busy="true"] {
   gap: 0.5rem;
   font-size: 14px;
 }
-
 .stage-tile-standing-rank,
 .stage-tile-result-rank {
   font-size: 14px;
@@ -1767,7 +1505,6 @@ button[aria-busy="true"] {
   min-width: 25px;
   flex-shrink: 0;
 }
-
 .stage-tile-standing-name,
 .stage-tile-result-name {
   flex: 1;
@@ -1776,7 +1513,6 @@ button[aria-busy="true"] {
   color: #00334e;
   line-height: 1.4;
 }
-
 .stage-tile-standing-points,
 .stage-tile-result-time {
   font-size: 14px;
@@ -1786,7 +1522,6 @@ button[aria-busy="true"] {
   flex-shrink: 0;
   font-variant-numeric: tabular-nums;
 }
-
 .stage-tile-link {
   display: flex;
   align-items: center;
@@ -1803,11 +1538,9 @@ button[aria-busy="true"] {
   transition: color 0.2s;
   text-transform: lowercase;
 }
-
 .stage-tile-link:hover {
   color: #00cac6;
 }
-
 .stage-tile-link .action-arrow {
   width: 9px;
   height: 12px;
@@ -1815,17 +1548,14 @@ button[aria-busy="true"] {
   flex-shrink: 0;
   transform: rotate(0deg);
 }
-
 @media (max-width: 480px) {
   .stages-grid-container {
     grid-template-columns: 1fr;
   }
-  
   .stage-tile {
     max-height: none;
     overflow-y: visible;
   }
-  
   .stage-tile-riders-list,
   .stage-tile-standings-list,
   .stage-tile-results-list,
@@ -1833,22 +1563,18 @@ button[aria-busy="true"] {
     max-height: none;
     overflow-y: visible;
   }
-  
   .stage-tile-section-title {
     font-size: 15px;
   }
-  
   .stage-tile-rider-name,
   .stage-tile-jersey-name {
     font-size: 14px;
   }
-  
   .stage-tile-standing-item,
   .stage-tile-result-item {
     font-size: 13px;
   }
 }
-
 /* Etappe Informatie Page Styles */
 .header-top {
   display: flex;
@@ -1856,7 +1582,6 @@ button[aria-busy="true"] {
   align-items: center;
   margin-bottom: 1rem;
 }
-
 .back-link {
   color: #00334e;
   font-size: 16px;
@@ -1867,11 +1592,9 @@ button[aria-busy="true"] {
   align-items: center;
   gap: 0.5rem;
 }
-
 .back-link:hover {
   color: #00cac6;
 }
-
 .back-arrow {
   width: 9px;
   height: 12px;
@@ -1879,7 +1602,6 @@ button[aria-busy="true"] {
   flex-shrink: 0;
   transform: rotate(180deg);
 }
-
 /* Stage Navigation Bar */
 .stage-navigation {
   position: absolute;
@@ -1895,14 +1617,12 @@ button[aria-busy="true"] {
   border-top: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 -2px 10px rgba(0, 51, 78, 0.1);
 }
-
 .stage-nav-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
 }
-
 .stage-nav-button {
   width: 40px;
   height: 40px;
@@ -1921,42 +1641,34 @@ button[aria-busy="true"] {
   flex-shrink: 0;
   padding: 0;
 }
-
 .stage-nav-arrow {
   width: 9px;
   height: 12px;
   display: block;
   flex-shrink: 0;
 }
-
 .stage-nav-arrow-left {
   transform: rotate(180deg);
 }
-
 .stage-nav-arrow-right {
   transform: rotate(0deg);
 }
-
 .stage-nav-button:hover:not(:disabled) {
   background: #f0f3f5;
   transform: scale(1.05);
 }
-
 .stage-nav-button:active:not(:disabled) {
   transform: scale(0.95);
 }
-
 .stage-nav-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;
 }
-
 .stage-nav-info {
   flex: 1;
   text-align: center;
 }
-
 .stage-nav-title {
   display: flex;
   align-items: center;
@@ -1964,33 +1676,28 @@ button[aria-busy="true"] {
   gap: 0.5rem;
   margin-bottom: 0.25rem;
 }
-
 .stage-number {
   font-size: 24px;
   font-weight: 700;
   color: #00334e;
 }
-
 .bike-icon {
   width: 24px;
   height: 24px;
   display: block;
   flex-shrink: 0;
 }
-
 .stage-nav-route {
   font-size: 16px;
   font-weight: 400;
   color: #00334e;
 }
-
 /* Cards Grid Layout */
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
 }
-
 /* Card Styles */
 .card {
   background: #fff;
@@ -1999,19 +1706,16 @@ button[aria-busy="true"] {
   box-shadow: 0 8px 16px rgba(0, 51, 78, 0.16);
   filter: drop-shadow(0 8px 16px rgba(0, 51, 78, 0.161));
 }
-
 .card-title {
   font-size: 20px;
   font-weight: 700;
   color: #00334e;
   margin-bottom: 1.5rem;
 }
-
 .points-count {
   font-weight: 400;
   color: #668494;
 }
-
 /* Riders List */
 .riders-list {
   list-style: none;
@@ -2021,13 +1725,11 @@ button[aria-busy="true"] {
   flex-direction: column;
   gap: 1rem;
 }
-
 .rider-item {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
-
 .rider-avatar {
   width: 48px;
   height: 48px;
@@ -2040,48 +1742,41 @@ button[aria-busy="true"] {
   overflow: hidden;
   position: relative;
 }
-
 .rider-photo {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-
 .rider-avatar-placeholder {
   font-size: 14px;
   font-weight: 600;
   color: #668494;
   text-align: center;
 }
-
 .rider-info {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
-
 .rider-name {
   font-size: 16px;
   font-weight: 500;
   color: #00334e;
   line-height: 1.4;
 }
-
 .rider-team {
   font-size: 14px;
   font-weight: 400;
   color: #668494;
   line-height: 1.4;
 }
-
 .rider-position {
   font-size: 12px;
   font-weight: 400;
   color: #668494;
   line-height: 1.4;
 }
-
 .rider-points {
   font-size: 15px;
   font-weight: 500;
@@ -2090,7 +1785,6 @@ button[aria-busy="true"] {
   min-width: 80px;
   flex-shrink: 0;
 }
-
 /* Standings List */
 .standings-list {
   list-style: none;
@@ -2098,7 +1792,6 @@ button[aria-busy="true"] {
   margin: 0 0 1.5rem 0;
   counter-reset: standings-counter;
 }
-
 .standings-item {
   display: flex;
   align-items: center;
@@ -2106,7 +1799,6 @@ button[aria-busy="true"] {
   padding: 0.5rem 0;
   counter-increment: standings-counter;
 }
-
 .standings-position {
   font-size: 16px;
   font-weight: 400;
@@ -2114,7 +1806,6 @@ button[aria-busy="true"] {
   min-width: 30px;
   flex-shrink: 0;
 }
-
 .standings-name {
   flex: 1;
   font-size: 16px;
@@ -2122,7 +1813,6 @@ button[aria-busy="true"] {
   color: #00334e;
   line-height: 1.4;
 }
-
 .standings-points {
   font-size: 16px;
   font-weight: 500;
@@ -2130,21 +1820,18 @@ button[aria-busy="true"] {
   text-align: right;
   flex-shrink: 0;
 }
-
 /* Results List with Time */
 .results-list {
   list-style: none;
   padding: 0;
   margin: 0 0 1.5rem 0;
 }
-
 .list-with-time .result-item {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   padding: 0.5rem 0;
 }
-
 .result-position {
   font-size: 16px;
   font-weight: 400;
@@ -2152,7 +1839,6 @@ button[aria-busy="true"] {
   min-width: 30px;
   flex-shrink: 0;
 }
-
 .result-rider {
   flex: 1;
   font-size: 16px;
@@ -2160,7 +1846,6 @@ button[aria-busy="true"] {
   color: #00334e;
   line-height: 1.4;
 }
-
 .result-time {
   font-size: 16px;
   font-weight: 400;
@@ -2169,9 +1854,7 @@ button[aria-busy="true"] {
   flex-shrink: 0;
   font-variant-numeric: tabular-nums;
 }
-
 /* Jerseys List */
-
 .jersey-icon {
   width: 32px;
   height: 32px;
@@ -2179,25 +1862,20 @@ button[aria-busy="true"] {
   flex-shrink: 0;
   border: 2px solid #cdd7dc;
 }
-
 .jersey-geel {
   background: #ffd700;
 }
-
 .jersey-groen {
   background: #00ff00;
 }
-
 .jersey-bolletjes {
   background: #fff;
   background-image: radial-gradient(circle, #ff0000 2px, transparent 2px);
   background-size: 8px 8px;
 }
-
 .jersey-wit {
   background: #fff;
 }
-
 /* Card Link */
 .card-link {
   display: inline-flex;
@@ -2210,11 +1888,9 @@ button[aria-busy="true"] {
   transition: color 0.2s;
   margin-top: 0.5rem;
 }
-
 .card-link:hover {
   color: #00cac6;
 }
-
 .card-link .action-arrow {
   width: 9px;
   height: 12px;
@@ -2222,35 +1898,28 @@ button[aria-busy="true"] {
   flex-shrink: 0;
   transform: rotate(0deg);
 }
-
 /* Responsive Design for Etappe Informatie */
 @media (max-width: 768px) {
   .cards-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  
   .card {
     padding: 1.5rem;
   }
-  
   .stage-nav-content {
     padding: 0 1rem;
   }
-  
   .stage-number {
     font-size: 20px;
   }
-  
   .stage-nav-route {
     font-size: 14px;
   }
-  
   .card-title {
     font-size: 18px;
   }
 }
-
 /* Team Overview Page Styles */
 .team-card {
   background: #fff;
@@ -2259,16 +1928,13 @@ button[aria-busy="true"] {
   box-shadow: 0 8px 16px rgba(0, 51, 78, 0.16);
   filter: drop-shadow(0 8px 16px rgba(0, 51, 78, 0.161));
 }
-
 /* Static cards (without dynamic data) have a slightly darker background */
 .team-card.static-card {
   background: #f0f3f5;
 }
-
 .dashboard-section.static-card {
   background: #f0f3f5;
 }
-
 .team-card-header {
   position: relative;
   display: flex;
@@ -2276,7 +1942,6 @@ button[aria-busy="true"] {
   justify-content: space-between;
   margin-bottom: 1.5rem;
 }
-
 .team-card-title {
   font-size: 20px;
   font-weight: 700;
@@ -2285,7 +1950,6 @@ button[aria-busy="true"] {
   text-transform: none;
   flex: 1;
 }
-
 .info-icon-button {
   background: transparent;
   border: none;
@@ -2299,17 +1963,14 @@ button[aria-busy="true"] {
   flex-shrink: 0;
   margin-left: 0.5rem;
 }
-
 .info-icon-button:hover {
   color: #00334e;
 }
-
 .info-icon-button svg {
   width: 20px;
   height: 20px;
   display: block;
 }
-
 .info-popup {
   position: absolute;
   top: 100%;
@@ -2325,7 +1986,6 @@ button[aria-busy="true"] {
   border: 1px solid #cdd7dc;
   animation: fadeIn 0.2s ease-out;
 }
-
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -2336,18 +1996,15 @@ button[aria-busy="true"] {
     transform: translateY(0);
   }
 }
-
 .info-popup-content {
   padding: 1.25rem;
 }
-
 .info-popup-content h3 {
   font-size: 18px;
   font-weight: 700;
   color: #00334e;
   margin: 0 0 0.75rem 0;
 }
-
 .info-popup-content p {
   font-size: 14px;
   font-weight: 400;
@@ -2355,16 +2012,13 @@ button[aria-busy="true"] {
   line-height: 1.6;
   margin: 0;
 }
-
 /* Team Info Card */
-
 .team-info-header {
   display: flex;
   align-items: flex-start;
   gap: 1.5rem;
   margin-bottom: 1.5rem;
 }
-
 .team-avatar-container {
   width: 80px;
   height: 80px;
@@ -2377,34 +2031,29 @@ button[aria-busy="true"] {
   overflow: hidden;
   position: relative;
 }
-
 .team-avatar-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-
 .team-avatar-placeholder {
   font-size: 32px;
   font-weight: 600;
   color: #668494;
   text-align: center;
 }
-
 .team-info-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
-
 .team-info-top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
 }
-
 .team-name {
   font-size: 24px;
   font-weight: 700;
@@ -2412,20 +2061,17 @@ button[aria-busy="true"] {
   margin: 0;
   flex: 1;
 }
-
 .team-ranking {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   flex-shrink: 0;
 }
-
 .ranking-value {
   font-size: 20px;
   font-weight: 700;
   color: #00334e;
 }
-
 .ranking-change {
   display: flex;
   align-items: center;
@@ -2433,25 +2079,20 @@ button[aria-busy="true"] {
   font-size: 14px;
   font-weight: 500;
 }
-
 .ranking-down {
   color: #d32f2f;
 }
-
 .ranking-up {
   color: #2e7d32;
 }
-
 .ranking-change-value {
   font-weight: 600;
 }
-
 .team-member-name {
   font-size: 16px;
   font-weight: 400;
   color: #00334e;
 }
-
 .team-info-details {
   display: flex;
   flex-direction: column;
@@ -2460,27 +2101,23 @@ button[aria-busy="true"] {
   padding-top: 1.5rem;
   border-top: 1px solid #cdd7dc;
 }
-
 .team-detail-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
 }
-
 .team-detail-label {
   font-size: 16px;
   font-weight: 400;
   color: #00334e;
 }
-
 .team-detail-value {
   font-size: 16px;
   font-weight: 400;
   color: #00334e;
   text-align: right;
 }
-
 /* Team Edit Button */
 .team-edit-button {
   display: flex;
@@ -2496,11 +2133,9 @@ button[aria-busy="true"] {
   padding: 0;
   margin-top: auto;
 }
-
 .team-edit-button:hover {
   color: #00cac6;
 }
-
 .team-edit-button .action-arrow {
   width: 9px;
   height: 12px;
@@ -2508,7 +2143,6 @@ button[aria-busy="true"] {
   flex-shrink: 0;
   transform: rotate(0deg);
 }
-
 /* Team Action Button (teal) */
 .team-action-button {
   display: flex;
@@ -2527,16 +2161,13 @@ button[aria-busy="true"] {
   margin-top: 1.5rem;
   transition: background-color 0.2s, transform 0.1s;
 }
-
 .team-action-button:hover {
   background: #00b3af;
   transform: translateY(-1px);
 }
-
 .team-action-button:active {
   transform: translateY(0);
 }
-
 .team-action-button .action-arrow {
   width: 9px;
   height: 12px;
@@ -2545,14 +2176,12 @@ button[aria-busy="true"] {
   transform: rotate(0deg);
   filter: brightness(0) invert(1);
 }
-
 .team-card-actions {
   display: flex;
   flex-direction: row;
   gap: 1rem;
   align-items: center;
 }
-
 .team-delete-button {
   display: flex;
   align-items: center;
@@ -2568,11 +2197,9 @@ button[aria-busy="true"] {
   padding: 0;
   transition: color 0.2s;
 }
-
 .team-delete-button:hover {
   color: #ff0000;
 }
-
 .team-delete-button .action-arrow {
   width: 9px;
   height: 12px;
@@ -2580,7 +2207,6 @@ button[aria-busy="true"] {
   flex-shrink: 0;
   transform: rotate(0deg);
 }
-
 /* Riders List Container */
 .riders-list-container {
   display: flex;
@@ -2589,14 +2215,12 @@ button[aria-busy="true"] {
   margin-bottom: 1.5rem;
   min-height: 100px;
 }
-
 .no-riders-message {
   font-size: 16px;
   font-weight: 400;
   color: #668494;
   text-align: left;
 }
-
 .no-jerseys-message {
   font-size: 16px;
   font-weight: 400;
@@ -2604,11 +2228,9 @@ button[aria-busy="true"] {
   text-align: left;
   margin-top: 1rem;
 }
-
 .no-jerseys-message p {
   margin: 0;
 }
-
 /* Jersey Assignment Modal Styles */
 .jersey-assignments {
   display: flex;
@@ -2616,25 +2238,21 @@ button[aria-busy="true"] {
   gap: 1.5rem;
   padding: 1rem 0;
 }
-
 .jersey-assignment-item {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
-
 .jersey-assignment-header {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
-
 .jersey-assignment-label {
   font-size: 16px;
   font-weight: 600;
   color: #1a1a1a;
 }
-
 .jersey-rider-select {
   width: 100%;
   padding: 0.75rem 1rem;
@@ -2652,32 +2270,26 @@ button[aria-busy="true"] {
   background-position: right 1rem center;
   padding-right: 2.5rem;
 }
-
 .jersey-rider-select:hover {
   border-color: #668494;
 }
-
 .jersey-rider-select:focus {
   outline: none;
   border-color: #0066cc;
   box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
 }
-
 .jersey-rider-select option {
   padding: 0.5rem;
 }
-
 .team-rider-item {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
-
 /* Team Compare Card */
 .team-compare-card {
   padding: 1.5rem 2rem;
 }
-
 .team-compare-button {
   display: flex;
   align-items: center;
@@ -2693,11 +2305,9 @@ button[aria-busy="true"] {
   padding: 0;
   width: 100%;
 }
-
 .team-compare-button:hover {
   color: #00cac6;
 }
-
 .team-compare-button .action-arrow {
   width: 9px;
   height: 12px;
@@ -2705,9 +2315,7 @@ button[aria-busy="true"] {
   flex-shrink: 0;
   transform: rotate(0deg);
 }
-
 /* Jerseys Card */
-
 /* Responsive Design for Team Overview */
 @media (max-width: 768px) {
   .team-info-header {
@@ -2715,28 +2323,23 @@ button[aria-busy="true"] {
     align-items: center;
     text-align: center;
   }
-  
   .team-info-top {
     flex-direction: column;
     align-items: center;
     text-align: center;
   }
-  
   .team-detail-item {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
   }
-  
   .team-detail-value {
     text-align: left;
   }
-  
   .team-card {
     padding: 1.5rem;
   }
 }
-
 /* Rider Selection Modal */
 .modal-overlay {
   position: fixed;
@@ -2753,7 +2356,6 @@ button[aria-busy="true"] {
   justify-content: center;
   padding: 1rem;
 }
-
 .modal-container {
   background: #fff;
   border-radius: 20px;
@@ -2765,7 +2367,6 @@ button[aria-busy="true"] {
   box-shadow: 0 8px 32px rgba(0, 51, 78, 0.3);
   overflow: hidden;
 }
-
 .modal-header {
   display: flex;
   align-items: center;
@@ -2774,14 +2375,12 @@ button[aria-busy="true"] {
   border-bottom: 1px solid #cdd7dc;
   flex-shrink: 0;
 }
-
 .modal-title {
   font-size: 24px;
   font-weight: 700;
   color: #00334e;
   margin: 0;
 }
-
 .modal-close {
   background: transparent;
   border: none;
@@ -2794,22 +2393,18 @@ button[aria-busy="true"] {
   transition: color 0.2s, transform 0.1s;
   flex-shrink: 0;
 }
-
 .modal-close:hover {
   color: #00cac6;
   transform: scale(1.1);
 }
-
 .modal-close:active {
   transform: scale(0.95);
 }
-
 .modal-close svg {
   width: 24px;
   height: 24px;
   display: block;
 }
-
 .modal-content {
   flex: 1;
   overflow-y: auto;
@@ -2818,7 +2413,6 @@ button[aria-busy="true"] {
   flex-direction: column;
   gap: 1.5rem;
 }
-
 .modal-warning-message {
   padding: 1rem;
   background: #fff3cd;
@@ -2828,19 +2422,16 @@ button[aria-busy="true"] {
   font-size: 14px;
   line-height: 1.6;
 }
-
 .modal-warning-message p {
   margin: 0;
   font-weight: 500;
 }
-
 .modal-search-container {
   position: relative;
   display: flex;
   align-items: center;
   flex-shrink: 0;
 }
-
 .modal-search-icon {
   position: absolute;
   left: 1rem;
@@ -2848,13 +2439,11 @@ button[aria-busy="true"] {
   pointer-events: none;
   z-index: 1;
 }
-
 .modal-search-icon svg {
   width: 20px;
   height: 20px;
   display: block;
 }
-
 .modal-search-input {
   width: 100%;
   padding: 1rem 1rem 1rem 3rem;
@@ -2866,16 +2455,13 @@ button[aria-busy="true"] {
   font-family: 'Open Sans', system-ui, sans-serif;
   transition: border-color 0.2s;
 }
-
 .modal-search-input:focus {
   outline: none;
   border-color: #00cac6;
 }
-
 .modal-search-input::placeholder {
   color: #668494;
 }
-
 .modal-riders-list {
   display: flex;
   flex-direction: column;
@@ -2884,7 +2470,6 @@ button[aria-busy="true"] {
   flex: 1;
   min-height: 200px;
 }
-
 .modal-rider-item {
   display: flex;
   align-items: center;
@@ -2894,53 +2479,44 @@ button[aria-busy="true"] {
   transition: background-color 0.2s, opacity 0.2s;
   cursor: pointer;
 }
-
 .modal-rider-item:hover {
   background: #f0f3f5;
 }
-
 .modal-rider-item.rider-disabled {
   opacity: 0.5;
   cursor: not-allowed;
   background: #f5f5f5;
 }
-
 .modal-rider-item.rider-disabled:hover {
   background: #f5f5f5;
 }
-
 .rider-status {
   font-size: 12px;
   font-weight: 400;
   color: #668494;
   margin-top: 0.25rem;
 }
-
 .modal-rider-item .rider-avatar {
   width: 48px;
   height: 48px;
   flex-shrink: 0;
 }
-
 .modal-rider-item .rider-info {
   flex: 1;
   min-width: 0;
 }
-
 .modal-rider-item .rider-name {
   font-size: 16px;
   font-weight: 500;
   color: #00334e;
   line-height: 1.4;
 }
-
 .modal-rider-item .rider-team {
   font-size: 14px;
   font-weight: 400;
   color: #668494;
   line-height: 1.4;
 }
-
 .modal-rider-checkbox {
   width: 24px;
   height: 24px;
@@ -2955,12 +2531,10 @@ button[aria-busy="true"] {
   -webkit-appearance: none;
   -moz-appearance: none;
 }
-
 .modal-rider-checkbox:checked {
   background: #2e7d32;
   border-color: #2e7d32;
 }
-
 .modal-rider-checkbox:checked::after {
   content: '';
   position: absolute;
@@ -2973,13 +2547,11 @@ button[aria-busy="true"] {
   border-width: 0 2px 2px 0;
   transform: translate(-50%, -60%) rotate(45deg);
 }
-
 .modal-footer {
   padding: 1.5rem 2rem;
   border-top: 1px solid #cdd7dc;
   flex-shrink: 0;
 }
-
 .modal-add-button {
   display: flex;
   align-items: center;
@@ -2995,16 +2567,13 @@ button[aria-busy="true"] {
   transition: color 0.2s;
   text-transform: lowercase;
 }
-
 .modal-add-button:hover {
   color: #00cac6;
 }
-
 .modal-add-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
-
 .modal-add-button .action-arrow {
   width: 9px;
   height: 12px;
@@ -3012,40 +2581,32 @@ button[aria-busy="true"] {
   flex-shrink: 0;
   transform: rotate(0deg);
 }
-
 /* Responsive Design for Modal */
 @media (max-width: 768px) {
   .modal-container {
     max-width: 100%;
     max-height: 95vh;
   }
-  
   .modal-header {
     padding: 1rem 1.5rem;
   }
-  
   .modal-title {
     font-size: 20px;
   }
-  
   .modal-content {
     padding: 1rem 1.5rem;
   }
-  
   .modal-footer {
     padding: 1rem 1.5rem;
   }
 }
-
 /* Etappe Toevoegen Page Styles */
 .etappe-form-container {
   margin-top: 1.5rem;
 }
-
 .form-group {
   margin-bottom: 1.5rem;
 }
-
 .form-label {
   display: block;
   font-size: 14px;
@@ -3053,7 +2614,6 @@ button[aria-busy="true"] {
   margin-bottom: 0.5rem;
   font-weight: 500;
 }
-
 .form-select {
   width: 100%;
   padding: 1rem;
@@ -3066,12 +2626,10 @@ button[aria-busy="true"] {
   cursor: pointer;
   transition: border-color 0.2s;
 }
-
 .form-select:focus {
   outline: none;
   border-color: #00cac6;
 }
-
 .form-textarea {
   width: 100%;
   padding: 1rem;
@@ -3086,12 +2644,10 @@ button[aria-busy="true"] {
   line-height: 1.6;
   transition: border-color 0.2s;
 }
-
 .form-textarea:focus {
   outline: none;
   border-color: #00cac6;
 }
-
 .form-hint {
   display: block;
   font-size: 12px;
@@ -3099,12 +2655,10 @@ button[aria-busy="true"] {
   margin-top: 0.5rem;
   font-style: italic;
 }
-
 .form-actions {
   margin-top: 2rem;
   margin-bottom: 2rem;
 }
-
 .form-button {
   display: inline-flex;
   align-items: center;
@@ -3121,42 +2675,35 @@ button[aria-busy="true"] {
   font-family: 'Open Sans', system-ui, sans-serif;
   text-transform: lowercase;
 }
-
 .form-button:hover {
   background: #f0f3f5;
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0, 51, 78, 0.1);
 }
-
 .form-button-primary {
   background: #00334e;
   color: #fff;
   border-color: #00334e;
 }
-
 .form-button-primary:hover {
   background: #004d6d;
   border-color: #004d6d;
 }
-
 .form-button .action-arrow {
   width: 12px;
   height: 12px;
   transform: rotate(-90deg);
   filter: brightness(0) invert(1);
 }
-
 .form-button-primary .action-arrow {
   filter: brightness(0) invert(1);
 }
-
 /* Validation Results */
 .validation-results {
   margin-top: 2rem;
   padding: 1.5rem;
   border-radius: 10px;
 }
-
 .validation-success {
   display: flex;
   flex-direction: column;
@@ -3167,50 +2714,42 @@ button[aria-busy="true"] {
   border: 2px solid #00aa2e;
   border-radius: 10px;
 }
-
 .validation-success-icon {
   font-size: 32px;
   color: #00aa2e;
   font-weight: bold;
 }
-
 .validation-success-message {
   flex: 1;
 }
-
 .validation-success-message h3 {
   font-size: 18px;
   color: #00aa2e;
   margin-bottom: 0.5rem;
   font-weight: 600;
 }
-
 .validation-success-message p {
   font-size: 14px;
   color: #00334e;
   margin: 0;
 }
-
 .validation-errors {
   padding: 1.5rem;
   background: #fff5f5;
   border: 2px solid #d32f2f;
   border-radius: 10px;
 }
-
 .validation-errors-header h3 {
   font-size: 18px;
   color: #d32f2f;
   margin-bottom: 0.5rem;
   font-weight: 600;
 }
-
 .validation-errors-header p {
   font-size: 14px;
   color: #00334e;
   margin-bottom: 1rem;
 }
-
 .validation-errors-list {
   display: flex;
   flex-direction: column;
@@ -3218,7 +2757,6 @@ button[aria-busy="true"] {
   max-height: 400px;
   overflow-y: auto;
 }
-
 .validation-error-item {
   padding: 1rem;
   background: #fff;
@@ -3226,14 +2764,12 @@ button[aria-busy="true"] {
   border-radius: 8px;
   border-left: 4px solid #d32f2f;
 }
-
 .validation-error-line {
   font-size: 12px;
   font-weight: 600;
   color: #d32f2f;
   margin-bottom: 0.25rem;
 }
-
 .validation-error-content {
   font-size: 13px;
   color: #00334e;
@@ -3244,13 +2780,11 @@ button[aria-busy="true"] {
   margin: 0.5rem 0;
   word-break: break-all;
 }
-
 .validation-error-message {
   font-size: 13px;
   color: #d32f2f;
   margin-top: 0.5rem;
 }
-
 .validation-error-summary {
   padding: 1rem;
   background: #fff;
@@ -3261,18 +2795,15 @@ button[aria-busy="true"] {
   color: #00334e;
   text-align: center;
 }
-
 .validation-errors-editable {
   margin-top: 1.5rem;
   padding-top: 1.5rem;
   border-top: 2px solid #ffcccc;
 }
-
 .form-textarea-editable {
   margin-top: 0.5rem;
   margin-bottom: 1rem;
 }
-
 /* Preview Section */
 .preview-section {
   margin-top: 1.5rem;
@@ -3281,14 +2812,12 @@ button[aria-busy="true"] {
   border: 2px solid #00cac6;
   border-radius: 10px;
 }
-
 .preview-title {
   font-size: 18px;
   color: #00334e;
   margin-bottom: 1rem;
   font-weight: 600;
 }
-
 .preview-table-container {
   max-height: 400px;
   overflow-y: auto;
@@ -3296,20 +2825,17 @@ button[aria-busy="true"] {
   border-radius: 8px;
   margin-bottom: 1.5rem;
 }
-
 .preview-table {
   width: 100%;
   border-collapse: collapse;
   background: #fff;
 }
-
 .preview-table thead {
   position: sticky;
   top: 0;
   background: #f5f5f5;
   z-index: 10;
 }
-
 .preview-table th {
   padding: 0.75rem 1rem;
   text-align: left;
@@ -3319,56 +2845,46 @@ button[aria-busy="true"] {
   border-bottom: 2px solid #e0e0e0;
   background: #f5f5f5;
 }
-
 .preview-table td {
   padding: 0.75rem 1rem;
   font-size: 14px;
   color: #00334e;
   border-bottom: 1px solid #f0f0f0;
 }
-
 .preview-table tbody tr:hover {
   background: #f9f9f9;
 }
-
 .preview-table tbody tr:last-child td {
   border-bottom: none;
 }
-
 .preview-actions {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
 }
-
 .preview-actions .form-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
-
 .etappe-import-section .dashboard-section-title {
   font-size: 20px !important;
   font-weight: 700 !important;
   text-transform: none;
   margin-bottom: 1.5rem;
 }
-
 .etappe-form-description {
   font-size: 14px;
   color: #00334e;
   margin-bottom: 1.5rem;
   line-height: 1.6;
 }
-
 .etappe-form-description a {
   color: #00cac6;
   text-decoration: underline;
 }
-
 .etappe-form-description a:hover {
   color: #00a09d;
 }
-
 /* Loading Indicator */
 .loading-indicator {
   display: flex;
@@ -3378,7 +2894,6 @@ button[aria-busy="true"] {
   padding: 2rem;
   gap: 1rem;
 }
-
 .loading-spinner {
   width: 32px;
   height: 32px;
@@ -3387,26 +2902,22 @@ button[aria-busy="true"] {
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
-
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
 }
-
 .loading-text {
   font-size: 14px;
   color: #668494;
   font-weight: 400;
 }
-
 .no-data {
   padding: 2rem;
   text-align: center;
   color: #668494;
   font-size: 14px;
 }
-
 /* Build Info Indicator */
 .build-info {
   position: fixed;
@@ -3422,11 +2933,9 @@ button[aria-busy="true"] {
   opacity: 0.6;
   transition: opacity 0.2s;
 }
-
 .build-info:hover {
   opacity: 1;
 }
-
 @media (max-width: 768px) {
   .build-info {
     font-size: 9px;
@@ -3434,7 +2943,6 @@ button[aria-busy="true"] {
     right: 10px;
   }
 }
-
 /* Import Success */
 .import-success {
   display: flex;
@@ -3447,4 +2955,3 @@ button[aria-busy="true"] {
   border-radius: 10px;
   margin-top: 2rem;
 }
-

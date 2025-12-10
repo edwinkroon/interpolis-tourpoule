@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   } catch (error) {
     console.error('Auth check failed:', error);
-    console.log('Continuing with fallback data due to auth error');
   }
 
   // Check if first stage has results (to determine if editing is locked)
@@ -337,7 +336,6 @@ async function handleSaveJerseys() {
       await loadTeamJerseys();
       
       // Show success message (optional)
-      console.log('Jersey assignments saved successfully');
     } else {
       console.error('Error saving jersey assignments:', result);
       const errorMsg = result.error || 'Onbekende fout';
@@ -1023,8 +1021,6 @@ async function handleAddRiders() {
     riderIds: riderIdsArray
   };
   
-  console.log('Adding riders:', requestBody);
-  console.log('Request URL: /.netlify/functions/add-team-riders');
   
   try {
     const response = await fetch('/.netlify/functions/add-team-riders', {
@@ -1035,19 +1031,8 @@ async function handleAddRiders() {
       body: JSON.stringify(requestBody)
     });
     
-    console.log('Response status:', response.status);
-    console.log('Response ok:', response.ok);
     
     const result = await response.json();
-    
-    console.log('Add riders response:', result);
-    console.log('Response details:', {
-      ok: result.ok,
-      added: result.added,
-      skipped: result.skipped,
-      error: result.error,
-      details: result.details
-    });
     
     if (result.ok) {
       // Close modal
@@ -1056,13 +1041,7 @@ async function handleAddRiders() {
       // Reload team riders to show the newly added ones
       await loadTeamRiders();
       
-      // Show success message
-      if (result.added > 0) {
-        console.log(`Successfully added ${result.added} rider(s) to team`);
-      }
-      if (result.skipped > 0) {
-        console.log(`${result.skipped} rider(s) were already in the team`);
-      }
+      // Success message handled by UI
     } else {
       console.error('Error adding riders:', result);
       const errorMsg = result.error || result.details || 'Onbekende fout';
@@ -1398,8 +1377,7 @@ async function handleDeleteRiders() {
       // Also reload team jerseys to update any removed jersey assignments
       await loadTeamJerseys();
       
-      // Show success message
-      console.log(`Successfully deleted ${result.deleted || riderIdsArray.length} rider(s) from team`);
+      // Success message handled by UI
     } else {
       console.error('Error deleting riders:', result);
       const errorMsg = result.error || 'Onbekende fout';

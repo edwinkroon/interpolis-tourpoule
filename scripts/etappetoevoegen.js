@@ -81,7 +81,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     currentStageId = parseInt(stageId, 10);
     originalResultsText = resultsText; // Store original text
     
-    console.log('Validating results for stageId:', currentStageId, 'from select value:', stageId);
 
     try {
       const response = await fetch('/.netlify/functions/validate-stage-results', {
@@ -276,8 +275,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     try {
-      console.log('Importing results for stageId:', currentStageId);
-      console.log('Number of results:', resultsToImport.length);
       
       const response = await fetch('/.netlify/functions/import-stage-results', {
         method: 'POST',
@@ -294,7 +291,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         })
       });
 
-      console.log('Import response status:', response.status, response.statusText);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: `Server error: ${response.status}` }));
@@ -307,10 +303,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       const result = await response.json();
 
       if (result.ok) {
-        console.log('Import successful for stageId:', currentStageId);
-        if (result.replacedExisting) {
-          console.log(`Replaced ${result.existingCount} existing results`);
-        }
         
         // Hide preview section
         if (previewSection) {
@@ -403,7 +395,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     stageSelect.addEventListener('change', function() {
       currentStageId = null;
       validatedResults = null;
-      console.log('Stage select changed, resetting currentStageId');
     });
   }
 

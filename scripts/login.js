@@ -29,7 +29,6 @@ async function login() {
     return;
   }
   try {
-    console.log('Starting login with redirect...');
     setLoadingState(document.getElementById('login-button'), 'Bezig met inloggen...');
     await auth0Client.loginWithRedirect({
       authorizationParams: {

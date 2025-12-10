@@ -244,7 +244,6 @@ exports.handler = async function(event) {
         await client.query('ROLLBACK');
       } catch (rollbackErr) {
         // Transaction might already be aborted, that's ok
-        console.log('Rollback error (expected if transaction already aborted):', rollbackErr.message);
       }
       throw err;
     }

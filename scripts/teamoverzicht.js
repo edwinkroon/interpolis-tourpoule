@@ -167,13 +167,9 @@ function renderRidersList(riders, type, statusInfo = null) {
   }
   
   // Determine if buttons should be shown
-  const totalRiders = statusInfo?.totalRiders || riders.length;
-  const maxRiders = statusInfo?.maxRiders || 15;
-  const allRidersSelected = statusInfo?.allRidersSelected || totalRiders >= maxRiders;
-  
   const maxForType = type === 'main' ? 10 : 5;
-  const canAddMore = !allRidersSelected && riders.length < maxForType;
-  const canDelete = riders.length > 0;
+  const canAddMore = riders.length < maxForType; // Can add if current type is not full
+  const canDelete = riders.length > 0; // Can delete if there are riders
   
   // Show/hide add button
   const addButtonId = type === 'main' ? 'main-riders-edit-button' : 'reserve-riders-edit-button';

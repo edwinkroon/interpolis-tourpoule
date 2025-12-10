@@ -3274,6 +3274,34 @@ button[aria-busy="true"] {
   color: #00a09d;
 }
 
+/* Build Info Indicator */
+.build-info {
+  position: fixed;
+  bottom: 8px;
+  right: 12px;
+  font-size: 10px;
+  font-weight: 400;
+  color: #9ca3af;
+  z-index: 1000;
+  font-family: 'Open Sans', system-ui, sans-serif;
+  user-select: none;
+  pointer-events: none;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.build-info:hover {
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .build-info {
+    font-size: 9px;
+    bottom: 6px;
+    right: 10px;
+  }
+}
+
 /* Import Success */
 .import-success {
   display: flex;

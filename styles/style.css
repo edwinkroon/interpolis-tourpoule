@@ -2005,7 +2005,7 @@ button[aria-busy="true"] {
 .team-card-header {
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 1.5rem;
 }
@@ -2022,13 +2022,15 @@ button[aria-busy="true"] {
   border: none;
   color: #668494;
   cursor: pointer;
-  padding: 0.25rem;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: color 0.2s;
   flex-shrink: 0;
   margin-left: 0.5rem;
+  align-self: flex-start;
+  margin-top: 0.05em;
 }
 .info-icon-button:hover {
   color: #00334e;

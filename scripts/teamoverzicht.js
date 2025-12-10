@@ -361,6 +361,8 @@ function closeRiderModal() {
   // Reset state
   selectedRiderIds.clear();
   currentSlotType = null;
+  currentTeamRiderIds.clear();
+  currentRiderCount = 0;
   const searchInput = document.getElementById('rider-search-input');
   if (searchInput) {
     searchInput.value = '';

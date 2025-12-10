@@ -152,6 +152,10 @@ exports.handler = async function(event) {
       } catch (err) {
         // Table doesn't exist, create it
         if (err.code === '42P01') { // relation does not exist
+          // Rollback current transaction before creating table (DDL operations auto-commit)
+          await client.query('COMMIT');
+          
+          // Create table (this will auto-commit)
           await client.query(`
             CREATE TABLE IF NOT EXISTS fantasy_team_jerseys (
               id SERIAL PRIMARY KEY,
@@ -166,8 +170,13 @@ exports.handler = async function(event) {
               UNIQUE(fantasy_team_id, jersey_id)
             )
           `);
+          
+          // Start a new transaction for the rest of the operations
+          await client.query('BEGIN');
           tableExists = true;
         } else {
+          // If it's not a "table doesn't exist" error, rollback and rethrow
+          await client.query('ROLLBACK');
           throw err;
         }
       }
@@ -208,8 +217,15 @@ exports.handler = async function(event) {
         })
       };
     } catch (err) {
-      // Rollback transaction on error
-      await client.query('ROLLBACK');
+      // Rollback transaction on error (if still in transaction)
+      try {
+        const result = await client.query('SELECT 1');
+        // If query succeeds, we're still connected, so rollback
+        await client.query('ROLLBACK');
+      } catch (rollbackErr) {
+        // Transaction might already be aborted, that's ok
+        console.log('Rollback error (expected if transaction already aborted):', rollbackErr.message);
+      }
       throw err;
     }
   } catch (err) {

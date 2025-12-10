@@ -152,6 +152,14 @@ function renderRidersList(riders, type) {
   const ridersContainer = document.getElementById(containerId);
   const noRidersMessage = document.getElementById(messageId);
   
+  // Update title with rider count
+  const cardElement = ridersContainer?.closest('.team-card');
+  const titleElement = cardElement?.querySelector('.team-card-title');
+  if (titleElement) {
+    const baseTitle = type === 'main' ? 'Basisrenners' : 'Reserverenners';
+    titleElement.textContent = `${baseTitle} (${riders.length})`;
+  }
+  
   if (!ridersContainer) return;
   
   if (riders.length > 0) {

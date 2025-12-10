@@ -1,5 +1,8 @@
 // Team Overview Page Script
 
+// Global variable to track if editing is locked
+let editingLocked = false;
+
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', async function() {
   // Check if user is authenticated and exists in database
@@ -13,6 +16,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     console.log('Continuing with fallback data due to auth error');
   }
 
+  // Check if first stage has results (to determine if editing is locked)
+  editingLocked = await checkFirstStageHasResults();
+  
   // Load team data
   await loadTeamData();
   
@@ -21,6 +27,11 @@ document.addEventListener('DOMContentLoaded', async function() {
   
   // Load team jerseys
   await loadTeamJerseys();
+  
+  // Hide edit buttons if first stage has results
+  if (editingLocked) {
+    hideEditButtons();
+  }
   
   // Setup modal handlers
   setupModalHandlers();
@@ -34,6 +45,75 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Setup jersey modal handlers
   setupJerseyModalHandlers();
 });
+
+// Check if first stage has results
+async function checkFirstStageHasResults() {
+  try {
+    const response = await fetch('/.netlify/functions/check-first-stage-has-results');
+    
+    if (!response.ok) {
+      console.error('Error checking first stage results:', response.status);
+      return false; // Default to allowing edits if check fails
+    }
+    
+    const data = await response.json();
+    
+    if (data.ok && data.hasResults) {
+      return true;
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('Error checking first stage results:', error);
+    return false; // Default to allowing edits if check fails
+  }
+}
+
+// Hide edit buttons when first stage has results
+function hideEditButtons() {
+  // Hide jersey edit button
+  const jerseyEditButton = document.getElementById('jerseys-edit-button');
+  if (jerseyEditButton) {
+    jerseyEditButton.style.display = 'none';
+  }
+  
+  // Hide main riders edit and delete buttons
+  const mainRidersEditButton = document.getElementById('main-riders-edit-button');
+  const mainRidersDeleteButton = document.getElementById('main-riders-delete-button');
+  if (mainRidersEditButton) {
+    mainRidersEditButton.style.display = 'none';
+  }
+  if (mainRidersDeleteButton) {
+    mainRidersDeleteButton.style.display = 'none';
+  }
+  
+  // Hide reserve riders edit and delete buttons
+  const reserveRidersEditButton = document.getElementById('reserve-riders-edit-button');
+  const reserveRidersDeleteButton = document.getElementById('reserve-riders-delete-button');
+  if (reserveRidersEditButton) {
+    reserveRidersEditButton.style.display = 'none';
+  }
+  if (reserveRidersDeleteButton) {
+    reserveRidersDeleteButton.style.display = 'none';
+  }
+  
+  // Also hide the entire team-card-actions container if both buttons are hidden
+  if (mainRidersEditButton && mainRidersDeleteButton) {
+    const mainRidersActions = mainRidersEditButton.closest('.team-card-actions');
+    if (mainRidersActions) {
+      mainRidersActions.style.display = 'none';
+    }
+  }
+  
+  if (reserveRidersEditButton && reserveRidersDeleteButton) {
+    const reserveRidersActions = reserveRidersEditButton.closest('.team-card-actions');
+    if (reserveRidersActions) {
+      reserveRidersActions.style.display = 'none';
+    }
+  }
+  
+  // Note: The button on team-info-card is NOT hidden (it should remain visible)
+}
 
 // Setup jersey modal handlers
 function setupJerseyModalHandlers() {
@@ -417,8 +497,8 @@ function renderRidersList(riders, type, statusInfo = null) {
   
   // Determine if buttons should be shown
   const maxForType = type === 'main' ? 10 : 5;
-  const canAddMore = riders.length < maxForType; // Can add if current type is not full
-  const canDelete = riders.length > 0; // Can delete if there are riders
+  const canAddMore = riders.length < maxForType && !editingLocked; // Can add if current type is not full AND editing is not locked
+  const canDelete = riders.length > 0 && !editingLocked; // Can delete if there are riders AND editing is not locked
   
   // Show/hide add button
   const addButtonId = type === 'main' ? 'main-riders-edit-button' : 'reserve-riders-edit-button';
@@ -426,7 +506,11 @@ function renderRidersList(riders, type, statusInfo = null) {
   if (addButton) {
     const actionsContainer = addButton.closest('.team-card-actions');
     if (actionsContainer) {
-      actionsContainer.style.display = 'flex';
+      if (canAddMore || canDelete) {
+        actionsContainer.style.display = 'flex';
+      } else {
+        actionsContainer.style.display = 'none';
+      }
     }
     if (canAddMore) {
       addButton.style.display = 'flex';
@@ -590,13 +674,17 @@ function renderJerseys(jerseys, allJerseysAssigned) {
   }
   
   // Update button text based on whether all jerseys are assigned
-  if (jerseysButtonText) {
-    jerseysButtonText.textContent = allJerseysAssigned ? 'aanpassen' : 'toevoegen';
-  }
-  
-  // Update button aria-label
+  // Hide button if editing is locked
   if (jerseysButton) {
-    jerseysButton.setAttribute('aria-label', allJerseysAssigned ? 'Aanpassen' : 'Toevoegen');
+    if (editingLocked) {
+      jerseysButton.style.display = 'none';
+    } else {
+      jerseysButton.style.display = 'flex';
+      if (jerseysButtonText) {
+        jerseysButtonText.textContent = allJerseysAssigned ? 'aanpassen' : 'toevoegen';
+      }
+      jerseysButton.setAttribute('aria-label', allJerseysAssigned ? 'Aanpassen' : 'Toevoegen');
+    }
   }
 }
 

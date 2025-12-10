@@ -347,21 +347,41 @@ exports.handler = async function(event) {
     // Try to match riders with database
     const validatedResults = [];
     const unmatchedResults = [];
-    let lastValidTimeSeconds = null; // Track last valid time to propagate to null times
+    let lastValidTimeSeconds = null; // Track last valid absolute time
     
-    for (const result of parsedResults) {
+    for (let i = 0; i < parsedResults.length; i++) {
+      const result = parsedResults[i];
       let riderId = null;
       let matchedRider = null;
       
-      // If time is null, use the time from the previous rider (same time group)
+      // Time logic:
+      // - First rider: time is absolute (e.g., "3:53:11")
+      // - Next riders with no time: same time as previous rider
+      // - Next riders with time: relative time (add to previous rider's time)
       let timeSeconds = result.timeSeconds;
-      if (timeSeconds === null && lastValidTimeSeconds !== null) {
-        timeSeconds = lastValidTimeSeconds;
-      }
       
-      // Update lastValidTimeSeconds if we have a valid time
-      if (timeSeconds !== null) {
-        lastValidTimeSeconds = timeSeconds;
+      if (i === 0) {
+        // First rider: time is absolute
+        if (timeSeconds !== null) {
+          lastValidTimeSeconds = timeSeconds;
+        }
+      } else {
+        // Not first rider
+        if (timeSeconds === null) {
+          // No time: use previous rider's time
+          if (lastValidTimeSeconds !== null) {
+            timeSeconds = lastValidTimeSeconds;
+          }
+        } else {
+          // Has time: it's relative, add to previous rider's time
+          if (lastValidTimeSeconds !== null) {
+            timeSeconds = lastValidTimeSeconds + timeSeconds;
+            lastValidTimeSeconds = timeSeconds;
+          } else {
+            // No previous time available, treat as absolute (fallback)
+            lastValidTimeSeconds = timeSeconds;
+          }
+        }
       }
       
       // Normalize input names FIRST - this is the key improvement

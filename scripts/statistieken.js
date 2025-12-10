@@ -78,7 +78,7 @@ async function loadStatistics() {
 async function loadGeneralStats() {
   try {
     // Get total riders count
-    const ridersResponse = await fetch('/.netlify/functions/get-riders');
+    const ridersResponse = await fetch('/.netlify/functions/get-all-riders');
     if (ridersResponse.ok) {
       const ridersData = await ridersResponse.json();
       if (ridersData.ok && ridersData.riders) {

@@ -1348,6 +1348,11 @@ button[aria-busy="true"] {
     font-size: 14px;
   }
 
+  .etappe-import-section .dashboard-section-title {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+  }
+
   .points-display {
     font-size: 18px;
   }
@@ -3247,8 +3252,8 @@ button[aria-busy="true"] {
 }
 
 .etappe-import-section .dashboard-section-title {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 20px !important;
+  font-weight: 700 !important;
   text-transform: none;
   margin-bottom: 1.5rem;
 }

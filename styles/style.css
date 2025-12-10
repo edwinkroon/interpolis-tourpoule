@@ -490,6 +490,13 @@ button[aria-busy="true"] {
   margin-bottom: 1.5rem;
   text-transform: none;
 }
+.etappe-uitslag-section .dashboard-section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #00334e;
+  margin-bottom: 1.5rem;
+  text-transform: none;
+}
 .points-value {
   font-weight: 400;
 }

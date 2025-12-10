@@ -65,6 +65,8 @@ exports.handler = async function(event) {
       SELECT 
         p.id as participant_id,
         p.team_name,
+        p.avatar_url,
+        p.email,
         COALESCE(fsp.total_points, 0) as points
       FROM participants p
       INNER JOIN fantasy_teams ft ON ft.participant_id = p.id
@@ -93,9 +95,22 @@ exports.handler = async function(event) {
       
       previousPoints = points;
       
+      // Generate participant name from email if available
+      let participantName = 'Gebruiker';
+      if (row.email) {
+        const emailParts = row.email.split('@')[0];
+        const nameParts = emailParts.split('.');
+        participantName = nameParts.map(part => 
+          part.charAt(0).toUpperCase() + part.slice(1)
+        ).join(' ');
+      }
+      
       return {
         rank: currentRank,
         teamName: row.team_name,
+        participantName: participantName,
+        avatarUrl: row.avatar_url || null,
+        email: row.email || null,
         points: points,
         participantId: row.participant_id
       };

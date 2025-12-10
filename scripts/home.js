@@ -518,45 +518,73 @@ function renderDayWinners(dayWinners, latestStageRoute = null) {
     }
   }
 
-  // Sort winners by points (highest first) to determine medal colors
+  if (!dayWinners || dayWinners.length === 0) {
+    dayWinnersList.innerHTML = '<div class="no-data">Geen winnaars beschikbaar</div>';
+    return;
+  }
+
+  // Sort winners by points (highest first) to determine medals
+  // Teams with same points get same rank/medal
   const sortedWinners = [...dayWinners].sort((a, b) => (b.points || 0) - (a.points || 0));
   
   // Avatar colors for day winners (fallback)
   const avatarColors = ['#00334e', '#668494', '#cdd7dc'];
   
-  dayWinners.forEach((winner) => {
+  // Determine medal for each winner based on rank (handling ties)
+  let currentMedalRank = 1;
+  let previousPoints = null;
+  const winnersWithMedals = sortedWinners.map((winner, index) => {
+    const points = winner.points || 0;
+    
+    // If points are different from previous, update medal rank
+    if (previousPoints !== null && points < previousPoints) {
+      currentMedalRank = index + 1;
+    } else if (previousPoints === null || points > previousPoints) {
+      currentMedalRank = index + 1;
+    }
+    // If points are same as previous, keep same medal rank
+    
+    previousPoints = points;
+    
+    return {
+      ...winner,
+      medalRank: currentMedalRank
+    };
+  });
+  
+  winnersWithMedals.forEach((winner) => {
     const winnerItem = document.createElement('div');
     winnerItem.className = 'day-winner-item';
     
-    // Find position in sorted list to determine medal
-    const position = sortedWinners.findIndex(w => w.id === winner.id) + 1;
-    const avatarColor = avatarColors[position - 1] || '#cdd7dc';
+    const medalRank = winner.medalRank;
+    const avatarColor = avatarColors[medalRank - 1] || '#cdd7dc';
     
-    // Medal based on position (1 = gold, 2 = silver, 3 = bronze)
+    // Medal based on rank (1 = gold, 2 = silver, 3 = bronze)
     let medalIcon = '';
-    if (position === 1) {
+    if (medalRank === 1) {
       medalIcon = '<img src="icons/eersteplaatsmedaille.svg" alt="1e plaats" class="day-winner-medal-icon">';
-    } else if (position === 2) {
+    } else if (medalRank === 2) {
       medalIcon = '<img src="icons/tweedeplaatsmedaille.svg" alt="2e plaats" class="day-winner-medal-icon">';
-    } else if (position === 3) {
+    } else if (medalRank === 3) {
       medalIcon = '<img src="icons/derdeplaatsmedaille.svg" alt="3e plaats" class="day-winner-medal-icon">';
     }
     
     // Use photo if available, otherwise use generated avatar or colored fallback
     let avatarHtml = '';
     if (winner.photoUrl) {
-      avatarHtml = `<div class="day-winner-avatar"><img src="${sanitizeInput(winner.photoUrl)}" alt="${sanitizeInput(winner.name)}" class="day-winner-avatar-img"></div>`;
+      avatarHtml = `<div class="day-winner-avatar"><img src="${sanitizeInput(winner.photoUrl)}" alt="${sanitizeInput(winner.team || winner.name)}" class="day-winner-avatar-img"></div>`;
     } else {
-      // Generate avatar using UI Avatars service based on name
-      const initials = winner.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
-      const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(winner.name)}&size=76&background=${avatarColor.replace('#', '')}&color=ffffff&bold=true&font-size=0.5`;
-      avatarHtml = `<div class="day-winner-avatar"><img src="${avatarUrl}" alt="${sanitizeInput(winner.name)}" class="day-winner-avatar-img" onerror="this.parentElement.style.backgroundColor='${avatarColor}'"></div>`;
+      // Generate avatar using UI Avatars service based on team name or participant name
+      const nameForAvatar = winner.team || winner.name;
+      const initials = nameForAvatar.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+      const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(nameForAvatar)}&size=76&background=${avatarColor.replace('#', '')}&color=ffffff&bold=true&font-size=0.5`;
+      avatarHtml = `<div class="day-winner-avatar"><img src="${avatarUrl}" alt="${sanitizeInput(nameForAvatar)}" class="day-winner-avatar-img" onerror="this.parentElement.style.backgroundColor='${avatarColor}'"></div>`;
     }
     
     winnerItem.innerHTML = `
       ${avatarHtml}
       <div class="day-winner-info">
-        ${winner.team ? `<div class="day-winner-name">${sanitizeInput(winner.team)}</div>` : ''}
+        <div class="day-winner-name">${sanitizeInput(winner.team || 'Team')}</div>
         <div class="day-winner-team">${sanitizeInput(winner.name)}</div>
       </div>
       ${medalIcon ? `<div class="day-winner-medal">${medalIcon}</div>` : '<div class="day-winner-medal"></div>'}
@@ -627,13 +655,55 @@ async function loadLatestStage() {
     const response = await fetch('/.netlify/functions/get-latest-stage');
     const data = await response.json();
     
-    if (data.ok && data.stage && data.stage.route_text) {
-      return data.stage.route_text;
+    if (data.ok && data.stage) {
+      return {
+        route_text: data.stage.route_text || null,
+        stage_number: data.stage.stage_number || null
+      };
     }
     return null;
   } catch (error) {
     console.error('Error loading latest stage:', error);
     return null;
+  }
+}
+
+async function loadDayWinners() {
+  try {
+    // Get latest stage
+    const latestStage = await loadLatestStage();
+    if (!latestStage || !latestStage.stage_number) {
+      return { winners: [], route: null };
+    }
+    
+    // Get top 3 teams for latest stage
+    const response = await fetch(`/.netlify/functions/get-stage-team-points?stage_number=${latestStage.stage_number}`);
+    const data = await response.json();
+    
+    if (data.ok && data.teams && data.teams.length > 0) {
+      // Get top 3 teams
+      const top3Teams = data.teams.slice(0, 3);
+      
+      // Format winners for renderDayWinners
+      const winners = top3Teams.map(team => ({
+        id: team.participantId,
+        name: team.participantName,
+        team: team.teamName,
+        points: team.points,
+        photoUrl: team.avatarUrl || null,
+        email: team.email || null
+      }));
+      
+      return {
+        winners: winners,
+        route: latestStage.route_text
+      };
+    }
+    
+    return { winners: [], route: latestStage.route_text };
+  } catch (error) {
+    console.error('Error loading day winners:', error);
+    return { winners: [], route: null };
   }
 }
 
@@ -721,9 +791,6 @@ function updateChooseRidersTile(status, statusInfo = null) {
 
 async function loadDashboardData() {
   try {
-    // Load latest stage route info
-    const latestStageRoute = await loadLatestStage();
-    
     // Load team status and update tile
     await loadTeamStatus();
     
@@ -745,16 +812,9 @@ async function loadDashboardData() {
     
     renderAchievements(dashboardData.achievements);
     
-    // Render day winners first without photos (immediate display)
-    // Pass latest stage route to renderDayWinners
-    renderDayWinners(dashboardData.dayWinners || [], latestStageRoute);
-    
-    // Then load photos in background and update
-    loadRiderPhotos(dashboardData.dayWinners || []).then(dayWinnersWithPhotos => {
-      renderDayWinners(dayWinnersWithPhotos, latestStageRoute);
-    }).catch(error => {
-      console.error('Error loading day winner photos:', error);
-    });
+    // Load day winners dynamically from latest stage
+    const dayWinnersData = await loadDayWinners();
+    renderDayWinners(dayWinnersData.winners || [], dayWinnersData.route);
     
     // Load standings from API
     loadStandings().then(standings => {

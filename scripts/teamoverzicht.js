@@ -513,39 +513,29 @@ async function loadTeamJerseys() {
 
 // Render jerseys list
 function renderJerseys(jerseys, allJerseysAssigned) {
-  const jerseysList = document.getElementById('jerseys-list');
+  const jerseysContainer = document.getElementById('jerseys-list-container');
   const jerseysButton = document.getElementById('jerseys-edit-button');
   const jerseysButtonText = document.getElementById('jerseys-button-text');
   const noJerseysMessage = document.getElementById('no-jerseys-message');
   
-  if (!jerseysList) return;
+  if (!jerseysContainer) return;
   
-  jerseysList.innerHTML = '';
+  // Remove all existing jersey items (but keep the message element)
+  const existingJerseyItems = jerseysContainer.querySelectorAll('.team-rider-item');
+  existingJerseyItems.forEach(item => item.remove());
   
   // Check if any jerseys are assigned
   const hasAssignedJerseys = jerseys.length > 0 && jerseys.some(j => j.assigned !== null);
   
-  // Show/hide encouragement message and list
+  // Show/hide encouragement message
   if (noJerseysMessage) {
-    if (!hasAssignedJerseys) {
-      // Show message, hide list when nothing is assigned OR when jerseys array is empty
+    if (!hasAssignedJerseys && jerseys.length > 0) {
+      // Show message if jerseys exist but none assigned
       noJerseysMessage.style.display = 'block';
-      if (jerseys.length === 0) {
-        // If no jerseys data at all, don't render list items
-        jerseysList.style.display = 'none';
-      } else {
-        // If jerseys exist but none assigned, still render the list (showing "Niet toegewezen")
-        // but show the encouragement message above it
-        jerseysList.style.display = 'block';
-      }
     } else {
-      // Hide message, show list when there are assigned jerseys
+      // Hide message if jerseys are assigned or if no jerseys at all
       noJerseysMessage.style.display = 'none';
-      jerseysList.style.display = 'block';
     }
-  } else {
-    // Fallback: always show list if message element doesn't exist
-    jerseysList.style.display = 'block';
   }
   
   // Map jersey type to class name and title
@@ -556,45 +546,48 @@ function renderJerseys(jerseys, allJerseysAssigned) {
     'wit': { class: 'jersey-wit', title: 'Witte trui' }
   };
   
-  jerseys.forEach(jersey => {
-    const li = document.createElement('li');
-    li.className = 'jersey-item';
-    
-    const jerseyInfo = jerseyClassMap[jersey.type] || { class: 'jersey-geel', title: 'Trui' };
-    
-    if (jersey.assigned) {
-      // Jersey is assigned to a rider
-      const initials = jersey.assigned.first_name && jersey.assigned.last_name
-        ? `${jersey.assigned.first_name[0]}${jersey.assigned.last_name[0]}`.toUpperCase()
-        : jersey.assigned.last_name ? jersey.assigned.last_name.substring(0, 2).toUpperCase() : 'R';
+  // Render jerseys if there are any
+  if (jerseys.length > 0) {
+    jerseys.forEach(jersey => {
+      const jerseyItem = document.createElement('div');
+      jerseyItem.className = 'team-rider-item';
       
-      li.innerHTML = `
-        <div class="rider-avatar">
-          <img src="${jersey.assigned.photo_url || ''}" alt="${sanitizeInput(jersey.assigned.first_name || '')} ${sanitizeInput(jersey.assigned.last_name || '')}" class="rider-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-          <div class="rider-avatar-placeholder" style="display: none;">${sanitizeInput(initials)}</div>
-        </div>
-        <div class="rider-info">
-          <div class="rider-name">${sanitizeInput(jersey.assigned.first_name || '')} ${sanitizeInput(jersey.assigned.last_name || '')}</div>
-          <div class="rider-team">${sanitizeInput(jersey.assigned.team_name || '')}</div>
-        </div>
-        <div class="jersey-icon ${jerseyInfo.class}" title="${sanitizeInput(jerseyInfo.title)}"></div>
-      `;
-    } else {
-      // Jersey is not assigned
-      li.innerHTML = `
-        <div class="rider-avatar">
-          <div class="rider-avatar-placeholder" style="display: block; background: #f0f3f5; color: #668494;">—</div>
-        </div>
-        <div class="rider-info">
-          <div class="rider-name" style="color: #668494;">Niet toegewezen</div>
-          <div class="rider-team" style="color: #668494; font-style: italic;">Selecteer een renner</div>
-        </div>
-        <div class="jersey-icon ${jerseyInfo.class}" title="${sanitizeInput(jerseyInfo.title)}"></div>
-      `;
-    }
-    
-    jerseysList.appendChild(li);
-  });
+      const jerseyInfo = jerseyClassMap[jersey.type] || { class: 'jersey-geel', title: 'Trui' };
+      
+      if (jersey.assigned) {
+        // Jersey is assigned to a rider
+        const initials = jersey.assigned.first_name && jersey.assigned.last_name
+          ? `${jersey.assigned.first_name[0]}${jersey.assigned.last_name[0]}`.toUpperCase()
+          : jersey.assigned.last_name ? jersey.assigned.last_name.substring(0, 2).toUpperCase() : 'R';
+        
+        jerseyItem.innerHTML = `
+          <div class="rider-avatar">
+            <img src="${jersey.assigned.photo_url || ''}" alt="${sanitizeInput(jersey.assigned.first_name || '')} ${sanitizeInput(jersey.assigned.last_name || '')}" class="rider-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div class="rider-avatar-placeholder" style="display: none;">${sanitizeInput(initials)}</div>
+          </div>
+          <div class="rider-info">
+            <div class="rider-name">${sanitizeInput(jersey.assigned.first_name || '')} ${sanitizeInput(jersey.assigned.last_name || '')}</div>
+            <div class="rider-team">${sanitizeInput(jersey.assigned.team_name || '')}</div>
+          </div>
+          <div class="jersey-icon ${jerseyInfo.class}" title="${sanitizeInput(jerseyInfo.title)}"></div>
+        `;
+      } else {
+        // Jersey is not assigned
+        jerseyItem.innerHTML = `
+          <div class="rider-avatar">
+            <div class="rider-avatar-placeholder" style="display: block; background: #f0f3f5; color: #668494;">—</div>
+          </div>
+          <div class="rider-info">
+            <div class="rider-name" style="color: #668494;">Niet toegewezen</div>
+            <div class="rider-team" style="color: #668494; font-style: italic;">Selecteer een renner</div>
+          </div>
+          <div class="jersey-icon ${jerseyInfo.class}" title="${sanitizeInput(jerseyInfo.title)}"></div>
+        `;
+      }
+      
+      jerseysContainer.appendChild(jerseyItem);
+    });
+  }
   
   // Update button text based on whether all jerseys are assigned
   if (jerseysButtonText) {

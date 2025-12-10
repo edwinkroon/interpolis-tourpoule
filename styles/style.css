@@ -2544,7 +2544,6 @@ button[aria-busy="true"] {
   font-weight: 400;
   cursor: pointer;
   padding: 0;
-  width: 100%;
   transition: color 0.2s;
 }
 

@@ -2802,12 +2802,29 @@ button[aria-busy="true"] {
   gap: 1rem;
   padding: 0.75rem;
   border-radius: 10px;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, opacity 0.2s;
   cursor: pointer;
 }
 
 .modal-rider-item:hover {
   background: #f0f3f5;
+}
+
+.modal-rider-item.rider-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f5f5f5;
+}
+
+.modal-rider-item.rider-disabled:hover {
+  background: #f5f5f5;
+}
+
+.rider-status {
+  font-size: 12px;
+  font-weight: 400;
+  color: #668494;
+  margin-top: 0.25rem;
 }
 
 .modal-rider-item .rider-avatar {

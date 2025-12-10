@@ -245,6 +245,7 @@ let filteredRiders = [];
 let selectedRiderIds = new Set();
 let currentSlotType = null; // 'main' or 'reserve' - determines which slot type to prioritize
 let currentRiderCount = 0; // Current number of riders in the team for this slot type
+let currentTeamRiderIds = new Set(); // IDs of riders already in the team
 
 // Delete modal state
 let deleteSelectedRiderIds = new Set();
@@ -309,14 +310,21 @@ async function openRiderModal(slotType = null) {
     searchInput.value = '';
   }
   
-  // Load current rider count for this slot type
+  // Load current rider count and team rider IDs for this slot type
   const userId = await getUserId();
+  currentTeamRiderIds.clear();
   if (userId) {
     try {
       const response = await fetch(`/.netlify/functions/get-team-riders?userId=${encodeURIComponent(userId)}`);
       const result = await response.json();
       
       if (result.ok && result.riders) {
+        // Get all riders in team (both main and reserve), not just this slot type
+        // This prevents adding a rider that's already in the team in another slot
+        result.riders.forEach(rider => {
+          currentTeamRiderIds.add(rider.id);
+        });
+        
         const currentRiders = result.riders.filter(rider => rider.slot_type === slotType);
         currentRiderCount = currentRiders.length;
       } else {
@@ -426,6 +434,12 @@ function renderModalRidersList() {
       : rider.last_name ? rider.last_name.substring(0, 2).toUpperCase() : 'R';
     
     const isSelected = selectedRiderIds.has(rider.id);
+    const isAlreadyInTeam = currentTeamRiderIds.has(rider.id);
+    
+    // Add disabled class if rider is already in team
+    if (isAlreadyInTeam) {
+      riderItem.classList.add('rider-disabled');
+    }
     
     riderItem.innerHTML = `
       <div class="rider-avatar">
@@ -435,35 +449,39 @@ function renderModalRidersList() {
       <div class="rider-info">
         <div class="rider-name">${sanitizeInput(rider.name)}</div>
         <div class="rider-team">${sanitizeInput(rider.team_name || '')}</div>
+        ${isAlreadyInTeam ? '<div class="rider-status">Al in team</div>' : ''}
       </div>
       <input 
         type="checkbox" 
         class="modal-rider-checkbox" 
         data-rider-id="${rider.id}"
         ${isSelected ? 'checked' : ''}
+        ${isAlreadyInTeam ? 'disabled' : ''}
         aria-label="Selecteer ${sanitizeInput(rider.name)}"
       >
     `;
     
-    // Add click handler for checkbox
+    // Add click handler for checkbox (only if not disabled)
     const checkbox = riderItem.querySelector('.modal-rider-checkbox');
-    checkbox.addEventListener('change', function() {
-      if (this.checked) {
-        selectedRiderIds.add(rider.id);
-      } else {
-        selectedRiderIds.delete(rider.id);
-      }
-      updateAddButton();
-      updateWarningMessage();
-    });
-    
-    // Make entire item clickable
-    riderItem.addEventListener('click', function(e) {
-      if (e.target !== checkbox) {
-        checkbox.checked = !checkbox.checked;
-        checkbox.dispatchEvent(new Event('change'));
-      }
-    });
+    if (!isAlreadyInTeam) {
+      checkbox.addEventListener('change', function() {
+        if (this.checked) {
+          selectedRiderIds.add(rider.id);
+        } else {
+          selectedRiderIds.delete(rider.id);
+        }
+        updateAddButton();
+        updateWarningMessage();
+      });
+      
+      // Make entire item clickable (only if not disabled)
+      riderItem.addEventListener('click', function(e) {
+        if (e.target !== checkbox && !isAlreadyInTeam) {
+          checkbox.checked = !checkbox.checked;
+          checkbox.dispatchEvent(new Event('change'));
+        }
+      });
+    }
     
     ridersList.appendChild(riderItem);
   });

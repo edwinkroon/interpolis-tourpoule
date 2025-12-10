@@ -1307,6 +1307,9 @@ async function handleDeleteRiders() {
       // Reload team riders to show the updated list
       await loadTeamRiders();
       
+      // Also reload team jerseys to update any removed jersey assignments
+      await loadTeamJerseys();
+      
       // Show success message
       console.log(`Successfully deleted ${result.deleted || riderIdsArray.length} rider(s) from team`);
     } else {

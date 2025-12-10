@@ -91,6 +91,26 @@ exports.handler = async function(event) {
 
     const fantasyTeamId = teamResult.rows[0].id;
 
+    // First, delete jersey assignments for these riders (if they exist)
+    // Check if fantasy_team_jerseys table exists
+    try {
+      const jerseyPlaceholders = riderIds.map((_, index) => `$${index + 2}`).join(', ');
+      const deleteJerseysQuery = `
+        DELETE FROM fantasy_team_jerseys
+        WHERE fantasy_team_id = $1
+          AND rider_id IN (${jerseyPlaceholders})
+      `;
+      
+      const jerseyDeleteParams = [fantasyTeamId, ...riderIds];
+      await client.query(deleteJerseysQuery, jerseyDeleteParams);
+    } catch (jerseyErr) {
+      // If table doesn't exist (error code 42P01), ignore the error
+      // Otherwise, log it but don't fail the entire operation
+      if (jerseyErr.code !== '42P01') {
+        console.log('Note: Could not delete jersey assignments (table may not exist):', jerseyErr.message);
+      }
+    }
+
     // Delete riders
     const placeholders = riderIds.map((_, index) => `$${index + 2}`).join(', ');
     const deleteQuery = `

@@ -29,7 +29,7 @@ exports.handler = async function(event) {
 
     await client.connect();
 
-    // Get the latest stage (lowest stage_number that has results, default to etappe 1)
+    // Get the latest stage (highest stage_number) that has results
     const query = `
       SELECT 
         s.id,
@@ -45,7 +45,7 @@ exports.handler = async function(event) {
         FROM stage_results sr 
         WHERE sr.stage_id = s.id
       )
-      ORDER BY s.stage_number ASC
+      ORDER BY s.stage_number DESC
       LIMIT 1
     `;
     

@@ -992,25 +992,32 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Load user data from database
   await loadUserData();
   
-  // Load dashboard data (using stub data for now)
-  // Small delay to ensure DOM is ready
-  setTimeout(async () => {
-    await loadDashboardData();
-  }, 100);
-
   // Setup button click handlers
   setupButtonHandlers();
   
   // Setup info popup handlers
   setupInfoPopupHandlers();
+  
+  // Load dashboard data (using stub data for now)
+  // Small delay to ensure DOM is ready
+  setTimeout(async () => {
+    await loadDashboardData();
+    // Setup info popup handlers again after data is loaded (in case DOM changed)
+    setupInfoPopupHandlers();
+  }, 100);
 });
+
+// Flag to track if document click listener has been added
+let infoPopupDocumentListenerAdded = false;
+let pointsInfoButtonListenerAdded = false;
 
 // Setup info popup handlers
 function setupInfoPopupHandlers() {
   const pointsInfoButton = document.getElementById('points-info-button');
   const pointsPopup = document.getElementById('points-info-popup');
   
-  if (pointsInfoButton && pointsPopup) {
+  if (pointsInfoButton && pointsPopup && !pointsInfoButtonListenerAdded) {
+    pointsInfoButtonListenerAdded = true;
     pointsInfoButton.addEventListener('click', function(e) {
       e.stopPropagation();
       const isOpen = pointsPopup.style.display !== 'none';
@@ -1025,12 +1032,16 @@ function setupInfoPopupHandlers() {
     });
   }
   
-  // Close popups when clicking outside
-  document.addEventListener('click', function(e) {
-    if (!e.target.closest('.info-icon-button') && !e.target.closest('.info-popup')) {
-      closeAllInfoPopups();
-    }
-  });
+  // Close popups when clicking outside (only add once)
+  if (!infoPopupDocumentListenerAdded) {
+    infoPopupDocumentListenerAdded = true;
+    document.addEventListener('click', function(e) {
+      const isClickInsidePopup = e.target.closest('.info-popup') || e.target.closest('.info-icon-button');
+      if (!isClickInsidePopup) {
+        closeAllInfoPopups();
+      }
+    });
+  }
 }
 
 function closeAllInfoPopups() {

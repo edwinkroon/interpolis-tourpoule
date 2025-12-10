@@ -76,9 +76,23 @@
 
             <!-- Dagwinnaars Section (Most Important) -->
             <div class="dashboard-section day-winners-section">
-              <div class="day-winners-header">
-                <h2 class="dashboard-section-title">Dagwinnaars</h2>
-                <div class="day-winners-route" id="day-winners-route"></div>
+              <div class="team-card-header">
+                <div class="day-winners-header">
+                  <h2 class="dashboard-section-title">Dagwinnaars</h2>
+                  <div class="day-winners-route" id="day-winners-route"></div>
+                </div>
+                <button class="info-icon-button" id="day-winners-info-button" aria-label="Informatie over dagwinnaars">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    <text x="10" y="14" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">i</text>
+                  </svg>
+                </button>
+                <div class="info-popup" id="day-winners-info-popup" style="display: none;">
+                  <div class="info-popup-content">
+                    <h3>Dagwinnaars</h3>
+                    <p>Hier zie je de drie teams die de meeste punten hebben gehaald bij de laatste etappe. De teams worden gesorteerd op basis van het aantal punten dat ze hebben behaald bij deze etappe.</p>
+                  </div>
+                </div>
               </div>
               <div class="day-winners-list" id="day-winners-list">
                 <!-- Day winners will be rendered here -->
@@ -130,7 +144,21 @@
           <div class="dashboard-column">
             <!-- Stand Section -->
             <div class="dashboard-section standings-section">
-              <h2 class="dashboard-section-title">Stand</h2>
+              <div class="team-card-header">
+                <h2 class="dashboard-section-title">Stand</h2>
+                <button class="info-icon-button" id="standings-info-button" aria-label="Informatie over stand">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    <text x="10" y="14" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">i</text>
+                  </svg>
+                </button>
+                <div class="info-popup" id="standings-info-popup" style="display: none;">
+                  <div class="info-popup-content">
+                    <h3>Stand</h3>
+                    <p>Hier zie je de huidige stand van alle teams. De teams worden gesorteerd op basis van het totale aantal punten dat ze hebben behaald tijdens alle etappes.</p>
+                  </div>
+                </div>
+              </div>
               <div class="standings-list" id="standings-list">
                 <!-- Standings will be rendered here -->
               </div>

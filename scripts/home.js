@@ -1102,6 +1102,10 @@ function setupButtonHandlers() {
 function setupInfoPopupHandlers() {
   const pointsInfoButton = document.getElementById('points-info-button');
   const pointsPopup = document.getElementById('points-info-popup');
+  const dayWinnersInfoButton = document.getElementById('day-winners-info-button');
+  const dayWinnersPopup = document.getElementById('day-winners-info-popup');
+  const standingsInfoButton = document.getElementById('standings-info-button');
+  const standingsPopup = document.getElementById('standings-info-popup');
   
   // Only add listener if button exists and listener hasn't been added yet
   if (pointsInfoButton && pointsPopup && !pointsInfoButton.hasAttribute('data-listener-added')) {
@@ -1116,6 +1120,38 @@ function setupInfoPopupHandlers() {
       // Toggle this popup
       if (!isOpen) {
         pointsPopup.style.display = 'block';
+      }
+    });
+  }
+  
+  if (dayWinnersInfoButton && dayWinnersPopup && !dayWinnersInfoButton.hasAttribute('data-listener-added')) {
+    dayWinnersInfoButton.setAttribute('data-listener-added', 'true');
+    dayWinnersInfoButton.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const isOpen = dayWinnersPopup.style.display !== 'none';
+      
+      // Close all popups first
+      closeAllInfoPopups();
+      
+      // Toggle this popup
+      if (!isOpen) {
+        dayWinnersPopup.style.display = 'block';
+      }
+    });
+  }
+  
+  if (standingsInfoButton && standingsPopup && !standingsInfoButton.hasAttribute('data-listener-added')) {
+    standingsInfoButton.setAttribute('data-listener-added', 'true');
+    standingsInfoButton.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const isOpen = standingsPopup.style.display !== 'none';
+      
+      // Close all popups first
+      closeAllInfoPopups();
+      
+      // Toggle this popup
+      if (!isOpen) {
+        standingsPopup.style.display = 'block';
       }
     });
   }

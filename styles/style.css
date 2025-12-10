@@ -1075,6 +1075,10 @@ button[aria-busy="true"] {
   transform: rotate(0deg);
 }
 .day-winners-header {
+  flex: 1;
+  margin-bottom: 0;
+}
+.day-winners-section .team-card-header {
   margin-bottom: 1.5rem;
 }
 .day-winners-section .dashboard-section-title {

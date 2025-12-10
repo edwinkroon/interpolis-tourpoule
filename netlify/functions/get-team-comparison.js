@@ -10,13 +10,23 @@ exports.handler = async function(event) {
   }
 
   // Get participant_id from query string
-  const participantId = event.queryStringParameters?.participantId;
+  const participantIdParam = event.queryStringParameters?.participantId;
   
-  if (!participantId) {
+  if (!participantIdParam) {
     return {
       statusCode: 400,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ok: false, error: 'participantId parameter is required' })
+    };
+  }
+  
+  const participantId = parseInt(participantIdParam, 10);
+  
+  if (isNaN(participantId)) {
+    return {
+      statusCode: 400,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ok: false, error: 'participantId must be a valid number' })
     };
   }
 
@@ -121,15 +131,14 @@ exports.handler = async function(event) {
     }
 
     // Get all stages with results to calculate total points per rider
-    const stagesWithResultsQuery = `
+    const stagesWithResults = await client.query(`
       SELECT DISTINCT s.id, s.stage_number
       FROM stages s
       WHERE EXISTS (
         SELECT 1 FROM stage_results sr WHERE sr.stage_id = s.id
       )
       ORDER BY s.stage_number ASC
-    `;
-    const stagesWithResults = await client.query(stagesWithResultsQuery);
+    `);
 
     // Get scoring rules
     const scoringRulesQuery = `
@@ -217,24 +226,11 @@ exports.handler = async function(event) {
       isActive: activeRiderIds.has(row.id) // Whether rider is still active
     }));
 
-    // Get latest standings to find rank and total points
-    const latestStageQuery = `
-      SELECT s.id, s.stage_number
-      FROM stages s
-      WHERE EXISTS (
-        SELECT 1 FROM stage_results sr WHERE sr.stage_id = s.id
-      )
-      ORDER BY s.stage_number DESC
-      LIMIT 1
-    `;
-    
-    const latestStageResult = await client.query(latestStageQuery);
-    
+    // Get latest standings to find rank and total points (reuse latestStageId from above)
     let totalPoints = 0;
     let rank = null;
     
-    if (latestStageResult.rows.length > 0) {
-      const latestStageId = latestStageResult.rows[0].id;
+    if (latestStageId) {
       
       // Try to get from cumulative points first
       const cumulativeQuery = `
@@ -300,6 +296,9 @@ exports.handler = async function(event) {
       })
     };
   } catch (err) {
+    console.error('Error in get-team-comparison:', err);
+    console.error('Error message:', err.message);
+    console.error('Error stack:', err.stack);
     return await handleDbError(err, client);
   }
 };

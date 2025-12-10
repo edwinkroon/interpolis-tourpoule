@@ -151,6 +151,32 @@ async function calculateStagePoints(client, stageId) {
   });
   
 
+  // Check if stage is cancelled - if so, return early (no points calculation needed)
+  const stageCheck = await client.query(
+    'SELECT is_neutralized, is_cancelled FROM stages WHERE id = $1',
+    [stageId]
+  );
+  
+  if (stageCheck.rows.length > 0 && stageCheck.rows[0].is_cancelled) {
+    // Stage is cancelled - no points should be awarded
+    // Still create entries with 0 points for all participants
+    const allParticipants = await client.query('SELECT id FROM participants');
+    for (const participant of allParticipants.rows) {
+      await client.query(
+        `INSERT INTO fantasy_stage_points 
+         (stage_id, participant_id, points_stage, points_jerseys, points_bonus)
+         VALUES ($1, $2, 0, 0, 0)
+         ON CONFLICT (stage_id, participant_id)
+         DO UPDATE SET
+           points_stage = 0,
+           points_jerseys = 0,
+           points_bonus = 0`,
+        [stageId, participant.id]
+      );
+    }
+    return { participantsCalculated: allParticipants.rows.length };
+  }
+
   // Step 2: Get all stage results for this stage
   const stageResults = await client.query(
     `SELECT rider_id, position 
@@ -235,13 +261,17 @@ async function calculateStagePoints(client, stageId) {
     let pointsJerseys = 0;
 
     // Calculate points from stage positions
-    teams.forEach(team => {
-      const stageResult = stageResults.rows.find(sr => sr.rider_id === team.rider_id);
-      if (stageResult) {
-        const positionPoints = positionPointsMap.get(stageResult.position) || 0;
-        pointsStage += positionPoints;
-      }
-    });
+    // BUSINESS RULE 11: If stage is neutralized, no stage position points are awarded
+    const isNeutralized = stageCheck.rows.length > 0 && stageCheck.rows[0].is_neutralized;
+    if (!isNeutralized) {
+      teams.forEach(team => {
+        const stageResult = stageResults.rows.find(sr => sr.rider_id === team.rider_id);
+        if (stageResult) {
+          const positionPoints = positionPointsMap.get(stageResult.position) || 0;
+          pointsStage += positionPoints;
+        }
+      });
+    }
 
     // Calculate points from jerseys
     // BUSINESS RULE 9: No jersey points on final stage

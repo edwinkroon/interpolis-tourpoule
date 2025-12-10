@@ -46,6 +46,50 @@ exports.handler = async function(event) {
 
     client = await getDbClient();
 
+    // Check if deadline has passed or first stage has results
+    const deadlineCheck = await client.query(
+      `SELECT value FROM settings WHERE key = 'registration_deadline'`
+    );
+    
+    const firstStageCheck = await client.query(
+      `SELECT COUNT(*) as count
+       FROM stage_results sr
+       JOIN stages s ON sr.stage_id = s.id
+       WHERE s.stage_number = 1`
+    );
+    
+    const hasFirstStageResults = parseInt(firstStageCheck.rows[0]?.count || 0, 10) > 0;
+    
+    // Check deadline if set
+    if (deadlineCheck.rows.length > 0 && deadlineCheck.rows[0].value) {
+      const deadline = new Date(deadlineCheck.rows[0].value);
+      const now = new Date();
+      
+      if (now > deadline) {
+        await client.end();
+        return {
+          statusCode: 403,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            ok: false, 
+            error: 'De aanmeldingsdeadline is verstreken. Je team kan niet meer worden gewijzigd.' 
+          })
+        };
+      }
+    }
+    
+    // Check if first stage has results
+    if (hasFirstStageResults) {
+      await client.end();
+      return {
+        statusCode: 403,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          ok: false, 
+          error: 'De eerste etappe heeft al resultaten. Je team kan niet meer worden gewijzigd.' 
+        })
+      };
+    }
 
     // Start transaction
     await client.query('BEGIN');

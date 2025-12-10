@@ -27,6 +27,8 @@ exports.handler = async function(event) {
         s.end_location,
         s.distance_km,
         s.date,
+        s.is_neutralized,
+        s.is_cancelled,
         -- Get winner (rider with position 1)
         (
           SELECT json_build_object(
@@ -56,6 +58,8 @@ exports.handler = async function(event) {
       end_location: row.end_location,
       distance_km: row.distance_km ? parseFloat(row.distance_km) : null,
       date: row.date,
+      is_neutralized: row.is_neutralized || false,
+      is_cancelled: row.is_cancelled || false,
       winner: row.winner
     }));
     

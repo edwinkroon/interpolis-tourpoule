@@ -1,17 +1,10 @@
-const { Client } = require('pg');
+const { getDbClient, handleDbError, missingDbConfigResponse } = require('./_shared/db');
 
 exports.handler = async function(event) {
   let client;
   try {
     if (!process.env.NEON_DATABASE_URL) {
-      return {
-        statusCode: 500,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ok: false,
-          error: 'Database configuration missing'
-        })
-      };
+      return missingDbConfigResponse();
     }
 
     // Get user_id from query string (passed from frontend)
@@ -40,12 +33,7 @@ exports.handler = async function(event) {
       };
     }
 
-    client = new Client({
-      connectionString: process.env.NEON_DATABASE_URL,
-      ssl: { rejectUnauthorized: false }
-    });
-
-    await client.connect();
+    client = await getDbClient();
 
     // Get participant
     const participantResult = await client.query(
@@ -201,27 +189,7 @@ exports.handler = async function(event) {
       })
     };
   } catch (err) {
-    if (client) {
-      try {
-        await client.end();
-      } catch (closeErr) {
-        // Silent fail
-      }
-    }
-
-    console.error('Error in get-my-stage-riders:', err);
-
-    return {
-      statusCode: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      },
-      body: JSON.stringify({
-        ok: false,
-        error: err.message || 'Database error'
-      })
-    };
+    return await handleDbError(err, client);
   }
 };
 

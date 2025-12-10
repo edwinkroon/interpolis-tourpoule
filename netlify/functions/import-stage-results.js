@@ -189,17 +189,12 @@ exports.handler = async function(event) {
     };
   }
 
+  const { getDbClient, handleDbError, missingDbConfigResponse } = require('./_shared/db');
+  
   let client;
   try {
     if (!process.env.NEON_DATABASE_URL) {
-      return {
-        statusCode: 500,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ok: false,
-          error: 'Database configuration missing'
-        })
-      };
+      return missingDbConfigResponse();
     }
 
     let body;
@@ -242,12 +237,7 @@ exports.handler = async function(event) {
       };
     }
 
-    client = new Client({
-      connectionString: process.env.NEON_DATABASE_URL,
-      ssl: { rejectUnauthorized: false }
-    });
-
-    await client.connect();
+    client = await getDbClient();
 
     // Verify stage exists
     const stageCheck = await client.query('SELECT id, stage_number, name FROM stages WHERE id = $1', [stageId]);
@@ -396,28 +386,16 @@ exports.handler = async function(event) {
       throw err;
     }
   } catch (err) {
+    // Try to rollback if in transaction
     if (client) {
       try {
-        await client.end();
-      } catch (closeErr) {
-        // Silent fail on connection close error
+        await client.query('ROLLBACK');
+      } catch (rollbackErr) {
+        // Transaction might already be aborted, that's ok
       }
     }
-
-    console.error('Error in import-stage-results function:', err);
-
-    return {
-      statusCode: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      },
-      body: JSON.stringify({
-        ok: false,
-        error: err.message || 'Database error',
-        details: process.env.NODE_ENV === 'development' ? err.stack : undefined
-      })
-    };
+    return await handleDbError(err, client);
   }
 };
+
 

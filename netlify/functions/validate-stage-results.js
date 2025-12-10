@@ -1,4 +1,4 @@
-const { Client } = require('pg');
+const { getDbClient, handleDbError, missingDbConfigResponse } = require('./_shared/db');
 
 exports.handler = async function(event) {
   if (event.httpMethod !== 'POST') {
@@ -12,14 +12,7 @@ exports.handler = async function(event) {
   let client;
   try {
     if (!process.env.NEON_DATABASE_URL) {
-      return {
-        statusCode: 500,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ok: false,
-          error: 'Database configuration missing'
-        })
-      };
+      return missingDbConfigResponse();
     }
 
     let body;
@@ -61,12 +54,7 @@ exports.handler = async function(event) {
       };
     }
 
-    client = new Client({
-      connectionString: process.env.NEON_DATABASE_URL,
-      ssl: { rejectUnauthorized: false }
-    });
-
-    await client.connect();
+    client = await getDbClient();
 
     // Helper function to normalize names (remove diacritics)
     // Similar to Python's normalize_name function
@@ -792,37 +780,7 @@ exports.handler = async function(event) {
       })
     };
   } catch (err) {
-    if (client) {
-      try {
-        await client.end();
-      } catch (closeErr) {
-        // Silent fail on connection close error
-      }
-    }
-
-    console.error('Error in validate-stage-results function:', err);
-    console.error('Error stack:', err.stack);
-    console.error('Error details:', {
-      message: err.message,
-      code: err.code,
-      detail: err.detail,
-      hint: err.hint
-    });
-
-    return {
-      statusCode: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      },
-      body: JSON.stringify({
-        ok: false,
-        error: err.message || 'Database error',
-        errorCode: err.code,
-        details: process.env.NODE_ENV === 'development' ? err.stack : undefined,
-        hint: err.hint || err.detail
-      })
-    };
+    return await handleDbError(err, client);
   }
 };
 

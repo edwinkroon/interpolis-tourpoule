@@ -1,4 +1,4 @@
-const { Client } = require('pg');
+const { getDbClient, handleDbError, missingDbConfigResponse } = require('./_shared/db');
 
 exports.handler = async function(event) {
   if (event.httpMethod !== 'POST') {
@@ -12,14 +12,7 @@ exports.handler = async function(event) {
   let client;
   try {
     if (!process.env.NEON_DATABASE_URL) {
-      return {
-        statusCode: 500,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          ok: false, 
-          error: 'Database configuration missing' 
-        })
-      };
+      return missingDbConfigResponse();
     }
 
     // Parse request body
@@ -62,12 +55,7 @@ exports.handler = async function(event) {
       };
     }
 
-    client = new Client({
-      connectionString: process.env.NEON_DATABASE_URL,
-      ssl: { rejectUnauthorized: false }
-    });
-
-    await client.connect();
+    client = await getDbClient();
 
     // Check if fantasy_team_jerseys table exists BEFORE starting transaction
     // (DDL operations like CREATE TABLE auto-commit, which breaks transactions)
@@ -256,20 +244,7 @@ exports.handler = async function(event) {
       }
     }
 
-    console.error('Error in save-team-jerseys function:', err);
-
-    return {
-      statusCode: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      },
-      body: JSON.stringify({
-        ok: false,
-        error: err.message || 'Database error',
-        details: process.env.NODE_ENV === 'development' ? err.stack : undefined
-      })
-    };
+    return await handleDbError(err, client);
   }
 };
 

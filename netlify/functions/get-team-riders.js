@@ -105,28 +105,7 @@ exports.handler = async function(event) {
       })
     };
   } catch (err) {
-    if (client) {
-      try {
-        await client.end();
-      } catch (closeErr) {
-        // Silent fail on connection close error
-      }
-    }
-
-    console.error('Error in get-team-riders function:', err);
-    
-    return {
-      statusCode: 500,
-      headers: { 
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      },
-      body: JSON.stringify({ 
-        ok: false, 
-        error: err.message || 'Database error',
-        details: process.env.NODE_ENV === 'development' ? err.stack : undefined
-      })
-    };
+    return await handleDbError(err, client);
   }
 };
 

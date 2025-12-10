@@ -1,4 +1,4 @@
-const { Client } = require('pg');
+const { getDbClient, handleDbError, missingDbConfigResponse } = require('./_shared/db');
 const fs = require('fs');
 const path = require('path');
 
@@ -15,14 +15,7 @@ exports.handler = async function(event) {
   try {
     // Check if database URL is set
     if (!process.env.NEON_DATABASE_URL) {
-      return {
-        statusCode: 500,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          ok: false, 
-          error: 'Database configuration missing' 
-        })
-      };
+      return missingDbConfigResponse();
     }
 
     // Read CSV file
@@ -95,12 +88,7 @@ exports.handler = async function(event) {
     }
 
     // Connect to database
-    client = new Client({
-      connectionString: process.env.NEON_DATABASE_URL,
-      ssl: { rejectUnauthorized: false }
-    });
-
-    await client.connect();
+    client = await getDbClient();
 
     // Check if teams_pro table exists, if not create it
     const createTableQuery = `
@@ -161,25 +149,7 @@ exports.handler = async function(event) {
       })
     };
   } catch (err) {
-    if (client) {
-      try {
-        await client.end();
-      } catch (closeErr) {
-        // Silent fail on connection close error
-      }
-    }
-
-    console.error('Import error:', err);
-    
-    return {
-      statusCode: 500,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        ok: false, 
-        error: err.message || 'Database error',
-        details: process.env.NODE_ENV === 'development' ? err.stack : undefined
-      })
-    };
+    return await handleDbError(err, client);
   }
 };
 

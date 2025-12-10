@@ -1,4 +1,4 @@
-const { Client } = require('pg');
+const { getDbClient, handleDbError, missingDbConfigResponse } = require('./_shared/db');
 
 exports.handler = async function(event) {
   if (event.httpMethod !== 'POST') {
@@ -78,26 +78,10 @@ exports.handler = async function(event) {
 
     // Check if database URL is set
     if (!process.env.NEON_DATABASE_URL) {
-      return {
-        statusCode: 500,
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ 
-          ok: false, 
-          error: 'Database configuration missing',
-          message: 'NEON_DATABASE_URL environment variable is not set. Please configure it in Netlify site settings.'
-        })
-      };
+      return missingDbConfigResponse();
     }
 
-    // Create new client for each request (serverless best practice)
-    client = new Client({
-      connectionString: process.env.NEON_DATABASE_URL,
-      ssl: { rejectUnauthorized: false }
-    });
-
-    await client.connect();
+    client = await getDbClient();
 
     // user_id is now required (NOT NULL), so always use ON CONFLICT for upsert
     const query = `
@@ -125,24 +109,6 @@ exports.handler = async function(event) {
       body: JSON.stringify({ ok: true, id: rows[0].id })
     };
   } catch (err) {
-    if (client) {
-      try {
-        await client.end();
-      } catch (closeErr) {
-        // Silent fail on connection close error
-      }
-    }
-
-    return {
-      statusCode: 500,
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ 
-        ok: false, 
-        error: err.message || 'Database error',
-        details: process.env.NODE_ENV === 'development' ? err.stack : undefined
-      })
-    };
+    return await handleDbError(err, client);
   }
 };

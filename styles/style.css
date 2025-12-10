@@ -2257,9 +2257,6 @@ button[aria-busy="true"] {
 }
 
 /* Team Info Card */
-.team-info-card {
-  margin-bottom: 1.5rem;
-}
 
 .team-info-header {
   display: flex;

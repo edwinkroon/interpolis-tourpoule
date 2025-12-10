@@ -218,8 +218,8 @@ function renderStageInfo(data) {
   // Stage results are now loaded from database, not from dummy data
   // renderStageResults(data.stageResults);
   
-  // Render jerseys
-  renderJerseys(data.jerseys);
+  // Jerseys are now loaded dynamically from database in loadStageData
+  // renderJerseys(data.jerseys);
 }
 
 async function loadMyRiders(stageNumber) {
@@ -405,6 +405,24 @@ function renderStageResults(results) {
   });
 }
 
+async function loadJerseyWearers(stageNumber) {
+  try {
+    const response = await fetch(`/.netlify/functions/get-stage-jersey-wearers?stage_number=${stageNumber}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    if (data.ok && data.jerseys) {
+      renderJerseys(data.jerseys);
+    } else {
+      showNoData('jerseys-list', 'Geen truidragers beschikbaar');
+    }
+  } catch (error) {
+    console.error('Error loading jersey wearers:', error);
+    showNoData('jerseys-list', 'Fout bij laden van truidragers');
+  }
+}
+
 function renderJerseys(jerseys) {
   const container = document.getElementById('jerseys-list');
   if (!container) return;
@@ -433,10 +451,18 @@ function renderJerseys(jerseys) {
     
     const jerseyInfo = jerseyClassMap[jersey.type] || { class: 'jersey-geel', title: 'Trui' };
     
+    // Use photo URL if available, otherwise use placeholder
+    let avatarHtml = '';
+    if (jersey.photoUrl) {
+      avatarHtml = `<img src="${sanitizeInput(jersey.photoUrl)}" alt="${sanitizeInput(jersey.rider)}" class="rider-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">`;
+    } else {
+      avatarHtml = `<img src="" alt="${sanitizeInput(jersey.rider)}" class="rider-photo" style="display: none;">`;
+    }
+    
     jerseyItem.innerHTML = `
       <div class="rider-avatar">
-        <img src="" alt="${sanitizeInput(jersey.rider)}" class="rider-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-        <div class="rider-avatar-placeholder" style="display: none;">${sanitizeInput(initials)}</div>
+        ${avatarHtml}
+        <div class="rider-avatar-placeholder" ${jersey.photoUrl ? 'style="display: none;"' : ''}>${sanitizeInput(initials)}</div>
       </div>
       <div class="rider-info">
         <div class="rider-name">${sanitizeInput(jersey.rider)}</div>
@@ -520,6 +546,9 @@ async function loadStageData(stage) {
   
   // Load day standings (top 3 teams)
   await loadDayStandings(stage.stage_number);
+  
+  // Load jersey wearers
+  await loadJerseyWearers(stage.stage_number);
   
   // Update URL without reload
   const newUrl = new URL(window.location);

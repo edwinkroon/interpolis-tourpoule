@@ -261,7 +261,8 @@ exports.handler = async function(event) {
       const timeSeconds = parseTimeToSeconds(timeStr);
 
       // Try to split rider name into first and last name
-      // Usually the last word is the last name, everything before is first name
+      // In the text file, the format is usually: last name first, then first name
+      // So the first word is the last name, everything after is the first name
       const nameParts = riderName.trim().split(/\s+/);
       let firstName, lastName;
       
@@ -270,13 +271,13 @@ exports.handler = async function(event) {
         firstName = null;
         lastName = nameParts[0];
       } else if (nameParts.length === 2) {
-        // Two words: first and last name
-        firstName = nameParts[0];
-        lastName = nameParts[1];
+        // Two words: first word is last name, second word is first name
+        lastName = nameParts[0];
+        firstName = nameParts[1];
       } else {
-        // More than two words: last word is last name, rest is first name
-        lastName = nameParts[nameParts.length - 1];
-        firstName = nameParts.slice(0, -1).join(' ');
+        // More than two words: first word is last name, rest is first name
+        lastName = nameParts[0];
+        firstName = nameParts.slice(1).join(' ');
       }
 
       parsedResults.push({

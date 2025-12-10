@@ -43,6 +43,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   
   // Setup jersey modal handlers
   setupJerseyModalHandlers();
+  
+  // Setup team edit modal handlers
+  setupTeamEditModalHandlers();
 });
 
 // Check if first stage has results
@@ -1391,6 +1394,268 @@ async function handleDeleteRiders() {
       deleteRiderButton.disabled = false;
       if (buttonSpan) {
         buttonSpan.textContent = 'verwijder';
+      }
+    }
+  }
+}
+
+// Setup team edit modal handlers
+function setupTeamEditModalHandlers() {
+  const teamEditButton = document.querySelector('.team-info-card .team-edit-button');
+  const teamEditModalOverlay = document.getElementById('team-edit-modal-overlay');
+  const teamEditModalClose = document.getElementById('team-edit-modal-close');
+  const teamEditSaveButton = document.getElementById('team-edit-save-button');
+  const teamEditAvatarInput = document.getElementById('team-edit-avatar-input');
+  
+  // Open modal when edit button is clicked
+  if (teamEditButton && teamEditModalOverlay) {
+    teamEditButton.addEventListener('click', async function() {
+      await openTeamEditModal();
+    });
+  }
+  
+  // Close modal when close button is clicked
+  if (teamEditModalClose && teamEditModalOverlay) {
+    teamEditModalClose.addEventListener('click', function() {
+      closeTeamEditModal();
+    });
+  }
+  
+  // Close modal when clicking outside
+  if (teamEditModalOverlay) {
+    teamEditModalOverlay.addEventListener('click', function(e) {
+      if (e.target === teamEditModalOverlay) {
+        closeTeamEditModal();
+      }
+    });
+  }
+  
+  // Handle avatar file input
+  if (teamEditAvatarInput) {
+    teamEditAvatarInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const avatarPreview = document.getElementById('team-edit-avatar-preview');
+          const avatarPlaceholder = document.getElementById('team-edit-avatar-placeholder');
+          if (avatarPreview) {
+            avatarPreview.src = e.target.result;
+            avatarPreview.style.display = 'block';
+            if (avatarPlaceholder) {
+              avatarPlaceholder.style.display = 'none';
+            }
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+  
+  // Save button handler
+  if (teamEditSaveButton) {
+    teamEditSaveButton.addEventListener('click', async function() {
+      await saveTeamData();
+    });
+  }
+}
+
+// Open team edit modal with current data
+async function openTeamEditModal() {
+  const modalOverlay = document.getElementById('team-edit-modal-overlay');
+  if (!modalOverlay) return;
+  
+  // Load current team data
+  const userId = await getUserId();
+  if (!userId) return;
+  
+  try {
+    const response = await fetch(`/.netlify/functions/get-user?userId=${encodeURIComponent(userId)}`);
+    const result = await response.json();
+    
+    if (result.ok && result.exists && result.participant) {
+      const participant = result.participant;
+      
+      // Fill form fields
+      const teamNameInput = document.getElementById('team-edit-name');
+      const memberNameInput = document.getElementById('team-edit-member-name');
+      const emailInput = document.getElementById('team-edit-email');
+      const newsletterCheckbox = document.getElementById('team-edit-newsletter');
+      const avatarPreview = document.getElementById('team-edit-avatar-preview');
+      const avatarPlaceholder = document.getElementById('team-edit-avatar-placeholder');
+      
+      if (teamNameInput) {
+        teamNameInput.value = participant.team_name || '';
+      }
+      
+      if (memberNameInput) {
+        // Extract name from email or use placeholder
+        if (participant.email) {
+          const emailParts = participant.email.split('@')[0];
+          const nameParts = emailParts.split('.');
+          const formattedName = nameParts.map(part => 
+            part.charAt(0).toUpperCase() + part.slice(1)
+          ).join(' ');
+          memberNameInput.value = formattedName;
+        } else {
+          memberNameInput.value = '';
+        }
+      }
+      
+      if (emailInput) {
+        emailInput.value = participant.email || '';
+      }
+      
+      if (newsletterCheckbox) {
+        newsletterCheckbox.checked = participant.newsletter || false;
+      }
+      
+      // Set avatar preview
+      if (participant.avatar_url && participant.avatar_url.trim()) {
+        if (avatarPreview) {
+          avatarPreview.src = participant.avatar_url;
+          avatarPreview.style.display = 'block';
+          if (avatarPlaceholder) {
+            avatarPlaceholder.style.display = 'none';
+          }
+        }
+      } else {
+        if (avatarPreview) {
+          avatarPreview.style.display = 'none';
+        }
+        if (avatarPlaceholder) {
+          const initials = participant.team_name 
+            ? participant.team_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+            : 'U';
+          avatarPlaceholder.textContent = initials;
+          avatarPlaceholder.style.display = 'flex';
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error loading team data for edit:', error);
+  }
+  
+  // Show modal
+  modalOverlay.style.display = 'flex';
+}
+
+// Close team edit modal
+function closeTeamEditModal() {
+  const modalOverlay = document.getElementById('team-edit-modal-overlay');
+  if (modalOverlay) {
+    modalOverlay.style.display = 'none';
+  }
+  
+  // Reset avatar input
+  const avatarInput = document.getElementById('team-edit-avatar-input');
+  if (avatarInput) {
+    avatarInput.value = '';
+  }
+}
+
+// Save team data
+async function saveTeamData() {
+  const saveButton = document.getElementById('team-edit-save-button');
+  const buttonSpan = saveButton?.querySelector('span');
+  
+  if (saveButton) {
+    saveButton.disabled = true;
+    if (buttonSpan) {
+      buttonSpan.textContent = 'Opslaan...';
+    }
+  }
+  
+  try {
+    const userId = await getUserId();
+    if (!userId) {
+      throw new Error('User not authenticated');
+    }
+    
+    // Get form values
+    const teamNameInput = document.getElementById('team-edit-name');
+    const emailInput = document.getElementById('team-edit-email');
+    const newsletterCheckbox = document.getElementById('team-edit-newsletter');
+    const avatarInput = document.getElementById('team-edit-avatar-input');
+    const avatarPreview = document.getElementById('team-edit-avatar-preview');
+    
+    const teamName = teamNameInput?.value.trim() || '';
+    const email = emailInput?.value.trim() || '';
+    const newsletter = newsletterCheckbox?.checked || false;
+    
+    // Get avatar URL (either from file input or existing preview)
+    let avatarUrl = null;
+    if (avatarInput?.files && avatarInput.files.length > 0) {
+      // New file selected - convert to data URL
+      const file = avatarInput.files[0];
+      avatarUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    } else if (avatarPreview && avatarPreview.style.display !== 'none') {
+      // Use existing avatar
+      avatarUrl = avatarPreview.src;
+    }
+    
+    // Validate required fields
+    if (!teamName) {
+      alert('Team naam is verplicht');
+      if (saveButton) {
+        saveButton.disabled = false;
+        if (buttonSpan) {
+          buttonSpan.textContent = 'opslaan';
+        }
+      }
+      return;
+    }
+    
+    if (!email) {
+      alert('Email is verplicht');
+      if (saveButton) {
+        saveButton.disabled = false;
+        if (buttonSpan) {
+          buttonSpan.textContent = 'opslaan';
+        }
+      }
+      return;
+    }
+    
+    // Save to API
+    const response = await fetch('/.netlify/functions/save-participant', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        userId: userId,
+        teamName: teamName,
+        email: email,
+        avatarUrl: avatarUrl,
+        newsletter: newsletter
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.ok) {
+      // Reload team data
+      await loadTeamData();
+      
+      // Close modal
+      closeTeamEditModal();
+    } else {
+      throw new Error(result.error || 'Failed to save team data');
+    }
+  } catch (error) {
+    console.error('Error saving team data:', error);
+    alert('Er is een fout opgetreden bij het opslaan van de team gegevens. Probeer het opnieuw.');
+  } finally {
+    if (saveButton) {
+      saveButton.disabled = false;
+      if (buttonSpan) {
+        buttonSpan.textContent = 'opslaan';
       }
     }
   }

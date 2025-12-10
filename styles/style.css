@@ -2652,6 +2652,127 @@ button[aria-busy="true"] {
     padding: 1rem 1.5rem;
   }
 }
+/* Team Edit Modal Styles */
+.team-edit-field {
+  margin-bottom: 1.5rem;
+}
+.team-edit-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #00334e;
+  margin-bottom: 0.5rem;
+}
+.team-edit-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 14px;
+  color: #00334e;
+  background: #fff;
+  border: 1px solid #cdd7dc;
+  border-radius: 10px;
+  font-family: 'Open Sans', system-ui, sans-serif;
+  transition: border-color 0.2s;
+}
+.team-edit-input:focus {
+  outline: none;
+  border-color: #00cac6;
+}
+.team-edit-avatar-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.team-edit-avatar-preview {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #cdd7dc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.team-edit-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.team-edit-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: #00334e;
+  text-transform: uppercase;
+}
+.team-edit-avatar-input {
+  display: none;
+}
+.team-edit-avatar-button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 1px solid #00334e;
+  border-radius: 10px;
+  color: #00334e;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Open Sans', system-ui, sans-serif;
+}
+.team-edit-avatar-button:hover {
+  background: #00334e;
+  color: #fff;
+}
+.team-edit-toggle-container {
+  display: flex;
+  align-items: center;
+}
+.team-edit-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+.team-edit-toggle-input {
+  display: none;
+}
+.team-edit-toggle-slider {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background: #cdd7dc;
+  border-radius: 12px;
+  transition: background 0.2s;
+}
+.team-edit-toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  top: 3px;
+  left: 3px;
+  transition: transform 0.2s;
+}
+.team-edit-toggle-input:checked + .team-edit-toggle-slider {
+  background: #00cac6;
+}
+.team-edit-toggle-input:checked + .team-edit-toggle-slider::before {
+  transform: translateX(20px);
+}
+.team-edit-toggle-label {
+  font-size: 14px;
+  color: #00334e;
+  font-weight: 400;
+}
 /* Etappe Toevoegen Page Styles */
 .etappe-form-container {
   margin-top: 1.5rem;

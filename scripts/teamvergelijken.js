@@ -171,8 +171,12 @@ function renderMyTeam(team) {
     rankEl.textContent = team.rank ? `#${team.rank}` : '-';
   }
   
-  // Riders
-  renderRiders(team.riders, 'my-team-riders');
+  // Store team data for comparison
+  myTeamData = team;
+  
+  // Riders (no comparison needed for my team)
+  renderRiders(team.mainRiders || [], 'my-team-main-riders', []);
+  renderRiders(team.reserveRiders || [], 'my-team-reserve-riders', []);
 }
 
 // Render compare team
@@ -215,11 +219,16 @@ function renderCompareTeam(team) {
   }
   
   // Riders
-  renderRiders(team.riders, 'compare-team-riders');
+  const myTeamMainRiders = myTeamData ? (myTeamData.mainRiders || []) : [];
+  const myTeamReserveRiders = myTeamData ? (myTeamData.reserveRiders || []) : [];
+  const allMyRiders = [...myTeamMainRiders, ...myTeamReserveRiders];
+  
+  renderRiders(team.mainRiders || [], 'compare-team-main-riders', allMyRiders);
+  renderRiders(team.reserveRiders || [], 'compare-team-reserve-riders', allMyRiders);
 }
 
 // Render riders list
-function renderRiders(riders, containerId) {
+function renderRiders(riders, containerId, otherTeamRiders = []) {
   const container = document.getElementById(containerId);
   if (!container) return;
   
@@ -230,12 +239,24 @@ function renderRiders(riders, containerId) {
     return;
   }
   
+  // Create map of other team rider IDs for comparison
+  const otherTeamRiderIds = new Set(otherTeamRiders.map(r => r.id));
+  
   riders.forEach(rider => {
     const riderItem = document.createElement('div');
-    riderItem.className = 'team-compare-rider-item';
+    const isShared = otherTeamRiderIds.has(rider.id);
+    riderItem.className = `team-compare-rider-item ${isShared ? 'team-compare-rider-shared' : ''}`;
     
     const name = `${rider.firstName || ''} ${rider.lastName || ''}`.trim();
     const initials = getRiderInitials(rider.firstName, rider.lastName);
+    
+    // Build jersey badges
+    let jerseyBadges = '';
+    if (rider.jerseys && rider.jerseys.length > 0) {
+      jerseyBadges = rider.jerseys.map(jersey => {
+        return `<span class="team-compare-rider-jersey-badge" title="${sanitizeInput(jersey.name)}">${jersey.icon || '🏆'}</span>`;
+      }).join('');
+    }
     
     riderItem.innerHTML = `
       <div class="team-compare-rider-avatar-container">
@@ -246,8 +267,12 @@ function renderRiders(riders, containerId) {
         }
       </div>
       <div class="team-compare-rider-info">
-        <div class="team-compare-rider-name">${sanitizeInput(name)}</div>
+        <div class="team-compare-rider-header">
+          <div class="team-compare-rider-name">${sanitizeInput(name)}</div>
+          ${jerseyBadges ? `<div class="team-compare-rider-jerseys">${jerseyBadges}</div>` : ''}
+        </div>
         <div class="team-compare-rider-team">${sanitizeInput(rider.teamName)}</div>
+        <div class="team-compare-rider-points">${rider.totalPoints || 0} punten</div>
       </div>
     `;
     

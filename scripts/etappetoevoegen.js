@@ -13,6 +13,16 @@ document.addEventListener('DOMContentLoaded', async function() {
   let currentStageId = null;
   let originalResultsText = null;
 
+  // Setup navigation buttons
+  document.querySelectorAll('[data-nav]').forEach(button => {
+    button.addEventListener('click', function() {
+      const target = this.getAttribute('data-nav');
+      if (target) {
+        window.location.href = target;
+      }
+    });
+  });
+
   // Load stages without results
   async function loadStagesWithoutResults() {
     const stageSelect = document.getElementById('stage-select');

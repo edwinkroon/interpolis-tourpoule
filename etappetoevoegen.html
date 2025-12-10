@@ -9,9 +9,9 @@
   <script src="scripts/auth0-spa-js.production.js"></script>
   <script src="scripts/auth-config.js"></script>
   <script src="scripts/auth.js"></script>
-  <script src="scripts/utils.js"></script>
-  <script src="scripts/build-info.js"></script>
-  <script src="scripts/etappetoevoegen.js"></script>
+  <script src="scripts/utils.js" defer></script>
+  <script src="scripts/build-info.js" defer></script>
+  <script src="scripts/etappetoevoegen.js" defer></script>
 </head>
 <body>
   <div id="build-info" class="build-info"></div>
@@ -46,15 +46,15 @@
       <!-- Sidebar with Action Buttons -->
       <div class="sidebar col-3">
         <div class="action-buttons">
-          <button class="action-button" aria-label="Bekijk spelregels" onclick="window.location.href='rules.html'">
+          <button class="action-button" aria-label="Bekijk spelregels" data-nav="rules.html">
             <span>Spelregels</span>
             <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
           </button>
-          <button class="action-button" aria-label="Bekijk statistieken" onclick="window.location.href='statistieken.html'">
+          <button class="action-button" aria-label="Bekijk statistieken" data-nav="statistieken.html">
             <span>Statistieken</span>
             <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
           </button>
-          <button class="action-button" aria-label="Etappe toevoegen" onclick="window.location.href='etappetoevoegen.html'">
+          <button class="action-button" aria-label="Etappe toevoegen" data-nav="etappetoevoegen.html">
             <span>Etappe toevoegen</span>
             <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
           </button>

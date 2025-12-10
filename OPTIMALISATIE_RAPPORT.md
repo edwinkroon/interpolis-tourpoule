@@ -133,6 +133,9 @@
 2. Dependencies optimalisatie
 
 ### Lage Prioriteit (Optioneel)
-1. Project structuur herorganisatie
-2. Build proces optimalisatie
+1. ✅ Project structuur herorganisatie - Voorstel gemaakt in `PROJECT_STRUCTUUR_VOORSTEL.md`
+2. ✅ Build proces optimalisatie - HTML optimalisaties uitgevoerd:
+   - Inline onclick handlers vervangen door event listeners
+   - Scripts geoptimaliseerd met `defer` attribuut
+   - Build script toegevoegd (`scripts/build-optimize.js`)
 

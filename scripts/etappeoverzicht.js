@@ -52,6 +52,16 @@ document.addEventListener('DOMContentLoaded', async function() {
     // For development: still try to load data
   }
 
+  // Setup navigation buttons
+  document.querySelectorAll('[data-nav]').forEach(button => {
+    button.addEventListener('click', function() {
+      const target = this.getAttribute('data-nav');
+      if (target) {
+        window.location.href = target;
+      }
+    });
+  });
+
   // Get stage number from URL parameter, or use latest stage
   const urlParams = new URLSearchParams(window.location.search);
   const stageNumberParam = urlParams.get('stage');

@@ -359,37 +359,63 @@ exports.handler = async function(event) {
       
       // Try multiple matching strategies
       // Strategy 1: Match on full name (CONCAT first_name + last_name) - both original and normalized
-      const fullNameQuery = `
-        SELECT id, first_name, last_name 
-        FROM riders 
-        WHERE LOWER(TRIM(CONCAT(first_name, ' ', last_name))) = LOWER(TRIM($1))
-           OR (first_name_normalized IS NOT NULL AND last_name_normalized IS NOT NULL
-               AND CONCAT(first_name_normalized, ' ', last_name_normalized) = $2)
-        LIMIT 1
-      `;
-      const fullNameMatch = await client.query(fullNameQuery, [result.riderName, normalizedRiderName]);
+      // Try normalized fields first, but don't fail if they don't exist
+      let fullNameMatch;
+      try {
+        const fullNameQuery = `
+          SELECT id, first_name, last_name 
+          FROM riders 
+          WHERE LOWER(TRIM(CONCAT(first_name, ' ', last_name))) = LOWER(TRIM($1))
+             OR (first_name_normalized IS NOT NULL AND last_name_normalized IS NOT NULL
+                 AND CONCAT(first_name_normalized, ' ', last_name_normalized) = $2)
+          LIMIT 1
+        `;
+        fullNameMatch = await client.query(fullNameQuery, [result.riderName, normalizedRiderName]);
+      } catch (queryErr) {
+        // If normalized columns don't exist, try without them
+        const fullNameQuery = `
+          SELECT id, first_name, last_name 
+          FROM riders 
+          WHERE LOWER(TRIM(CONCAT(first_name, ' ', last_name))) = LOWER(TRIM($1))
+          LIMIT 1
+        `;
+        fullNameMatch = await client.query(fullNameQuery, [result.riderName]);
+      }
       
       if (fullNameMatch.rows.length > 0) {
         riderId = fullNameMatch.rows[0].id;
         matchedRider = fullNameMatch.rows[0];
       } else if (result.firstName && result.lastName) {
         // Strategy 2: Match on first and last name separately - both original and normalized
-        const nameQuery = `
-          SELECT id, first_name, last_name 
-          FROM riders 
-          WHERE (LOWER(TRIM(first_name)) = LOWER(TRIM($1))
-            AND LOWER(TRIM(last_name)) = LOWER(TRIM($2)))
-           OR (first_name_normalized IS NOT NULL AND last_name_normalized IS NOT NULL
-               AND first_name_normalized = $3
-               AND last_name_normalized = $4)
-        LIMIT 1
-        `;
-        const nameMatch = await client.query(nameQuery, [
-          result.firstName, 
-          result.lastName,
-          normalizedFirstName,
-          normalizedLastName
-        ]);
+        let nameMatch;
+        try {
+          const nameQuery = `
+            SELECT id, first_name, last_name 
+            FROM riders 
+            WHERE (LOWER(TRIM(first_name)) = LOWER(TRIM($1))
+              AND LOWER(TRIM(last_name)) = LOWER(TRIM($2)))
+             OR (first_name_normalized IS NOT NULL AND last_name_normalized IS NOT NULL
+                 AND first_name_normalized = $3
+                 AND last_name_normalized = $4)
+          LIMIT 1
+          `;
+          nameMatch = await client.query(nameQuery, [
+            result.firstName, 
+            result.lastName,
+            normalizedFirstName,
+            normalizedLastName
+          ]);
+        } catch (queryErr) {
+          // If normalized columns don't exist, try without them
+          const nameQuery = `
+            SELECT id, first_name, last_name 
+            FROM riders 
+            WHERE LOWER(TRIM(first_name)) = LOWER(TRIM($1))
+              AND LOWER(TRIM(last_name)) = LOWER(TRIM($2))
+          LIMIT 1
+          `;
+          nameMatch = await client.query(nameQuery, [result.firstName, result.lastName]);
+        }
         
         if (nameMatch.rows.length > 0) {
           riderId = nameMatch.rows[0].id;
@@ -397,22 +423,35 @@ exports.handler = async function(event) {
         } else {
           // Strategy 3: Try matching with reversed order (in case parsing was wrong)
           // Try: parsed firstName as last_name, parsed lastName as first_name - both original and normalized
-          const reversedNameQuery = `
-            SELECT id, first_name, last_name 
-            FROM riders 
-            WHERE (LOWER(TRIM(first_name)) = LOWER(TRIM($1))
-              AND LOWER(TRIM(last_name)) = LOWER(TRIM($2)))
-           OR (first_name_normalized IS NOT NULL AND last_name_normalized IS NOT NULL
-               AND first_name_normalized = $3
-               AND last_name_normalized = $4)
-            LIMIT 1
-          `;
-          const reversedMatch = await client.query(reversedNameQuery, [
-            result.lastName, 
-            result.firstName,
-            normalizedLastName,
-            normalizedFirstName
-          ]);
+          let reversedMatch;
+          try {
+            const reversedNameQuery = `
+              SELECT id, first_name, last_name 
+              FROM riders 
+              WHERE (LOWER(TRIM(first_name)) = LOWER(TRIM($1))
+                AND LOWER(TRIM(last_name)) = LOWER(TRIM($2)))
+             OR (first_name_normalized IS NOT NULL AND last_name_normalized IS NOT NULL
+                 AND first_name_normalized = $3
+                 AND last_name_normalized = $4)
+              LIMIT 1
+            `;
+            reversedMatch = await client.query(reversedNameQuery, [
+              result.lastName, 
+              result.firstName,
+              normalizedLastName,
+              normalizedFirstName
+            ]);
+          } catch (queryErr) {
+            // If normalized columns don't exist, try without them
+            const reversedNameQuery = `
+              SELECT id, first_name, last_name 
+              FROM riders 
+              WHERE LOWER(TRIM(first_name)) = LOWER(TRIM($1))
+                AND LOWER(TRIM(last_name)) = LOWER(TRIM($2))
+              LIMIT 1
+            `;
+            reversedMatch = await client.query(reversedNameQuery, [result.lastName, result.firstName]);
+          }
           
           if (reversedMatch.rows.length > 0) {
             riderId = reversedMatch.rows[0].id;
@@ -420,14 +459,26 @@ exports.handler = async function(event) {
           } else {
             // Strategy 4: Try matching just last name (fuzzy match) - both original and normalized
             // This helps with compound last names like "van der Poel"
-            const lastNameQuery = `
-              SELECT id, first_name, last_name 
-              FROM riders 
-              WHERE LOWER(TRIM(last_name)) = LOWER(TRIM($1))
-                 OR (last_name_normalized IS NOT NULL AND last_name_normalized = $2)
-              LIMIT 1
-            `;
-            const lastNameMatch = await client.query(lastNameQuery, [result.lastName, normalizedLastName]);
+            let lastNameMatch;
+            try {
+              const lastNameQuery = `
+                SELECT id, first_name, last_name 
+                FROM riders 
+                WHERE LOWER(TRIM(last_name)) = LOWER(TRIM($1))
+                   OR (last_name_normalized IS NOT NULL AND last_name_normalized = $2)
+                LIMIT 1
+              `;
+              lastNameMatch = await client.query(lastNameQuery, [result.lastName, normalizedLastName]);
+            } catch (queryErr) {
+              // If normalized columns don't exist, try without them
+              const lastNameQuery = `
+                SELECT id, first_name, last_name 
+                FROM riders 
+                WHERE LOWER(TRIM(last_name)) = LOWER(TRIM($1))
+                LIMIT 1
+              `;
+              lastNameMatch = await client.query(lastNameQuery, [result.lastName]);
+            }
             
             if (lastNameMatch.rows.length === 1) {
               // Only match if there's exactly one rider with this last name
@@ -440,22 +491,35 @@ exports.handler = async function(event) {
               if (result.firstName && result.firstName.length >= 4) {
                 const firstNamePrefix = result.firstName.substring(0, 4).toLowerCase();
                 const normalizedFirstNamePrefix = normalizedFirstName ? normalizedFirstName.substring(0, 4) : null;
-                const fuzzyNameQuery = `
-                  SELECT id, first_name, last_name 
-                  FROM riders 
-                  WHERE ((LOWER(SUBSTRING(TRIM(first_name), 1, 4)) = $1
-                    AND LOWER(TRIM(last_name)) = LOWER(TRIM($2)))
-                   OR (first_name_normalized IS NOT NULL AND last_name_normalized IS NOT NULL
-                       AND SUBSTRING(first_name_normalized, 1, 4) = $3
-                       AND last_name_normalized = $4))
-                  LIMIT 1
-                `;
-                const fuzzyMatch = await client.query(fuzzyNameQuery, [
-                  firstNamePrefix, 
-                  result.lastName,
-                  normalizedFirstNamePrefix,
-                  normalizedLastName
-                ]);
+                let fuzzyMatch;
+                try {
+                  const fuzzyNameQuery = `
+                    SELECT id, first_name, last_name 
+                    FROM riders 
+                    WHERE ((LOWER(SUBSTRING(TRIM(first_name), 1, 4)) = $1
+                      AND LOWER(TRIM(last_name)) = LOWER(TRIM($2)))
+                     OR (first_name_normalized IS NOT NULL AND last_name_normalized IS NOT NULL
+                         AND SUBSTRING(first_name_normalized, 1, 4) = $3
+                         AND last_name_normalized = $4))
+                    LIMIT 1
+                  `;
+                  fuzzyMatch = await client.query(fuzzyNameQuery, [
+                    firstNamePrefix, 
+                    result.lastName,
+                    normalizedFirstNamePrefix,
+                    normalizedLastName
+                  ]);
+                } catch (queryErr) {
+                  // If normalized columns don't exist, try without them
+                  const fuzzyNameQuery = `
+                    SELECT id, first_name, last_name 
+                    FROM riders 
+                    WHERE LOWER(SUBSTRING(TRIM(first_name), 1, 4)) = $1
+                      AND LOWER(TRIM(last_name)) = LOWER(TRIM($2))
+                    LIMIT 1
+                  `;
+                  fuzzyMatch = await client.query(fuzzyNameQuery, [firstNamePrefix, result.lastName]);
+                }
                 
                 if (fuzzyMatch.rows.length > 0) {
                   riderId = fuzzyMatch.rows[0].id;
@@ -553,6 +617,13 @@ exports.handler = async function(event) {
     }
 
     console.error('Error in validate-stage-results function:', err);
+    console.error('Error stack:', err.stack);
+    console.error('Error details:', {
+      message: err.message,
+      code: err.code,
+      detail: err.detail,
+      hint: err.hint
+    });
 
     return {
       statusCode: 500,
@@ -563,7 +634,9 @@ exports.handler = async function(event) {
       body: JSON.stringify({
         ok: false,
         error: err.message || 'Database error',
-        details: process.env.NODE_ENV === 'development' ? err.stack : undefined
+        errorCode: err.code,
+        details: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+        hint: err.hint || err.detail
       })
     };
   }

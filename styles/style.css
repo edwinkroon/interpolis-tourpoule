@@ -2238,6 +2238,10 @@ button[aria-busy="true"] {
   background: #f0f3f5;
 }
 
+.dashboard-section.static-card {
+  background: #f0f3f5;
+}
+
 .team-card-header {
   position: relative;
   display: flex;

@@ -69,7 +69,40 @@ exports.handler = async function(event) {
 
     await client.connect();
 
-    // Start transaction
+    // Check if fantasy_team_jerseys table exists BEFORE starting transaction
+    // (DDL operations like CREATE TABLE auto-commit, which breaks transactions)
+    let tableExists = false;
+    try {
+      await client.query(`
+        SELECT 1 FROM fantasy_team_jerseys LIMIT 1
+      `);
+      tableExists = true;
+    } catch (err) {
+      // Table doesn't exist, create it
+      if (err.code === '42P01') { // relation does not exist
+        await client.query(`
+          CREATE TABLE IF NOT EXISTS fantasy_team_jerseys (
+            id SERIAL PRIMARY KEY,
+            fantasy_team_id INTEGER NOT NULL,
+            jersey_id INTEGER NOT NULL,
+            rider_id INTEGER,
+            created_at TIMESTAMP DEFAULT NOW(),
+            updated_at TIMESTAMP DEFAULT NOW(),
+            FOREIGN KEY (fantasy_team_id) REFERENCES fantasy_teams(id) ON DELETE CASCADE,
+            FOREIGN KEY (jersey_id) REFERENCES jerseys(id) ON DELETE CASCADE,
+            FOREIGN KEY (rider_id) REFERENCES riders(id) ON DELETE SET NULL,
+            UNIQUE(fantasy_team_id, jersey_id)
+          )
+        `);
+        tableExists = true;
+      } else {
+        // Unexpected error, close connection and return
+        await client.end();
+        throw err;
+      }
+    }
+
+    // Start transaction for the rest of the operations
     await client.query('BEGIN');
 
     try {
@@ -138,46 +171,6 @@ exports.handler = async function(event) {
               error: `Rider ${assignment.riderId} is not in your fantasy team` 
             })
           };
-        }
-      }
-
-      // Check if fantasy_team_jerseys table exists, if not create it
-      // First, try to query it to see if it exists
-      let tableExists = false;
-      try {
-        await client.query(`
-          SELECT 1 FROM fantasy_team_jerseys LIMIT 1
-        `);
-        tableExists = true;
-      } catch (err) {
-        // Table doesn't exist, create it
-        if (err.code === '42P01') { // relation does not exist
-          // Rollback current transaction before creating table (DDL operations auto-commit)
-          await client.query('COMMIT');
-          
-          // Create table (this will auto-commit)
-          await client.query(`
-            CREATE TABLE IF NOT EXISTS fantasy_team_jerseys (
-              id SERIAL PRIMARY KEY,
-              fantasy_team_id INTEGER NOT NULL,
-              jersey_id INTEGER NOT NULL,
-              rider_id INTEGER,
-              created_at TIMESTAMP DEFAULT NOW(),
-              updated_at TIMESTAMP DEFAULT NOW(),
-              FOREIGN KEY (fantasy_team_id) REFERENCES fantasy_teams(id) ON DELETE CASCADE,
-              FOREIGN KEY (jersey_id) REFERENCES jerseys(id) ON DELETE CASCADE,
-              FOREIGN KEY (rider_id) REFERENCES riders(id) ON DELETE SET NULL,
-              UNIQUE(fantasy_team_id, jersey_id)
-            )
-          `);
-          
-          // Start a new transaction for the rest of the operations
-          await client.query('BEGIN');
-          tableExists = true;
-        } else {
-          // If it's not a "table doesn't exist" error, rollback and rethrow
-          await client.query('ROLLBACK');
-          throw err;
         }
       }
 

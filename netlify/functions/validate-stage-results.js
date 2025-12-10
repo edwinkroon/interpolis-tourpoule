@@ -96,11 +96,24 @@ exports.handler = async function(event) {
 
     // Helper function to parse time string (HH:MM:SS or MM:SS) to seconds
     function parseTimeToSeconds(timeStr) {
-      if (!timeStr || timeStr.trim() === '' || timeStr.toLowerCase() === 'dnf' || timeStr.toLowerCase() === 'dns') {
+      if (!timeStr || typeof timeStr !== 'string') {
         return null;
       }
       
-      const parts = timeStr.trim().split(':').map(p => parseInt(p, 10));
+      // Clean the time string: remove commas, trim whitespace
+      const cleaned = timeStr.replace(/,/g, '').trim();
+      
+      // Check for empty, DNF, DNS, or just commas
+      if (cleaned === '' || cleaned.toLowerCase() === 'dnf' || cleaned.toLowerCase() === 'dns' || cleaned === ',') {
+        return null;
+      }
+      
+      // Parse time format (HH:MM:SS or MM:SS)
+      const parts = cleaned.split(':').map(p => {
+        const parsed = parseInt(p, 10);
+        return isNaN(parsed) ? 0 : parsed;
+      });
+      
       if (parts.length === 2) {
         // MM:SS format
         return parts[0] * 60 + parts[1];
@@ -230,10 +243,16 @@ exports.handler = async function(event) {
       const originalLineNumbers = entry.originalLineNumbers;
       const lineNumber = originalLineNumbers.join('-'); // Show range if multiple lines
       
-      // Split by tab (ProCyclingStats format) or comma (fallback)
-      const parts = line.includes('\t') 
-        ? line.split('\t').map(part => part.trim())
-        : line.split(',').map(part => part.trim());
+      // Split by tab (ProCyclingStats format) - tabs are the primary separator
+      // Only use commas if there are no tabs at all
+      let parts;
+      if (line.includes('\t')) {
+        // Use tabs as separator (ProCyclingStats format)
+        parts = line.split('\t').map(part => part.trim());
+      } else {
+        // Fallback to commas only if no tabs are present
+        parts = line.split(',').map(part => part.trim());
+      }
       
       if (parts.length < 3) {
         errors.push({

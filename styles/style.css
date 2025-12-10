@@ -3246,6 +3246,13 @@ button[aria-busy="true"] {
   margin-bottom: 1rem;
 }
 
+.etappe-import-section .dashboard-section-title {
+  font-size: 20px;
+  font-weight: 700;
+  text-transform: none;
+  margin-bottom: 1.5rem;
+}
+
 .etappe-form-description {
   font-size: 14px;
   color: #00334e;

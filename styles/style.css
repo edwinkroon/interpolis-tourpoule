@@ -3032,3 +3032,241 @@ button[aria-busy="true"] {
   }
 }
 
+/* Etappe Toevoegen Page Styles */
+.etappe-form-container {
+  margin-top: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 14px;
+  color: #00334e;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.form-select {
+  width: 100%;
+  padding: 1rem;
+  font-size: 14px;
+  color: #00334e;
+  background: #fff;
+  border: 1px solid #00334e;
+  border-radius: 10px;
+  font-family: 'Open Sans', system-ui, sans-serif;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: #00cac6;
+}
+
+.form-textarea {
+  width: 100%;
+  padding: 1rem;
+  font-size: 14px;
+  color: #00334e;
+  background: #fff;
+  border: 1px solid #00334e;
+  border-radius: 10px;
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  resize: vertical;
+  min-height: 300px;
+  line-height: 1.6;
+  transition: border-color 0.2s;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: #00cac6;
+}
+
+.form-hint {
+  display: block;
+  font-size: 12px;
+  color: #668494;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+.form-actions {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.form-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 14px;
+  font-weight: 500;
+  color: #00334e;
+  background: #fff;
+  border: 1px solid #00334e;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Open Sans', system-ui, sans-serif;
+  text-transform: lowercase;
+}
+
+.form-button:hover {
+  background: #f0f3f5;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 51, 78, 0.1);
+}
+
+.form-button-primary {
+  background: #00334e;
+  color: #fff;
+  border-color: #00334e;
+}
+
+.form-button-primary:hover {
+  background: #004d6d;
+  border-color: #004d6d;
+}
+
+.form-button .action-arrow {
+  width: 12px;
+  height: 12px;
+  transform: rotate(-90deg);
+  filter: brightness(0) invert(1);
+}
+
+.form-button-primary .action-arrow {
+  filter: brightness(0) invert(1);
+}
+
+/* Validation Results */
+.validation-results {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  border-radius: 10px;
+}
+
+.validation-success {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #f0f9f4;
+  border: 2px solid #00aa2e;
+  border-radius: 10px;
+}
+
+.validation-success-icon {
+  font-size: 32px;
+  color: #00aa2e;
+  font-weight: bold;
+}
+
+.validation-success-message {
+  flex: 1;
+}
+
+.validation-success-message h3 {
+  font-size: 18px;
+  color: #00aa2e;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.validation-success-message p {
+  font-size: 14px;
+  color: #00334e;
+  margin: 0;
+}
+
+.validation-errors {
+  padding: 1.5rem;
+  background: #fff5f5;
+  border: 2px solid #d32f2f;
+  border-radius: 10px;
+}
+
+.validation-errors-header h3 {
+  font-size: 18px;
+  color: #d32f2f;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.validation-errors-header p {
+  font-size: 14px;
+  color: #00334e;
+  margin-bottom: 1rem;
+}
+
+.validation-errors-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.validation-error-item {
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid #ffcccc;
+  border-radius: 8px;
+  border-left: 4px solid #d32f2f;
+}
+
+.validation-error-line {
+  font-size: 12px;
+  font-weight: 600;
+  color: #d32f2f;
+  margin-bottom: 0.25rem;
+}
+
+.validation-error-content {
+  font-size: 13px;
+  color: #00334e;
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  background: #f9f9f9;
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin: 0.5rem 0;
+  word-break: break-all;
+}
+
+.validation-error-message {
+  font-size: 13px;
+  color: #d32f2f;
+  margin-top: 0.5rem;
+}
+
+.validation-error-summary {
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid #ffcccc;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #00334e;
+  text-align: center;
+}
+
+/* Import Success */
+.import-success {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #f0f9f4;
+  border: 2px solid #00aa2e;
+  border-radius: 10px;
+  margin-top: 2rem;
+}
+

@@ -791,6 +791,10 @@ async function loadDashboardData() {
         button.addEventListener('click', function() {
           window.location.href = 'statistieken.html';
         });
+      } else if (text === 'Etappe toevoegen') {
+        button.addEventListener('click', function() {
+          window.location.href = 'etappetoevoegen.html';
+        });
       }
     }
   });

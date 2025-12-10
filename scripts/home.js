@@ -491,6 +491,25 @@ async function loadStandings() {
   }
 }
 
+async function loadPrikbord() {
+  try {
+    const response = await fetch('/.netlify/functions/get-prikbord-messages');
+    const result = await response.json();
+    
+    if (result.ok && result.messages) {
+      renderPrikbord(result.messages);
+      return result.messages;
+    } else {
+      renderPrikbord([]);
+      return [];
+    }
+  } catch (error) {
+    console.error('Error loading prikbord:', error);
+    renderPrikbord([]);
+    return [];
+  }
+}
+
 function renderPrikbord(prikbordItems) {
   const prikbordList = document.getElementById('prikbord-list');
   const prikbordDot = document.getElementById('prikbord-dot');
@@ -893,12 +912,13 @@ async function loadDashboardData() {
       renderStandings([]);
     }
     
-    // Render prikbord
+    // Load and render prikbord
     try {
-      const dashboardData = stubDashboardData;
-      renderPrikbord(dashboardData.prikbord || []);
+      await loadPrikbord();
     } catch (error) {
-      console.error('Error rendering prikbord:', error);
+      console.error('Error loading prikbord:', error);
+      // Fallback to empty array on error
+      renderPrikbord([]);
     }
   } catch (error) {
     console.error('Error loading dashboard data:', error);
@@ -946,10 +966,12 @@ async function loadDashboardData() {
   const prikbordButton = document.querySelector('.prikbord-button');
   if (prikbordButton) {
     prikbordButton.addEventListener('click', function() {
-      // TODO: Navigate to prikbord page when it's created
-      // window.location.href = 'prikbord.html';
+      openPrikbordModal();
     });
   }
+  
+  // Setup prikbord modal handlers
+  setupPrikbordModalHandlers();
   
   // Add click handler for spelregels and statistieken buttons
   const actionButtons = document.querySelectorAll('.action-button');
@@ -1173,4 +1195,144 @@ function closeAllInfoPopups() {
   popups.forEach(popup => {
     popup.style.display = 'none';
   });
+}
+
+// Prikbord Modal Functions
+function setupPrikbordModalHandlers() {
+  const modalOverlay = document.getElementById('prikbord-modal-overlay');
+  const modalClose = document.getElementById('prikbord-modal-close');
+  const saveButton = document.getElementById('prikbord-save-button');
+  const messageInput = document.getElementById('prikbord-message-input');
+  const charCount = document.getElementById('prikbord-char-count');
+  
+  if (!modalOverlay || !modalClose || !saveButton || !messageInput) {
+    return;
+  }
+  
+  // Close modal handlers
+  modalClose.addEventListener('click', closePrikbordModal);
+  modalOverlay.addEventListener('click', function(e) {
+    if (e.target === modalOverlay) {
+      closePrikbordModal();
+    }
+  });
+  
+  // Character count handler
+  if (charCount && messageInput) {
+    messageInput.addEventListener('input', function() {
+      const length = messageInput.value.length;
+      charCount.textContent = length;
+    });
+  }
+  
+  // Save button handler
+  saveButton.addEventListener('click', async function() {
+    await savePrikbordMessage();
+  });
+  
+  // Close on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && modalOverlay.style.display !== 'none') {
+      closePrikbordModal();
+    }
+  });
+}
+
+function openPrikbordModal() {
+  const modalOverlay = document.getElementById('prikbord-modal-overlay');
+  const messageInput = document.getElementById('prikbord-message-input');
+  const charCount = document.getElementById('prikbord-char-count');
+  
+  if (modalOverlay) {
+    modalOverlay.style.display = 'flex';
+    // Reset form
+    if (messageInput) {
+      messageInput.value = '';
+    }
+    if (charCount) {
+      charCount.textContent = '0';
+    }
+    // Focus on textarea
+    if (messageInput) {
+      setTimeout(() => messageInput.focus(), 100);
+    }
+  }
+}
+
+function closePrikbordModal() {
+  const modalOverlay = document.getElementById('prikbord-modal-overlay');
+  const messageInput = document.getElementById('prikbord-message-input');
+  
+  if (modalOverlay) {
+    modalOverlay.style.display = 'none';
+  }
+  if (messageInput) {
+    messageInput.value = '';
+  }
+}
+
+async function savePrikbordMessage() {
+  const messageInput = document.getElementById('prikbord-message-input');
+  const saveButton = document.getElementById('prikbord-save-button');
+  
+  if (!messageInput || !saveButton) {
+    return;
+  }
+  
+  const message = messageInput.value.trim();
+  
+  if (!message) {
+    alert('Voer een opmerking in voordat je deze plaatst.');
+    return;
+  }
+  
+  if (message.length > 1000) {
+    alert('De opmerking is te lang. Maximum 1000 tekens.');
+    return;
+  }
+  
+  // Disable button during save
+  saveButton.disabled = true;
+  const originalText = saveButton.querySelector('span').textContent;
+  saveButton.querySelector('span').textContent = 'opslaan...';
+  
+  try {
+    const userId = await getUserId();
+    if (!userId) {
+      throw new Error('Gebruiker niet gevonden');
+    }
+    
+    const response = await fetch('/.netlify/functions/post-prikbord-message', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId: userId,
+        message: message
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.ok) {
+      // Close modal
+      closePrikbordModal();
+      
+      // Reload prikbord data
+      await loadDashboardData();
+      
+      // Show success message (optional)
+      // You could add a toast notification here
+    } else {
+      throw new Error(result.error || 'Fout bij het plaatsen van de opmerking');
+    }
+  } catch (error) {
+    console.error('Error saving prikbord message:', error);
+    alert('Er is een fout opgetreden bij het plaatsen van de opmerking. Probeer het opnieuw.');
+  } finally {
+    // Re-enable button
+    saveButton.disabled = false;
+    saveButton.querySelector('span').textContent = originalText;
+  }
 }

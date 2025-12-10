@@ -188,6 +188,44 @@
     </div>
   </main>
 
+  <!-- Prikbord Modal -->
+  <div class="modal-overlay" id="prikbord-modal-overlay" style="display: none;">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2 class="modal-title">Prikbord</h2>
+        <button class="modal-close" id="prikbord-modal-close" aria-label="Sluit modal">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      
+      <div class="modal-content">
+        <div class="prikbord-form-field">
+          <label class="prikbord-form-label" for="prikbord-message-input">Opmerking</label>
+          <textarea 
+            id="prikbord-message-input" 
+            class="prikbord-form-textarea" 
+            placeholder="Schrijf hier je opmerking..."
+            rows="6"
+            maxlength="1000"
+          ></textarea>
+          <div class="prikbord-form-char-count">
+            <span id="prikbord-char-count">0</span> / 1000
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <button class="modal-add-button" id="prikbord-save-button" aria-label="Plaats opmerking">
+          <span>plaats opmerking</span>
+          <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
+        </button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
 

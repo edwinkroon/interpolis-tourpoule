@@ -2912,6 +2912,46 @@ button[aria-busy="true"] {
   color: #00334e;
   font-weight: 400;
 }
+/* Prikbord Form Styles */
+.prikbord-form-field {
+  margin-bottom: 1.5rem;
+}
+.prikbord-form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #00334e;
+  margin-bottom: 0.5rem;
+}
+.prikbord-form-textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 14px;
+  color: #00334e;
+  background: #fff;
+  border: 1px solid #cdd7dc;
+  border-radius: 10px;
+  font-family: 'Open Sans', system-ui, sans-serif;
+  resize: vertical;
+  min-height: 120px;
+  transition: border-color 0.2s;
+  line-height: 1.5;
+}
+.prikbord-form-textarea:focus {
+  outline: none;
+  border-color: #00cac6;
+}
+.prikbord-form-textarea::placeholder {
+  color: #668494;
+}
+.prikbord-form-char-count {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+  font-size: 12px;
+  color: #668494;
+  font-weight: 400;
+}
 /* Etappe Toevoegen Page Styles */
 .etappe-form-container {
   margin-top: 1.5rem;

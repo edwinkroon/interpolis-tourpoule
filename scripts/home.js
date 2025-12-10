@@ -836,32 +836,70 @@ function updateChooseRidersTile(status, statusInfo = null) {
 async function loadDashboardData() {
   try {
     // Load team status and update tile
-    await loadTeamStatus();
+    try {
+      await loadTeamStatus();
+    } catch (error) {
+      console.error('Error loading team status:', error);
+    }
     
     // Load my points riders dynamically
-    const pointsData = await loadMyPointsRiders();
-    renderPoints(pointsData.totalPoints);
-    renderPointsRiders(pointsData.riders, pointsData.route);
+    try {
+      const pointsData = await loadMyPointsRiders();
+      if (pointsData) {
+        renderPoints(pointsData.totalPoints || 0);
+        renderPointsRiders(pointsData.riders || [], pointsData.route || '');
+      } else {
+        renderPoints(0);
+        renderPointsRiders([], '');
+      }
+    } catch (error) {
+      console.error('Error loading points riders:', error);
+      renderPoints(0);
+      renderPointsRiders([], '');
+    }
     
     // TODO: Replace with actual backend API call for achievements
     // For now, use stub data
-    const dashboardData = stubDashboardData;
-    renderAchievements(dashboardData.achievements);
+    try {
+      const dashboardData = stubDashboardData;
+      renderAchievements(dashboardData.achievements || []);
+    } catch (error) {
+      console.error('Error rendering achievements:', error);
+    }
     
     // Load day winners dynamically from latest stage
-    const dayWinnersData = await loadDayWinners();
-    renderDayWinners(dayWinnersData.winners || [], dayWinnersData.route);
+    try {
+      const dayWinnersData = await loadDayWinners();
+      renderDayWinners(dayWinnersData?.winners || [], dayWinnersData?.route || '');
+    } catch (error) {
+      console.error('Error loading day winners:', error);
+      renderDayWinners([], '');
+    }
     
     // Load standings from API
-    loadStandings().then(standings => {
-      if (standings && standings.length > 0) {
-        renderStandings(standings, 5); // Show only first 5 on home
-      } else {
+    try {
+      loadStandings().then(standings => {
+        if (standings && standings.length > 0) {
+          renderStandings(standings, 5); // Show only first 5 on home
+        } else {
+          renderStandings([]);
+        }
+      }).catch(error => {
+        console.error('Error loading standings:', error);
         renderStandings([]);
-      }
-    });
+      });
+    } catch (error) {
+      console.error('Error in standings load:', error);
+      renderStandings([]);
+    }
     
-    renderPrikbord(dashboardData.prikbord || []);
+    // Render prikbord
+    try {
+      const dashboardData = stubDashboardData;
+      renderPrikbord(dashboardData.prikbord || []);
+    } catch (error) {
+      console.error('Error rendering prikbord:', error);
+    }
   } catch (error) {
     console.error('Error loading dashboard data:', error);
   }
@@ -1009,15 +1047,15 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 // Flag to track if document click listener has been added
 let infoPopupDocumentListenerAdded = false;
-let pointsInfoButtonListenerAdded = false;
 
 // Setup info popup handlers
 function setupInfoPopupHandlers() {
   const pointsInfoButton = document.getElementById('points-info-button');
   const pointsPopup = document.getElementById('points-info-popup');
   
-  if (pointsInfoButton && pointsPopup && !pointsInfoButtonListenerAdded) {
-    pointsInfoButtonListenerAdded = true;
+  // Only add listener if button exists and listener hasn't been added yet
+  if (pointsInfoButton && pointsPopup && !pointsInfoButton.hasAttribute('data-listener-added')) {
+    pointsInfoButton.setAttribute('data-listener-added', 'true');
     pointsInfoButton.addEventListener('click', function(e) {
       e.stopPropagation();
       const isOpen = pointsPopup.style.display !== 'none';

@@ -19,6 +19,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Load team riders
   await loadTeamRiders();
   
+  // Load team jerseys
+  await loadTeamJerseys();
+  
   // Setup modal handlers
   setupModalHandlers();
   
@@ -236,6 +239,98 @@ function renderRidersList(riders, type, statusInfo = null) {
       
       ridersContainer.appendChild(riderItem);
     });
+  }
+}
+
+// Load team jerseys
+async function loadTeamJerseys() {
+  const userId = await getUserId();
+  
+  if (!userId) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/.netlify/functions/get-team-jerseys?userId=${encodeURIComponent(userId)}`);
+    const result = await response.json();
+    
+    if (result.ok && result.jerseys) {
+      renderJerseys(result.jerseys, result.allJerseysAssigned);
+    } else {
+      renderJerseys([], false);
+    }
+  } catch (error) {
+    console.error('Error loading team jerseys:', error);
+    renderJerseys([], false);
+  }
+}
+
+// Render jerseys list
+function renderJerseys(jerseys, allJerseysAssigned) {
+  const jerseysList = document.getElementById('jerseys-list');
+  const jerseysButton = document.getElementById('jerseys-edit-button');
+  const jerseysButtonText = document.getElementById('jerseys-button-text');
+  
+  if (!jerseysList) return;
+  
+  jerseysList.innerHTML = '';
+  
+  // Map jersey type to class name and title
+  const jerseyClassMap = {
+    'geel': { class: 'jersey-geel', title: 'Gele trui' },
+    'groen': { class: 'jersey-groen', title: 'Groene trui' },
+    'bolletjes': { class: 'jersey-bolletjes', title: 'Bolkentrui' },
+    'wit': { class: 'jersey-wit', title: 'Witte trui' }
+  };
+  
+  jerseys.forEach(jersey => {
+    const li = document.createElement('li');
+    li.className = 'jersey-item';
+    
+    const jerseyInfo = jerseyClassMap[jersey.type] || { class: 'jersey-geel', title: 'Trui' };
+    
+    if (jersey.assigned) {
+      // Jersey is assigned to a rider
+      const initials = jersey.assigned.first_name && jersey.assigned.last_name
+        ? `${jersey.assigned.first_name[0]}${jersey.assigned.last_name[0]}`.toUpperCase()
+        : jersey.assigned.last_name ? jersey.assigned.last_name.substring(0, 2).toUpperCase() : 'R';
+      
+      li.innerHTML = `
+        <div class="rider-avatar">
+          <img src="${jersey.assigned.photo_url || ''}" alt="${sanitizeInput(jersey.assigned.first_name || '')} ${sanitizeInput(jersey.assigned.last_name || '')}" class="rider-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+          <div class="rider-avatar-placeholder" style="display: none;">${sanitizeInput(initials)}</div>
+        </div>
+        <div class="rider-info">
+          <div class="rider-name">${sanitizeInput(jersey.assigned.first_name || '')} ${sanitizeInput(jersey.assigned.last_name || '')}</div>
+          <div class="rider-team">${sanitizeInput(jersey.assigned.team_name || '')}</div>
+        </div>
+        <div class="jersey-icon ${jerseyInfo.class}" title="${sanitizeInput(jerseyInfo.title)}"></div>
+      `;
+    } else {
+      // Jersey is not assigned
+      li.innerHTML = `
+        <div class="rider-avatar">
+          <div class="rider-avatar-placeholder" style="display: block; background: #f0f3f5; color: #668494;">—</div>
+        </div>
+        <div class="rider-info">
+          <div class="rider-name" style="color: #668494;">Niet toegewezen</div>
+          <div class="rider-team" style="color: #668494; font-style: italic;">Selecteer een renner</div>
+        </div>
+        <div class="jersey-icon ${jerseyInfo.class}" title="${sanitizeInput(jerseyInfo.title)}"></div>
+      `;
+    }
+    
+    jerseysList.appendChild(li);
+  });
+  
+  // Update button text based on whether all jerseys are assigned
+  if (jerseysButtonText) {
+    jerseysButtonText.textContent = allJerseysAssigned ? 'aanpassen' : 'toevoegen';
+  }
+  
+  // Update button aria-label
+  if (jerseysButton) {
+    jerseysButton.setAttribute('aria-label', allJerseysAssigned ? 'Aanpassen' : 'Toevoegen');
   }
 }
 

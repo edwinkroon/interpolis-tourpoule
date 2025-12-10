@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   
   // Setup jersey modal handlers
   setupJerseyModalHandlers();
-}
+});
 
 // Setup jersey modal handlers
 function setupJerseyModalHandlers() {

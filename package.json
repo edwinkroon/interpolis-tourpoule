@@ -1,8 +1,6 @@
 {
-  "devDependencies": {
-    "prisma": "^6.19.0"
-  },
-  "dependencies": {
-    "@prisma/client": "^6.19.0"
-  }
+  "name": "interpolis-tourpoule",
+  "version": "1.0.0",
+  "description": "Interpolis Tourpoule Fantasy Cycling Game",
+  "private": true
 }

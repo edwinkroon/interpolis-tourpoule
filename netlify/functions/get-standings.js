@@ -118,19 +118,60 @@ exports.handler = async function(event) {
     
     if (previousStageResult.rows.length > 0) {
       const previousStageId = previousStageResult.rows[0].id;
-      const previousStandingsQuery = `
-        SELECT 
-          participant_id,
-          rank
+      const previousStageNumber = previousStageResult.rows[0].stage_number;
+      
+      // Check if cumulative points exist for previous stage
+      const previousCumulativeCheck = await client.query(`
+        SELECT COUNT(*) as count
         FROM fantasy_cumulative_points
         WHERE after_stage_id = $1
-      `;
+      `, [previousStageId]);
       
-      const previousStandings = await client.query(previousStandingsQuery, [previousStageId]);
-      
-      previousStandings.rows.forEach(row => {
-        previousRankMap.set(row.participant_id, row.rank);
-      });
+      if (previousCumulativeCheck.rows[0].count > 0) {
+        // Use cumulative points if available
+        const previousStandingsQuery = `
+          SELECT 
+            participant_id,
+            rank
+          FROM fantasy_cumulative_points
+          WHERE after_stage_id = $1
+        `;
+        
+        const previousStandings = await client.query(previousStandingsQuery, [previousStageId]);
+        
+        previousStandings.rows.forEach(row => {
+          previousRankMap.set(row.participant_id, row.rank);
+        });
+      } else {
+        // Calculate previous rankings from stage points if cumulative doesn't exist
+        const previousStagePointsQuery = `
+          SELECT 
+            p.id as participant_id,
+            COALESCE(SUM(fsp.total_points), 0) as total_points
+          FROM participants p
+          LEFT JOIN fantasy_stage_points fsp ON fsp.participant_id = p.id
+          WHERE fsp.stage_id IN (
+            SELECT id FROM stages WHERE stage_number <= $1
+          )
+          GROUP BY p.id
+          ORDER BY total_points DESC, p.team_name ASC
+        `;
+        
+        const previousStagePointsResult = await client.query(previousStagePointsQuery, [previousStageNumber]);
+        
+        // Assign ranks (handle ties)
+        let previousRank = 1;
+        let previousPoints = null;
+        previousStagePointsResult.rows.forEach((row, index) => {
+          if (previousPoints !== null && row.total_points < previousPoints) {
+            previousRank = index + 1;
+          } else if (previousPoints === null || row.total_points > previousPoints) {
+            previousRank = index + 1;
+          }
+          previousRankMap.set(row.participant_id, previousRank);
+          previousPoints = row.total_points;
+        });
+      }
     }
 
     // Build standings with position change

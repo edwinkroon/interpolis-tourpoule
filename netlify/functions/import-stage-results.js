@@ -1,4 +1,5 @@
 const { getDbClient, handleDbError, missingDbConfigResponse } = require('./_shared/db');
+const { calculateCumulativePoints } = require('./calculate-cumulative-points');
 
 // Helper function to calculate stage points (shared with calculate-stage-points.js)
 async function calculateStagePoints(client, stageId) {
@@ -344,6 +345,14 @@ exports.handler = async function(event) {
         
         if (actualCount === 0) {
           console.warn('WARNING: Points calculation reported success but no entries were created!');
+        }
+        
+        // Calculate cumulative points and rankings after stage points are calculated
+        try {
+          await calculateCumulativePoints(client, stageId);
+        } catch (cumulativeErr) {
+          console.error('Error calculating cumulative points:', cumulativeErr);
+          // Don't fail the import if cumulative points calculation fails
         }
         
       } catch (err) {

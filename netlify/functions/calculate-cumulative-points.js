@@ -1,0 +1,125 @@
+const { getDbClient, handleDbError, missingDbConfigResponse } = require('./_shared/db');
+
+/**
+ * Calculates cumulative points and rankings for all participants after a specific stage
+ * @param {Client} client - Database client
+ * @param {number} stageId - The stage ID to calculate cumulative points for
+ * @returns {Promise<Object>} Result with participants calculated
+ */
+async function calculateCumulativePoints(client, stageId) {
+  // Get stage number
+  const stageQuery = await client.query('SELECT stage_number FROM stages WHERE id = $1', [stageId]);
+  if (stageQuery.rows.length === 0) {
+    throw new Error(`Stage with id ${stageId} not found`);
+  }
+  const stageNumber = stageQuery.rows[0].stage_number;
+
+  // Calculate cumulative points for each participant up to this stage
+  const cumulativeQuery = `
+    SELECT 
+      p.id as participant_id,
+      COALESCE(SUM(fsp.total_points), 0) as total_points
+    FROM participants p
+    LEFT JOIN fantasy_stage_points fsp ON fsp.participant_id = p.id
+    WHERE fsp.stage_id IN (
+      SELECT id FROM stages WHERE stage_number <= $1
+    )
+    GROUP BY p.id
+    ORDER BY total_points DESC, p.team_name ASC
+  `;
+
+  const cumulativeResult = await client.query(cumulativeQuery, [stageNumber]);
+
+  // Assign ranks (handle ties - same points = same rank)
+  let currentRank = 1;
+  let previousPoints = null;
+  const rankedParticipants = [];
+
+  cumulativeResult.rows.forEach((row, index) => {
+    if (previousPoints !== null && row.total_points < previousPoints) {
+      // Points decreased, increment rank
+      currentRank = index + 1;
+    } else if (previousPoints !== null && row.total_points === previousPoints) {
+      // Same points, keep same rank
+      // currentRank stays the same
+    } else {
+      // First entry or points increased
+      currentRank = index + 1;
+    }
+
+    rankedParticipants.push({
+      participant_id: row.participant_id,
+      total_points: row.total_points,
+      rank: currentRank
+    });
+
+    previousPoints = row.total_points;
+  });
+
+  // Insert or update cumulative points
+  for (const participant of rankedParticipants) {
+    await client.query(
+      `INSERT INTO fantasy_cumulative_points 
+       (participant_id, after_stage_id, total_points, rank)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (participant_id, after_stage_id)
+       DO UPDATE SET
+         total_points = EXCLUDED.total_points,
+         rank = EXCLUDED.rank`,
+      [participant.participant_id, stageId, participant.total_points, participant.rank]
+    );
+  }
+
+  return { participantsCalculated: rankedParticipants.length };
+}
+
+exports.handler = async function(event) {
+  if (event.httpMethod !== 'POST') {
+    return {
+      statusCode: 405,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: 'Method Not Allowed' })
+    };
+  }
+
+  let client;
+  try {
+    if (!process.env.NEON_DATABASE_URL) {
+      return missingDbConfigResponse();
+    }
+
+    const body = JSON.parse(event.body || '{}');
+    const { stageId } = body;
+
+    if (!stageId) {
+      return {
+        statusCode: 400,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ok: false, error: 'stageId is required' })
+      };
+    }
+
+    client = await getDbClient();
+
+    const result = await calculateCumulativePoints(client, stageId);
+
+    await client.end();
+
+    return {
+      statusCode: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      },
+      body: JSON.stringify({
+        ok: true,
+        ...result
+      })
+    };
+  } catch (err) {
+    return await handleDbError(err, 'calculate-cumulative-points', client);
+  }
+};
+
+module.exports = { calculateCumulativePoints };
+

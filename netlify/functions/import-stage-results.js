@@ -39,6 +39,9 @@ exports.handler = async function(event) {
     const stageId = body.stageId;
     const results = body.results; // Array of {position, riderId, timeSeconds}
 
+    console.log('Import-stage-results called with stageId:', stageId);
+    console.log('Number of results:', results ? results.length : 0);
+
     if (!stageId) {
       return {
         statusCode: 400,

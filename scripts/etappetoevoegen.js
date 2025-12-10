@@ -80,6 +80,8 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     currentStageId = parseInt(stageId, 10);
     originalResultsText = resultsText; // Store original text
+    
+    console.log('Validating results for stageId:', currentStageId, 'from select value:', stageId);
 
     try {
       const response = await fetch('/.netlify/functions/validate-stage-results', {
@@ -187,6 +189,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     const validationResults = document.getElementById('validation-results');
     const validationSuccess = document.getElementById('validation-success');
+    const validationErrors = document.getElementById('validation-errors');
     const importSuccess = document.getElementById('import-success');
 
     // Show loading state
@@ -200,6 +203,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     try {
+      console.log('Importing results for stageId:', currentStageId);
+      console.log('Number of results:', resultsToImport.length);
+      
       const response = await fetch('/.netlify/functions/import-stage-results', {
         method: 'POST',
         headers: {
@@ -218,13 +224,19 @@ document.addEventListener('DOMContentLoaded', async function() {
       const result = await response.json();
 
       if (result.ok) {
+        console.log('Import successful for stageId:', currentStageId);
         validationResults.style.display = 'none';
         validationSuccess.style.display = 'none';
         importSuccess.style.display = 'block';
 
         // Reset form
         document.getElementById('results-textarea').value = '';
+        const stageSelect = document.getElementById('stage-select');
+        if (stageSelect) {
+          stageSelect.value = '';
+        }
         validatedResults = null;
+        const importedStageId = currentStageId; // Store before resetting
         currentStageId = null;
         
         // Reload stages (the imported stage should no longer appear)
@@ -267,6 +279,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Setup event listeners
   const validateButton = document.getElementById('validate-button');
   const retryValidateButton = document.getElementById('retry-validate-button');
+  const stageSelect = document.getElementById('stage-select');
 
   if (validateButton) {
     validateButton.addEventListener('click', validateResults);
@@ -274,6 +287,15 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   if (retryValidateButton) {
     retryValidateButton.addEventListener('click', retryValidation);
+  }
+
+  // Reset currentStageId when stage select changes
+  if (stageSelect) {
+    stageSelect.addEventListener('change', function() {
+      currentStageId = null;
+      validatedResults = null;
+      console.log('Stage select changed, resetting currentStageId');
+    });
   }
 
   // Load stages on page load

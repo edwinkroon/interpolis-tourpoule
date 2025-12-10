@@ -128,9 +128,9 @@ document.addEventListener('DOMContentLoaded', async function() {
       validationResults.style.display = 'block';
 
       if (result.ok && result.valid) {
-        // All riders matched - import directly
+        // All riders matched - show preview instead of importing directly
         validatedResults = result.results;
-        await importResultsDirectly(result.results);
+        showPreview(result.results);
       } else {
         // Some riders didn't match - show errors and editable textarea
         validatedResults = null;
@@ -180,7 +180,57 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   }
 
-  // Import results directly (when all riders matched)
+  // Show preview of validated results
+  function showPreview(results) {
+    const validationResults = document.getElementById('validation-results');
+    const validationSuccess = document.getElementById('validation-success');
+    const validationErrors = document.getElementById('validation-errors');
+    const previewSection = document.getElementById('preview-section');
+    const previewTableBody = document.getElementById('preview-table-body');
+
+    if (!validationResults || !validationSuccess || !previewSection || !previewTableBody) {
+      console.error('Required DOM elements not found for preview');
+      return;
+    }
+
+    // Show validation success and preview
+    validationResults.style.display = 'block';
+    validationSuccess.style.display = 'block';
+    validationErrors.style.display = 'none';
+    previewSection.style.display = 'block';
+
+    // Clear previous preview
+    previewTableBody.innerHTML = '';
+
+    // Helper function to format time from seconds
+    function formatTime(seconds) {
+      if (seconds === null || seconds === undefined) {
+        return '-';
+      }
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const secs = seconds % 60;
+      
+      if (hours > 0) {
+        return `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      } else {
+        return `${minutes}:${String(secs).padStart(2, '0')}`;
+      }
+    }
+
+    // Populate preview table
+    results.forEach(result => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${result.position}</td>
+        <td>${sanitizeInput(result.matchedName || `${result.firstName} ${result.lastName}`)}</td>
+        <td>${formatTime(result.timeSeconds)}</td>
+      `;
+      previewTableBody.appendChild(row);
+    });
+  }
+
+  // Import results directly (when export button is clicked)
   async function importResultsDirectly(resultsToImport) {
     if (!resultsToImport || !currentStageId) {
       alert('Geen gevalideerde resultaten om te importeren');
@@ -204,13 +254,25 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     // Show loading state
+    const previewSection = document.getElementById('preview-section');
+    const exportButton = document.getElementById('export-button');
+    
     validationResults.style.display = 'block';
     validationSuccess.style.display = 'block';
     validationErrors.style.display = 'none';
     
+    // Disable export button and show loading
+    if (exportButton) {
+      exportButton.disabled = true;
+      const buttonText = exportButton.querySelector('span');
+      if (buttonText) {
+        buttonText.textContent = 'Bezig met importeren...';
+      }
+    }
+    
     const successMessage = validationSuccess.querySelector('.validation-success-message p');
     if (successMessage) {
-      successMessage.textContent = 'Alle renners zijn succesvol gemapped. Data wordt geïmporteerd...';
+      successMessage.textContent = 'Data wordt geïmporteerd...';
     }
 
     try {
@@ -249,6 +311,12 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (result.replacedExisting) {
           console.log(`Replaced ${result.existingCount} existing results`);
         }
+        
+        // Hide preview section
+        if (previewSection) {
+          previewSection.style.display = 'none';
+        }
+        
         validationResults.style.display = 'none';
         validationSuccess.style.display = 'none';
         importSuccess.style.display = 'block';
@@ -309,6 +377,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Setup event listeners
   const validateButton = document.getElementById('validate-button');
   const retryValidateButton = document.getElementById('retry-validate-button');
+  const exportButton = document.getElementById('export-button');
   const stageSelect = document.getElementById('stage-select');
 
   if (validateButton) {
@@ -317,6 +386,16 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   if (retryValidateButton) {
     retryValidateButton.addEventListener('click', retryValidation);
+  }
+
+  if (exportButton) {
+    exportButton.addEventListener('click', async function() {
+      if (validatedResults && currentStageId) {
+        await importResultsDirectly(validatedResults);
+      } else {
+        alert('Geen gevalideerde resultaten om te exporteren');
+      }
+    });
   }
 
   // Reset currentStageId when stage select changes

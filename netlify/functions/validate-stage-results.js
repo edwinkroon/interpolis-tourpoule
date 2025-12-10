@@ -347,10 +347,22 @@ exports.handler = async function(event) {
     // Try to match riders with database
     const validatedResults = [];
     const unmatchedResults = [];
+    let lastValidTimeSeconds = null; // Track last valid time to propagate to null times
     
     for (const result of parsedResults) {
       let riderId = null;
       let matchedRider = null;
+      
+      // If time is null, use the time from the previous rider (same time group)
+      let timeSeconds = result.timeSeconds;
+      if (timeSeconds === null && lastValidTimeSeconds !== null) {
+        timeSeconds = lastValidTimeSeconds;
+      }
+      
+      // Update lastValidTimeSeconds if we have a valid time
+      if (timeSeconds !== null) {
+        lastValidTimeSeconds = timeSeconds;
+      }
       
       // Normalize input names FIRST - this is the key improvement
       // We'll use normalized names as primary matching strategy
@@ -706,7 +718,7 @@ exports.handler = async function(event) {
         validatedResults.push({
           position: result.position,
           riderId,
-          timeSeconds: result.timeSeconds,
+          timeSeconds: timeSeconds, // Use the potentially propagated time
           firstName: matchedRider.first_name,
           lastName: matchedRider.last_name,
           matchedName: `${matchedRider.first_name} ${matchedRider.last_name}`

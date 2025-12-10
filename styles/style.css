@@ -3257,6 +3257,79 @@ button[aria-busy="true"] {
   margin-bottom: 1rem;
 }
 
+/* Preview Section */
+.preview-section {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: #fff;
+  border: 2px solid #00cac6;
+  border-radius: 10px;
+}
+
+.preview-title {
+  font-size: 18px;
+  color: #00334e;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.preview-table-container {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.preview-table thead {
+  position: sticky;
+  top: 0;
+  background: #f5f5f5;
+  z-index: 10;
+}
+
+.preview-table th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: #00334e;
+  border-bottom: 2px solid #e0e0e0;
+  background: #f5f5f5;
+}
+
+.preview-table td {
+  padding: 0.75rem 1rem;
+  font-size: 14px;
+  color: #00334e;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.preview-table tbody tr:hover {
+  background: #f9f9f9;
+}
+
+.preview-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.preview-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.preview-actions .form-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .etappe-import-section .dashboard-section-title {
   font-size: 20px !important;
   font-weight: 700 !important;

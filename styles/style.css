@@ -2233,6 +2233,11 @@ button[aria-busy="true"] {
   filter: drop-shadow(0 8px 16px rgba(0, 51, 78, 0.161));
 }
 
+/* Static cards (without dynamic data) have a slightly darker background */
+.team-card.static-card {
+  background: #f0f3f5;
+}
+
 .team-card-header {
   position: relative;
   display: flex;

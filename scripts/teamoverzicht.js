@@ -636,11 +636,6 @@ function closeAllInfoPopups() {
   });
 }
 
-// Delete modal state
-let deleteSelectedRiderIds = new Set();
-let currentDeleteSlotType = null; // 'main' or 'reserve'
-let currentDeleteRiders = []; // Current riders in the delete modal
-
 // Setup delete rider handlers
 function setupDeleteRiderHandlers() {
   const mainDeleteButton = document.getElementById('main-riders-delete-button');

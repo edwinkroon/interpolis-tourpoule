@@ -1188,23 +1188,23 @@ button[aria-busy="true"] {
   transform: rotate(0deg);
 }
 
+.day-winners-header {
+  margin-bottom: 1.5rem;
+}
+
 .day-winners-section .dashboard-section-title {
   font-size: 20px;
   font-weight: 700;
   text-transform: none;
-  margin-bottom: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .day-winners-route {
   font-size: 14px;
   font-weight: 300;
+  font-style: italic;
   color: #00334e;
-  margin-left: auto;
+  text-align: right;
 }
 
 .day-winners-list {

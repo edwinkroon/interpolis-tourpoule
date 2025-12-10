@@ -68,6 +68,18 @@ exports.handler = async function(event) {
 
     await client.connect();
 
+    // Helper function to normalize names (remove diacritics)
+    // Similar to Python's normalize_name function
+    function normalizeName(name) {
+      if (!name) return '';
+      // Normalize to NFD (decomposed form) and remove combining marks
+      return name
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // Remove combining diacritical marks
+        .toLowerCase()
+        .trim();
+    }
+
     // Verify stage exists
     const stageCheck = await client.query('SELECT id, stage_number, name FROM stages WHERE id = $1', [stageId]);
     if (stageCheck.rows.length === 0) {
@@ -262,7 +274,7 @@ exports.handler = async function(event) {
 
       // Try to split rider name into first and last name
       // In the text file, the format is usually: last name first, then first name
-      // So the first word is the last name, everything after is the first name
+      // For compound last names (like "van der Poel"), we need to try different splits
       const nameParts = riderName.trim().split(/\s+/);
       let firstName, lastName;
       
@@ -275,9 +287,12 @@ exports.handler = async function(event) {
         lastName = nameParts[0];
         firstName = nameParts[1];
       } else {
-        // More than two words: first word is last name, rest is first name
-        lastName = nameParts[0];
-        firstName = nameParts.slice(1).join(' ');
+        // More than two words: try different splits
+        // Common pattern: compound last name (e.g., "van der Poel") + first name (e.g., "Mathieu")
+        // Try: last word = first name, rest = last name
+        // This handles cases like "van der Poel Mathieu" -> lastName="van der Poel", firstName="Mathieu"
+        lastName = nameParts.slice(0, -1).join(' ');
+        firstName = nameParts[nameParts.length - 1];
       }
 
       parsedResults.push({
@@ -318,47 +333,136 @@ exports.handler = async function(event) {
       let riderId = null;
       let matchedRider = null;
       
+      // Normalize input names for matching
+      const normalizedRiderName = normalizeName(result.riderName);
+      const normalizedFirstName = result.firstName ? normalizeName(result.firstName) : null;
+      const normalizedLastName = result.lastName ? normalizeName(result.lastName) : null;
+      
       // Try multiple matching strategies
-      // Strategy 1: Match on full name (CONCAT first_name + last_name)
+      // Strategy 1: Match on full name (CONCAT first_name + last_name) - both original and normalized
       const fullNameQuery = `
         SELECT id, first_name, last_name 
         FROM riders 
         WHERE LOWER(TRIM(CONCAT(first_name, ' ', last_name))) = LOWER(TRIM($1))
+           OR (first_name_normalized IS NOT NULL AND last_name_normalized IS NOT NULL
+               AND CONCAT(first_name_normalized, ' ', last_name_normalized) = $2)
         LIMIT 1
       `;
-      const fullNameMatch = await client.query(fullNameQuery, [result.riderName]);
+      const fullNameMatch = await client.query(fullNameQuery, [result.riderName, normalizedRiderName]);
       
       if (fullNameMatch.rows.length > 0) {
         riderId = fullNameMatch.rows[0].id;
         matchedRider = fullNameMatch.rows[0];
       } else if (result.firstName && result.lastName) {
-        // Strategy 2: Match on first and last name separately
+        // Strategy 2: Match on first and last name separately - both original and normalized
         const nameQuery = `
           SELECT id, first_name, last_name 
           FROM riders 
-          WHERE LOWER(TRIM(first_name)) = LOWER(TRIM($1))
-            AND LOWER(TRIM(last_name)) = LOWER(TRIM($2))
-          LIMIT 1
+          WHERE (LOWER(TRIM(first_name)) = LOWER(TRIM($1))
+            AND LOWER(TRIM(last_name)) = LOWER(TRIM($2)))
+           OR (first_name_normalized IS NOT NULL AND last_name_normalized IS NOT NULL
+               AND first_name_normalized = $3
+               AND last_name_normalized = $4)
+        LIMIT 1
         `;
-        const nameMatch = await client.query(nameQuery, [result.firstName, result.lastName]);
+        const nameMatch = await client.query(nameQuery, [
+          result.firstName, 
+          result.lastName,
+          normalizedFirstName,
+          normalizedLastName
+        ]);
         
         if (nameMatch.rows.length > 0) {
           riderId = nameMatch.rows[0].id;
           matchedRider = nameMatch.rows[0];
         } else {
-          // Strategy 3: Try matching just last name (fuzzy match)
-          const lastNameQuery = `
+          // Strategy 3: Try matching with reversed order (in case parsing was wrong)
+          // Try: parsed firstName as last_name, parsed lastName as first_name - both original and normalized
+          const reversedNameQuery = `
             SELECT id, first_name, last_name 
             FROM riders 
-            WHERE LOWER(TRIM(last_name)) = LOWER(TRIM($1))
+            WHERE (LOWER(TRIM(first_name)) = LOWER(TRIM($1))
+              AND LOWER(TRIM(last_name)) = LOWER(TRIM($2)))
+           OR (first_name_normalized IS NOT NULL AND last_name_normalized IS NOT NULL
+               AND first_name_normalized = $3
+               AND last_name_normalized = $4)
             LIMIT 1
           `;
-          const lastNameMatch = await client.query(lastNameQuery, [result.lastName]);
+          const reversedMatch = await client.query(reversedNameQuery, [
+            result.lastName, 
+            result.firstName,
+            normalizedLastName,
+            normalizedFirstName
+          ]);
           
-          if (lastNameMatch.rows.length === 1) {
-            // Only match if there's exactly one rider with this last name
-            riderId = lastNameMatch.rows[0].id;
-            matchedRider = lastNameMatch.rows[0];
+          if (reversedMatch.rows.length > 0) {
+            riderId = reversedMatch.rows[0].id;
+            matchedRider = reversedMatch.rows[0];
+          } else {
+            // Strategy 4: Try matching just last name (fuzzy match) - both original and normalized
+            // This helps with compound last names like "van der Poel"
+            const lastNameQuery = `
+              SELECT id, first_name, last_name 
+              FROM riders 
+              WHERE LOWER(TRIM(last_name)) = LOWER(TRIM($1))
+                 OR (last_name_normalized IS NOT NULL AND last_name_normalized = $2)
+              LIMIT 1
+            `;
+            const lastNameMatch = await client.query(lastNameQuery, [result.lastName, normalizedLastName]);
+            
+            if (lastNameMatch.rows.length === 1) {
+              // Only match if there's exactly one rider with this last name
+              riderId = lastNameMatch.rows[0].id;
+              matchedRider = lastNameMatch.rows[0];
+            } else {
+              // Strategy 5: Try fuzzy matching for spelling variations - both original and normalized
+              // This helps with cases like "Mathieu" vs "Matthieu"
+              // Match if first 4+ characters match and last name matches exactly
+              if (result.firstName && result.firstName.length >= 4) {
+                const firstNamePrefix = result.firstName.substring(0, 4).toLowerCase();
+                const normalizedFirstNamePrefix = normalizedFirstName ? normalizedFirstName.substring(0, 4) : null;
+                const fuzzyNameQuery = `
+                  SELECT id, first_name, last_name 
+                  FROM riders 
+                  WHERE ((LOWER(SUBSTRING(TRIM(first_name), 1, 4)) = $1
+                    AND LOWER(TRIM(last_name)) = LOWER(TRIM($2)))
+                   OR (first_name_normalized IS NOT NULL AND last_name_normalized IS NOT NULL
+                       AND SUBSTRING(first_name_normalized, 1, 4) = $3
+                       AND last_name_normalized = $4))
+                  LIMIT 1
+                `;
+                const fuzzyMatch = await client.query(fuzzyNameQuery, [
+                  firstNamePrefix, 
+                  result.lastName,
+                  normalizedFirstNamePrefix,
+                  normalizedLastName
+                ]);
+                
+                if (fuzzyMatch.rows.length > 0) {
+                  riderId = fuzzyMatch.rows[0].id;
+                  matchedRider = fuzzyMatch.rows[0];
+                } else {
+                  // Strategy 6: Fallback - try matching normalized input against original fields
+                  // This helps when normalized fields don't exist in database
+                  // Use a comprehensive character replacement for common diacritics
+                  const fallbackQuery = `
+                    SELECT id, first_name, last_name 
+                    FROM riders 
+                    WHERE LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                      TRIM(COALESCE(first_name, '')), 'á', 'a'), 'à', 'a'), 'â', 'a'), 'ä', 'a'), 'é', 'e'), 'è', 'e'), 'ê', 'e'), 'ë', 'e'), 'í', 'i'), 'ì', 'i'), 'î', 'i'), 'ï', 'i'), 'ó', 'o'), 'ò', 'o'), 'ô', 'o'), 'ö', 'o'), 'ú', 'u'), 'ù', 'u'), 'û', 'u'), 'ü', 'u'), 'ç', 'c'), 'č', 'c')) = $1
+                      AND LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                        TRIM(COALESCE(last_name, '')), 'á', 'a'), 'à', 'a'), 'â', 'a'), 'ä', 'a'), 'é', 'e'), 'è', 'e'), 'ê', 'e'), 'ë', 'e'), 'í', 'i'), 'ì', 'i'), 'î', 'i'), 'ï', 'i'), 'ó', 'o'), 'ò', 'o'), 'ô', 'o'), 'ö', 'o'), 'ú', 'u'), 'ù', 'u'), 'û', 'u'), 'ü', 'u'), 'ç', 'c'), 'č', 'c')) = $2
+                    LIMIT 1
+                  `;
+                  const fallbackMatch = await client.query(fallbackQuery, [normalizedFirstName, normalizedLastName]);
+                  
+                  if (fallbackMatch.rows.length > 0) {
+                    riderId = fallbackMatch.rows[0].id;
+                    matchedRider = fallbackMatch.rows[0];
+                  }
+                }
+              }
+            }
           }
         }
       }

@@ -3257,6 +3257,33 @@ button[aria-busy="true"] {
   text-align: center;
 }
 
+.validation-errors-editable {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #ffcccc;
+}
+
+.form-textarea-editable {
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.etappe-form-description {
+  font-size: 14px;
+  color: #00334e;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.etappe-form-description a {
+  color: #00cac6;
+  text-decoration: underline;
+}
+
+.etappe-form-description a:hover {
+  color: #00a09d;
+}
+
 /* Import Success */
 .import-success {
   display: flex;

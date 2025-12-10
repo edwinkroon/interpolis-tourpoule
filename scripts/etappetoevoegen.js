@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   let validatedResults = null;
   let currentStageId = null;
+  let originalResultsText = null;
 
   // Load stages without results
   async function loadStagesWithoutResults() {
@@ -78,6 +79,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     currentStageId = parseInt(stageId, 10);
+    originalResultsText = resultsText; // Store original text
 
     try {
       const response = await fetch('/.netlify/functions/validate-stage-results', {
@@ -96,15 +98,18 @@ document.addEventListener('DOMContentLoaded', async function() {
       validationResults.style.display = 'block';
 
       if (result.ok && result.valid) {
+        // All riders matched - import directly
         validatedResults = result.results;
-        validationSuccess.style.display = 'block';
-        validationErrors.style.display = 'none';
+        await importResultsDirectly(result.results);
       } else {
+        // Some riders didn't match - show errors and editable textarea
         validatedResults = null;
         validationSuccess.style.display = 'none';
         validationErrors.style.display = 'block';
 
         const errorsList = document.getElementById('validation-errors-list');
+        const unmatchedTextarea = document.getElementById('unmatched-results-textarea');
+        
         if (errorsList) {
           errorsList.innerHTML = '';
 
@@ -133,6 +138,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             errorsList.appendChild(summaryItem);
           }
         }
+
+        // Populate editable textarea with unmatched results
+        if (unmatchedTextarea && result.unmatchedText) {
+          unmatchedTextarea.value = result.unmatchedText;
+        }
       }
     } catch (error) {
       console.error('Error validating results:', error);
@@ -140,9 +150,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   }
 
-  // Import results
-  async function importResults() {
-    if (!validatedResults || !currentStageId) {
+  // Import results directly (when all riders matched)
+  async function importResultsDirectly(resultsToImport) {
+    if (!resultsToImport || !currentStageId) {
       alert('Geen gevalideerde resultaten om te importeren');
       return;
     }
@@ -150,6 +160,16 @@ document.addEventListener('DOMContentLoaded', async function() {
     const validationResults = document.getElementById('validation-results');
     const validationSuccess = document.getElementById('validation-success');
     const importSuccess = document.getElementById('import-success');
+
+    // Show loading state
+    validationResults.style.display = 'block';
+    validationSuccess.style.display = 'block';
+    validationErrors.style.display = 'none';
+    
+    const successMessage = validationSuccess.querySelector('.validation-success-message p');
+    if (successMessage) {
+      successMessage.textContent = 'Alle renners zijn succesvol gemapped. Data wordt geïmporteerd...';
+    }
 
     try {
       const response = await fetch('/.netlify/functions/import-stage-results', {
@@ -159,7 +179,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         },
         body: JSON.stringify({
           stageId: currentStageId,
-          results: validatedResults.map(r => ({
+          results: resultsToImport.map(r => ({
             position: r.position,
             riderId: r.riderId,
             timeSeconds: r.timeSeconds
@@ -184,24 +204,48 @@ document.addEventListener('DOMContentLoaded', async function() {
           loadStagesWithoutResults();
         }, 1000);
       } else {
+        validationSuccess.style.display = 'none';
+        validationErrors.style.display = 'block';
         alert('Er is een fout opgetreden bij het importeren: ' + (result.error || 'Onbekende fout'));
       }
     } catch (error) {
       console.error('Error importing results:', error);
+      validationSuccess.style.display = 'none';
+      validationErrors.style.display = 'block';
       alert('Er is een fout opgetreden bij het importeren: ' + error.message);
     }
   }
 
+  // Retry validation with edited unmatched results
+  async function retryValidation() {
+    const unmatchedTextarea = document.getElementById('unmatched-results-textarea');
+    const resultsTextarea = document.getElementById('results-textarea');
+    
+    if (!unmatchedTextarea || !resultsTextarea) return;
+
+    const editedUnmatchedText = unmatchedTextarea.value.trim();
+    if (!editedUnmatchedText) {
+      alert('Geen tekst om opnieuw te valideren');
+      return;
+    }
+
+    // Use the edited text as the new input (user has corrected the unmatched riders)
+    resultsTextarea.value = editedUnmatchedText;
+    
+    // Trigger validation with the corrected text
+    await validateResults();
+  }
+
   // Setup event listeners
   const validateButton = document.getElementById('validate-button');
-  const importButton = document.getElementById('import-button');
+  const retryValidateButton = document.getElementById('retry-validate-button');
 
   if (validateButton) {
     validateButton.addEventListener('click', validateResults);
   }
 
-  if (importButton) {
-    importButton.addEventListener('click', importResults);
+  if (retryValidateButton) {
+    retryValidateButton.addEventListener('click', retryValidation);
   }
 
   // Load stages on page load

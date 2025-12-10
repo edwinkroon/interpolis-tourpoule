@@ -82,7 +82,24 @@ exports.handler = async function(event) {
       };
     }
 
-    // Parse the results text
+    // Helper function to parse time string (HH:MM:SS or MM:SS) to seconds
+    function parseTimeToSeconds(timeStr) {
+      if (!timeStr || timeStr.trim() === '' || timeStr.toLowerCase() === 'dnf' || timeStr.toLowerCase() === 'dns') {
+        return null;
+      }
+      
+      const parts = timeStr.trim().split(':').map(p => parseInt(p, 10));
+      if (parts.length === 2) {
+        // MM:SS format
+        return parts[0] * 60 + parts[1];
+      } else if (parts.length === 3) {
+        // HH:MM:SS format
+        return parts[0] * 3600 + parts[1] * 60 + parts[2];
+      }
+      return null;
+    }
+
+    // Parse the results text (ProCyclingStats format: Rnk, Rider, Team, UCI, Pnt, , Time)
     const lines = resultsText.trim().split('\n').filter(line => line.trim().length > 0);
     const parsedResults = [];
     const errors = [];
@@ -91,26 +108,31 @@ exports.handler = async function(event) {
       const line = lines[i].trim();
       const lineNumber = i + 1;
       
-      // Skip empty lines
-      if (!line) continue;
+      // Skip empty lines or header lines
+      if (!line || line.toLowerCase().includes('rnk') && line.toLowerCase().includes('rider')) {
+        continue;
+      }
 
-      // Parse CSV-like format: position, first_name, last_name, [rider_id], time_seconds
-      const parts = line.split(',').map(part => part.trim());
+      // Split by tab (ProCyclingStats format) or comma (fallback)
+      const parts = line.includes('\t') 
+        ? line.split('\t').map(part => part.trim())
+        : line.split(',').map(part => part.trim());
       
       if (parts.length < 3) {
         errors.push({
           line: lineNumber,
           content: line,
-          error: 'Onvoldoende kolommen (minimaal positie, voornaam, achternaam vereist)'
+          error: 'Onvoldoende kolommen (verwacht: Rnk, Rider, Team, UCI, Pnt, Time)'
         });
         continue;
       }
 
       const position = parseInt(parts[0], 10);
-      const firstName = parts[1];
-      const lastName = parts[2];
-      const riderIdProvided = parts.length >= 4 && parts[3] !== '' ? parseInt(parts[3], 10) : null;
-      const timeSeconds = parts.length >= 5 && parts[4] !== '' ? parseInt(parts[4], 10) : null;
+      const riderName = parts[1] || ''; // Combined first and last name
+      const team = parts[2] || '';
+      const uci = parts[3] || '';
+      const pnt = parts[4] || '';
+      const timeStr = parts[6] || parts[5] || ''; // Time can be at position 5 or 6 (after empty column)
 
       if (isNaN(position) || position < 1) {
         errors.push({
@@ -121,39 +143,48 @@ exports.handler = async function(event) {
         continue;
       }
 
-      if (!firstName || !lastName) {
+      if (!riderName) {
         errors.push({
           line: lineNumber,
           content: line,
-          error: 'Voornaam en achternaam zijn verplicht'
+          error: 'Rider naam is verplicht'
         });
         continue;
       }
 
-      if (riderIdProvided !== null && isNaN(riderIdProvided)) {
-        errors.push({
-          line: lineNumber,
-          content: line,
-          error: 'Ongeldig rider_id formaat'
-        });
-        continue;
-      }
+      // Parse time to seconds
+      const timeSeconds = parseTimeToSeconds(timeStr);
 
-      if (timeSeconds !== null && isNaN(timeSeconds)) {
-        errors.push({
-          line: lineNumber,
-          content: line,
-          error: 'Ongeldig tijd formaat (moet seconden zijn)'
-        });
-        continue;
+      // Try to split rider name into first and last name
+      // Usually the last word is the last name, everything before is first name
+      const nameParts = riderName.trim().split(/\s+/);
+      let firstName, lastName;
+      
+      if (nameParts.length === 1) {
+        // Only one word, assume it's the last name
+        firstName = null;
+        lastName = nameParts[0];
+      } else if (nameParts.length === 2) {
+        // Two words: first and last name
+        firstName = nameParts[0];
+        lastName = nameParts[1];
+      } else {
+        // More than two words: last word is last name, rest is first name
+        lastName = nameParts[nameParts.length - 1];
+        firstName = nameParts.slice(0, -1).join(' ');
       }
 
       parsedResults.push({
         position,
+        riderName, // Keep original combined name
         firstName,
         lastName,
-        riderIdProvided,
-        timeSeconds
+        team,
+        uci,
+        pnt,
+        timeStr,
+        timeSeconds,
+        originalLine: line
       });
     }
 
@@ -176,24 +207,27 @@ exports.handler = async function(event) {
 
     // Try to match riders with database
     const validatedResults = [];
+    const unmatchedResults = [];
+    
     for (const result of parsedResults) {
       let riderId = null;
+      let matchedRider = null;
       
-      // First try rider_id if provided
-      if (result.riderIdProvided !== null) {
-        const riderCheck = await client.query('SELECT id, first_name, last_name FROM riders WHERE id = $1', [result.riderIdProvided]);
-        if (riderCheck.rows.length > 0) {
-          riderId = result.riderIdProvided;
-        } else {
-          errors.push({
-            line: parsedResults.indexOf(result) + 1,
-            content: `${result.position}, ${result.firstName}, ${result.lastName}`,
-            error: `Rider met id ${result.riderIdProvided} niet gevonden in database`
-          });
-          continue;
-        }
-      } else {
-        // Try to match by name
+      // Try multiple matching strategies
+      // Strategy 1: Match on full name (CONCAT first_name + last_name)
+      const fullNameQuery = `
+        SELECT id, first_name, last_name 
+        FROM riders 
+        WHERE LOWER(TRIM(CONCAT(first_name, ' ', last_name))) = LOWER(TRIM($1))
+        LIMIT 1
+      `;
+      const fullNameMatch = await client.query(fullNameQuery, [result.riderName]);
+      
+      if (fullNameMatch.rows.length > 0) {
+        riderId = fullNameMatch.rows[0].id;
+        matchedRider = fullNameMatch.rows[0];
+      } else if (result.firstName && result.lastName) {
+        // Strategy 2: Match on first and last name separately
         const nameQuery = `
           SELECT id, first_name, last_name 
           FROM riders 
@@ -203,28 +237,53 @@ exports.handler = async function(event) {
         `;
         const nameMatch = await client.query(nameQuery, [result.firstName, result.lastName]);
         
-        if (nameMatch.rows.length === 0) {
-          errors.push({
-            line: parsedResults.indexOf(result) + 1,
-            content: `${result.position}, ${result.firstName}, ${result.lastName}`,
-            error: `Renner "${result.firstName} ${result.lastName}" niet gevonden in database`
-          });
-          continue;
+        if (nameMatch.rows.length > 0) {
+          riderId = nameMatch.rows[0].id;
+          matchedRider = nameMatch.rows[0];
+        } else {
+          // Strategy 3: Try matching just last name (fuzzy match)
+          const lastNameQuery = `
+            SELECT id, first_name, last_name 
+            FROM riders 
+            WHERE LOWER(TRIM(last_name)) = LOWER(TRIM($1))
+            LIMIT 1
+          `;
+          const lastNameMatch = await client.query(lastNameQuery, [result.lastName]);
+          
+          if (lastNameMatch.rows.length === 1) {
+            // Only match if there's exactly one rider with this last name
+            riderId = lastNameMatch.rows[0].id;
+            matchedRider = lastNameMatch.rows[0];
+          }
         }
-        
-        riderId = nameMatch.rows[0].id;
       }
-
-      validatedResults.push({
-        ...result,
-        riderId
-      });
+      
+      if (riderId) {
+        validatedResults.push({
+          position: result.position,
+          riderId,
+          timeSeconds: result.timeSeconds,
+          firstName: matchedRider.first_name,
+          lastName: matchedRider.last_name,
+          matchedName: `${matchedRider.first_name} ${matchedRider.last_name}`
+        });
+      } else {
+        unmatchedResults.push(result);
+        errors.push({
+          line: parsedResults.indexOf(result) + 1,
+          content: result.originalLine || `${result.position}\t${result.riderName}`,
+          error: `Renner "${result.riderName}" niet gevonden in database`
+        });
+      }
     }
 
     await client.end();
 
     // Return validation result
     if (errors.length > 0) {
+      // Return unmatched results as editable text
+      const unmatchedText = unmatchedResults.map(r => r.originalLine || `${r.position}\t${r.riderName}\t${r.team || ''}\t${r.uci || ''}\t${r.pnt || ''}\t\t${r.timeStr || ''}`).join('\n');
+      
       return {
         statusCode: 200,
         headers: {
@@ -236,7 +295,9 @@ exports.handler = async function(event) {
           valid: false,
           errors: errors,
           validatedCount: validatedResults.length,
-          totalCount: parsedResults.length
+          totalCount: parsedResults.length,
+          unmatchedText: unmatchedText,
+          unmatchedResults: unmatchedResults
         })
       };
     }

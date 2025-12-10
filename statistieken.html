@@ -116,25 +116,25 @@
           </div>
 
           <div class="dashboard-column">
-            <!-- Points Distribution Chart -->
+            <!-- Most Selected Riders Chart -->
             <div class="dashboard-section chart-tile">
               <div class="team-card-header">
-                <h2 class="dashboard-section-title">Puntenverdeling</h2>
-                <button class="info-icon-button" id="points-distribution-info-button" aria-label="Informatie over puntenverdeling">
+                <h2 class="dashboard-section-title">Meest Geselecteerde Renners</h2>
+                <button class="info-icon-button" id="most-selected-info-button" aria-label="Informatie over meest geselecteerde renners">
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/>
                     <text x="10" y="14" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">i</text>
                   </svg>
                 </button>
-                <div class="info-popup" id="points-distribution-info-popup" style="display: none;">
+                <div class="info-popup" id="most-selected-info-popup" style="display: none;">
                   <div class="info-popup-content">
-                    <h3>Puntenverdeling</h3>
-                    <p>Deze grafiek toont hoe de punten verdeeld zijn over alle teams. Je ziet hoeveel teams in elke puntencategorie vallen, wat een beeld geeft van de competitie.</p>
+                    <h3>Meest Geselecteerde Renners</h3>
+                    <p>Deze grafiek toont welke renners het populairst zijn en in de meeste teams zitten. Dit geeft inzicht in welke renners het meest vertrouwd worden door de deelnemers.</p>
                   </div>
                 </div>
               </div>
               <div class="chart-container">
-                <canvas id="pointsDistributionChart"></canvas>
+                <canvas id="mostSelectedRidersChart"></canvas>
               </div>
             </div>
 

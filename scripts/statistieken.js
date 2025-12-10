@@ -130,8 +130,8 @@ async function loadChartData() {
     // Load team performance data
     await loadTeamPerformanceChart();
     
-    // Load points distribution
-    await loadPointsDistributionChart();
+    // Load most selected riders
+    await loadMostSelectedRidersChart();
     
     // Load stage winners
     await loadStageWinnersChart();
@@ -256,64 +256,44 @@ async function loadTeamPerformanceChart() {
     const myParticipantId = userResult.participant.id;
     const myTeamName = userResult.participant.team_name;
     
-    // Get all stages with results
-    const stagesResponse = await fetch('/.netlify/functions/get-stages-with-results');
-    const stagesResult = await stagesResponse.json();
+    // Get my team performance data
+    const myTeamResponse = await fetch(`/.netlify/functions/get-team-performance-stats?participantId=${myParticipantId}`);
+    const myTeamResult = await myTeamResponse.json();
     
-    if (!stagesResult.ok || !stagesResult.stages || stagesResult.stages.length === 0) {
-      throw new Error('No stages with results');
+    if (!myTeamResult.ok || !myTeamResult.teams || myTeamResult.teams.length === 0) {
+      throw new Error('No team data found');
     }
     
-    const stages = stagesResult.stages.sort((a, b) => a.stage_number - b.stage_number);
-    const labels = stages.map(s => `Etappe ${s.stage_number}`);
+    const labels = myTeamResult.stages || [];
+    const myTeamData = myTeamResult.teams[0];
     
-    // Get my team points per stage
-    const myTeamPoints = [];
-    for (const stage of stages) {
-      const pointsResponse = await fetch(`/.netlify/functions/get-stage-team-points?stageId=${stage.id}`);
-      const pointsResult = await pointsResponse.json();
-      
-      if (pointsResult.ok && pointsResult.teams) {
-        const myTeam = pointsResult.teams.find(t => t.participantId === myParticipantId);
-        myTeamPoints.push(myTeam ? myTeam.points : 0);
-      } else {
-        myTeamPoints.push(0);
-      }
-    }
-    
-    // Get top 3 other teams (excluding my team)
+    // Get top 3 other teams
     const standingsResponse = await fetch('/.netlify/functions/get-standings');
     const standingsResult = await standingsResponse.json();
     
-    const otherTeams = standingsResult.ok && standingsResult.standings 
+    const topOtherTeams = standingsResult.ok && standingsResult.standings 
       ? standingsResult.standings.filter(t => t.participantId !== myParticipantId).slice(0, 3)
       : [];
     
+    // Get performance data for top other teams
     const otherTeamsData = [];
-    for (const team of otherTeams) {
-      const teamPoints = [];
-      for (const stage of stages) {
-        const pointsResponse = await fetch(`/.netlify/functions/get-stage-team-points?stageId=${stage.id}`);
-        const pointsResult = await pointsResponse.json();
-        
-        if (pointsResult.ok && pointsResult.teams) {
-          const teamData = pointsResult.teams.find(t => t.participantId === team.participantId);
-          teamPoints.push(teamData ? teamData.points : 0);
-        } else {
-          teamPoints.push(0);
-        }
+    for (let i = 0; i < topOtherTeams.length; i++) {
+      const teamResponse = await fetch(`/.netlify/functions/get-team-performance-stats?participantId=${topOtherTeams[i].participantId}`);
+      const teamResult = await teamResponse.json();
+      
+      if (teamResult.ok && teamResult.teams && teamResult.teams.length > 0) {
+        otherTeamsData.push({
+          label: topOtherTeams[i].teamName,
+          data: teamResult.teams[0].points,
+          borderColor: i === 0 ? '#00aa2e' : i === 1 ? '#00334e' : '#668494'
+        });
       }
-      otherTeamsData.push({
-        label: team.teamName,
-        data: teamPoints,
-        borderColor: otherTeamsData.length === 0 ? '#00aa2e' : otherTeamsData.length === 1 ? '#00334e' : '#668494'
-      });
     }
     
     const teams = [
       {
         label: myTeamName,
-        data: myTeamPoints,
+        data: myTeamData.points,
         borderColor: '#00cac6'
       },
       ...otherTeamsData
@@ -401,68 +381,49 @@ async function loadTeamPerformanceChart() {
   }
 }
 
-// Points Distribution Chart (Doughnut)
-async function loadPointsDistributionChart() {
+// Most Selected Riders Chart (Horizontal Bar)
+async function loadMostSelectedRidersChart() {
   try {
-    // Get standings data
-    const response = await fetch('/.netlify/functions/get-standings');
-    let chartData = { labels: ['0-50', '51-100', '101-150', '151-200', '201+'], data: [0, 0, 0, 0, 0] };
+    // Get data from API
+    const response = await fetch('/.netlify/functions/get-most-selected-riders');
+    let chartData = { labels: [], counts: [] };
     
     if (response.ok) {
       const data = await response.json();
-      if (data.ok && data.standings && data.standings.length > 0) {
-        const teams = data.standings;
-        
-        // Count teams in each points range
-        const distribution = [0, 0, 0, 0, 0]; // [0-50, 51-100, 101-150, 151-200, 201+]
-        
-        teams.forEach(team => {
-          const points = team.totalPoints || 0;
-          if (points <= 50) {
-            distribution[0]++;
-          } else if (points <= 100) {
-            distribution[1]++;
-          } else if (points <= 150) {
-            distribution[2]++;
-          } else if (points <= 200) {
-            distribution[3]++;
-          } else {
-            distribution[4]++;
-          }
-        });
-        
-        chartData.data = distribution;
+      if (data.ok && data.riders && data.riders.length > 0) {
+        chartData.labels = data.riders.map(rider => rider.name);
+        chartData.counts = data.riders.map(rider => rider.selectionCount);
       }
     }
     
-    const ctx = document.getElementById('pointsDistributionChart').getContext('2d');
+    // Fallback to empty if no data
+    if (chartData.labels.length === 0) {
+      chartData = { labels: ['Geen data beschikbaar'], counts: [0] };
+    }
+    
+    const ctx = document.getElementById('mostSelectedRidersChart').getContext('2d');
     
     new Chart(ctx, {
-      type: 'doughnut',
+      type: 'bar',
       data: {
         labels: chartData.labels,
         datasets: [{
-          data: chartData.data,
-          backgroundColor: [
-            'rgba(0, 202, 198, 0.8)',
-            'rgba(0, 170, 46, 0.8)',
-            'rgba(0, 51, 78, 0.8)',
-            'rgba(102, 132, 148, 0.8)',
-            'rgba(24, 170, 46, 0.8)'
-          ],
-          borderColor: '#fff',
-          borderWidth: 3,
-          hoverOffset: 8
+          label: 'Aantal teams',
+          data: chartData.counts,
+          backgroundColor: createGradient(ctx, 'rgba(0, 170, 46, 0.8)', 'rgba(0, 202, 198, 0.8)'),
+          borderColor: '#00aa2e',
+          borderWidth: 2,
+          borderRadius: 8,
+          borderSkipped: false,
         }]
       },
       options: {
+        indexAxis: 'y',
         responsive: true,
         maintainAspectRatio: false,
-        cutout: '60%',
         plugins: {
           legend: {
-            display: true,
-            position: 'bottom'
+            display: false
           },
           tooltip: {
             backgroundColor: 'rgba(0, 51, 78, 0.9)',
@@ -475,14 +436,38 @@ async function loadPointsDistributionChart() {
               size: 13
             },
             cornerRadius: 8,
-            displayColors: true,
+            displayColors: false,
             callbacks: {
               label: function(context) {
-                const label = context.label || '';
-                const value = context.parsed || 0;
-                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                const percentage = ((value / total) * 100).toFixed(1);
-                return `${label}: ${value} teams (${percentage}%)`;
+                return `In ${context.parsed.x} team${context.parsed.x !== 1 ? 's' : ''}`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(205, 215, 220, 0.3)',
+              drawBorder: false
+            },
+            ticks: {
+              color: '#668494',
+              font: {
+                size: 12
+              },
+              stepSize: 1
+            }
+          },
+          y: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              color: '#00334e',
+              font: {
+                size: 13,
+                weight: '500'
               }
             }
           }
@@ -490,7 +475,7 @@ async function loadPointsDistributionChart() {
       }
     });
   } catch (error) {
-    console.error('Error loading points distribution chart:', error);
+    console.error('Error loading most selected riders chart:', error);
   }
 }
 

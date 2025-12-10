@@ -72,6 +72,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     stageToLoad = stagesWithResults[stagesWithResults.length - 1]; // Last one is latest
   }
   
+  // Show loading indicators for cards that will be loaded
+  showLoading('my-riders-list');
+  showLoading('day-standings-list');
+  showLoading('stage-results-list');
+  showLoading('jerseys-list');
+  
   if (stageToLoad) {
     currentStage = stageToLoad;
     await loadStageData(stageToLoad);
@@ -168,11 +174,17 @@ async function loadStageResults(stageNumber) {
       renderStageResults(data.results);
     } else {
       console.warn('No stage results found');
-      // Keep dummy data or show empty
+      const list = document.getElementById('stage-results-list');
+      if (list) {
+        list.innerHTML = '<li class="no-data">Geen resultaten beschikbaar</li>';
+      }
     }
   } catch (error) {
     console.error('Error loading stage results:', error);
-    // Keep dummy data on error
+    const list = document.getElementById('stage-results-list');
+    if (list) {
+      list.innerHTML = '<li class="no-data">Fout bij laden van resultaten</li>';
+    }
   }
 }
 
@@ -202,6 +214,11 @@ function renderMyRiders(riders) {
 
   list.innerHTML = '';
   
+  if (!riders || riders.length === 0) {
+    list.innerHTML = '<li class="no-data">Geen renners beschikbaar</li>';
+    return;
+  }
+  
   riders.forEach(rider => {
     const li = document.createElement('li');
     li.className = 'rider-item';
@@ -229,6 +246,11 @@ function renderDayStandings(standings) {
   if (!list) return;
 
   list.innerHTML = '';
+  
+  if (!standings || standings.length === 0) {
+    list.innerHTML = '<li class="no-data">Geen stand beschikbaar</li>';
+    return;
+  }
   
   standings.forEach(item => {
     const li = document.createElement('li');
@@ -269,6 +291,11 @@ function renderJerseys(jerseys) {
   if (!container) return;
 
   container.innerHTML = '';
+  
+  if (!jerseys || jerseys.length === 0) {
+    container.innerHTML = '<div class="no-data">Geen truidragers beschikbaar</div>';
+    return;
+  }
   
   jerseys.forEach(jersey => {
     const jerseyItem = document.createElement('div');
@@ -324,7 +351,25 @@ async function loadStagesWithResults() {
   }
 }
 
+function showLoading(elementId) {
+  const element = document.getElementById(elementId);
+  if (element) {
+    element.innerHTML = '<div class="loading-indicator"><div class="loading-spinner"></div><div class="loading-text">Laden...</div></div>';
+  }
+}
+
+function hideLoading(elementId) {
+  const element = document.getElementById(elementId);
+  if (element && element.querySelector('.loading-indicator')) {
+    // Loading will be replaced by actual content
+  }
+}
+
 async function loadStageData(stage) {
+  // Show loading indicators
+  showLoading('stage-results-list');
+  showLoading('jerseys-list');
+  
   // Update stage number
   const stageNumberElement = document.getElementById('stage-number');
   if (stageNumberElement) {

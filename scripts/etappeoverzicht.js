@@ -265,33 +265,29 @@ function renderStageResults(results) {
 }
 
 function renderJerseys(jerseys) {
-  const list = document.getElementById('jerseys-list');
-  if (!list) return;
+  const container = document.getElementById('jerseys-list');
+  if (!container) return;
 
-  list.innerHTML = '';
+  container.innerHTML = '';
   
   jerseys.forEach(jersey => {
-    const li = document.createElement('li');
-    li.className = 'jersey-item';
+    const jerseyItem = document.createElement('div');
+    jerseyItem.className = 'team-rider-item';
     
     // Get initials for placeholder
     const initials = jersey.rider.split(' ').map(n => n[0]).join('').substring(0, 2);
     
-    // Map jersey type to class name
+    // Map jersey type to class name and title
     const jerseyClassMap = {
-      'geel': 'jersey-geel',
-      'groen': 'jersey-groen',
-      'bolletjes': 'jersey-bolletjes',
-      'wit': 'jersey-wit'
+      'geel': { class: 'jersey-geel', title: 'Gele trui' },
+      'groen': { class: 'jersey-groen', title: 'Groene trui' },
+      'bolletjes': { class: 'jersey-bolletjes', title: 'Bolkentrui' },
+      'wit': { class: 'jersey-wit', title: 'Witte trui' }
     };
     
-    const jerseyClass = jerseyClassMap[jersey.type] || 'jersey-geel';
-    const jerseyTitle = jersey.type === 'geel' ? 'Gele trui' : 
-                       jersey.type === 'groen' ? 'Groene trui' :
-                       jersey.type === 'bolletjes' ? 'Bolkentrui' :
-                       jersey.type === 'wit' ? 'Witte trui' : 'Trui';
+    const jerseyInfo = jerseyClassMap[jersey.type] || { class: 'jersey-geel', title: 'Trui' };
     
-    li.innerHTML = `
+    jerseyItem.innerHTML = `
       <div class="rider-avatar">
         <img src="" alt="${sanitizeInput(jersey.rider)}" class="rider-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
         <div class="rider-avatar-placeholder" style="display: none;">${sanitizeInput(initials)}</div>
@@ -300,10 +296,10 @@ function renderJerseys(jerseys) {
         <div class="rider-name">${sanitizeInput(jersey.rider)}</div>
         <div class="rider-team">${sanitizeInput(jersey.team)}</div>
       </div>
-      <div class="jersey-icon ${jerseyClass}" title="${sanitizeInput(jerseyTitle)}"></div>
+      <div class="jersey-icon ${jerseyInfo.class}" title="${sanitizeInput(jerseyInfo.title)}"></div>
     `;
     
-    list.appendChild(li);
+    container.appendChild(jerseyItem);
   });
 }
 

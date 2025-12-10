@@ -81,51 +81,64 @@
         </div>
       </div>
 
-      <!-- Content Area with Cards -->
-      <div class="content-area col-9">
-        <div class="cards-grid">
-          <!-- Mijn punten Card -->
-          <div class="card card-my-points">
-            <h2 class="card-title">Mijn punten <span class="points-count"></span></h2>
-            <ul class="riders-list" id="my-riders-list">
-              <!-- Data wordt geladen vanuit JSON -->
-            </ul>
-            <a href="#" class="card-link">
-              <span>mijn team</span>
-              <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
-            </a>
+      <!-- Dashboard Content -->
+      <div class="dashboard-content col-9">
+        <!-- Two Column Layout -->
+        <div class="dashboard-grid">
+          <!-- Left Column -->
+          <div class="dashboard-column">
+            <!-- Mijn punten Card -->
+            <div class="dashboard-section points-section static-card">
+              <h2 class="dashboard-section-title">Mijn punten <span class="points-count"></span></h2>
+              <ul class="riders-list" id="my-riders-list">
+                <!-- Data wordt geladen vanuit JSON -->
+              </ul>
+              <a href="#" class="card-link">
+                <span>mijn team</span>
+                <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
+              </a>
+            </div>
+
+            <!-- Dag uitslag Card -->
+            <div class="dashboard-section static-card">
+              <h2 class="dashboard-section-title">Dag uitslag</h2>
+              <ol class="standings-list" id="day-standings-list">
+                <!-- Data wordt geladen vanuit JSON -->
+              </ol>
+              <a href="#" class="card-link">
+                <span>volledige dag stand</span>
+                <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
+              </a>
+            </div>
           </div>
 
-          <!-- Dag uitslag Card -->
-          <div class="card card-day-standings">
-            <h2 class="card-title">Dag uitslag</h2>
-            <ol class="standings-list" id="day-standings-list">
-              <!-- Data wordt geladen vanuit JSON -->
-            </ol>
-            <a href="#" class="card-link">
-              <span>volledige dag stand</span>
-              <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
-            </a>
-          </div>
+          <!-- Right Column -->
+          <div class="dashboard-column">
+            <!-- Etappe uitslag Card -->
+            <div class="dashboard-section static-card">
+              <h2 class="dashboard-section-title">Etappe uitslag</h2>
+              <ol class="results-list list-with-time" id="stage-results-list">
+                <!-- Data wordt geladen vanuit JSON -->
+              </ol>
+              <a href="#" class="card-link">
+                <span>volledige etappe uitslag</span>
+                <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
+              </a>
+            </div>
 
-          <!-- Etappe uitslag Card -->
-          <div class="card card-stage-results">
-            <h2 class="card-title">Etappe uitslag</h2>
-            <ol class="results-list list-with-time" id="stage-results-list">
-              <!-- Data wordt geladen vanuit JSON -->
-            </ol>
-            <a href="#" class="card-link">
-              <span>volledige etappe uitslag</span>
-              <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
-            </a>
-          </div>
-
-          <!-- Truien Card -->
-          <div class="card card-jerseys">
-            <h2 class="card-title">Truien</h2>
-            <ul class="jerseys-list" id="jerseys-list">
-              <!-- Data wordt geladen vanuit JSON -->
-            </ul>
+            <!-- Truien Card -->
+            <div class="dashboard-section static-card">
+              <div class="team-card jerseys-card">
+                <div class="team-card-header">
+                  <h2 class="team-card-title">Truidragers</h2>
+                </div>
+                <div class="riders-list-container" id="jerseys-list-container">
+                  <div id="jerseys-list">
+                    <!-- Data wordt geladen vanuit JSON -->
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

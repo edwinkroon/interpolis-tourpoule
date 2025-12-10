@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bereken Punten voor Alle Stages</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #00334e;
+      margin-bottom: 20px;
+    }
+    button {
+      background: #00cac6;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 5px;
+    }
+    button:hover {
+      background: #00a09d;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .status {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 5px;
+      background: #f0f0f0;
+    }
+    .success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+    .log {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f9f9f9;
+      border-radius: 5px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 12px;
+    }
+    .log-entry {
+      margin: 5px 0;
+      padding: 5px;
+      border-left: 3px solid #00cac6;
+      padding-left: 10px;
+    }
+    .log-entry.error {
+      border-left-color: #dc3545;
+    }
+    .log-entry.success {
+      border-left-color: #28a745;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Bereken Punten voor Alle Stages</h1>
+    <p>Dit script berekent punten voor alle stages die resultaten hebben maar nog geen punten.</p>
+    
+    <button id="calculate-all-btn" onclick="calculateAllStages()">Bereken Alle Stages</button>
+    <button id="check-status-btn" onclick="checkStatus()">Check Status</button>
+    
+    <div id="status" class="status" style="display: none;"></div>
+    <div id="log" class="log" style="display: none;"></div>
+  </div>
+
+  <script>
+    function log(message, type = 'info') {
+      const logDiv = document.getElementById('log');
+      logDiv.style.display = 'block';
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logDiv.appendChild(entry);
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    function showStatus(message, type = 'info') {
+      const statusDiv = document.getElementById('status');
+      statusDiv.style.display = 'block';
+      statusDiv.className = `status ${type}`;
+      statusDiv.textContent = message;
+    }
+
+    async function calculateStagePoints(stageId) {
+      try {
+        log(`Bereken punten voor stage ${stageId}...`, 'info');
+        const response = await fetch('/.netlify/functions/calculate-stage-points', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ stageId })
+        });
+
+        const result = await response.json();
+        
+        if (result.ok) {
+          log(`✓ Stage ${stageId}: ${result.participantsCalculated} participants berekend`, 'success');
+          return { success: true, stageId, result };
+        } else {
+          log(`✗ Stage ${stageId}: ${result.error || 'Onbekende fout'}`, 'error');
+          return { success: false, stageId, error: result.error };
+        }
+      } catch (error) {
+        log(`✗ Stage ${stageId}: ${error.message}`, 'error');
+        return { success: false, stageId, error: error.message };
+      }
+    }
+
+    async function getStagesNeedingCalculation() {
+      try {
+        // We kunnen dit niet direct doen, dus we proberen stages 1-10
+        // In productie zou je een functie kunnen maken die dit teruggeeft
+        const stages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        return stages;
+      } catch (error) {
+        log(`Fout bij ophalen stages: ${error.message}`, 'error');
+        return [];
+      }
+    }
+
+    async function calculateAllStages() {
+      const btn = document.getElementById('calculate-all-btn');
+      btn.disabled = true;
+      btn.textContent = 'Bezig met berekenen...';
+      
+      document.getElementById('log').innerHTML = '';
+      showStatus('Bezig met berekenen...', 'info');
+
+      const stages = await getStagesNeedingCalculation();
+      log(`Gevonden ${stages.length} stages om te berekenen`, 'info');
+
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (const stageId of stages) {
+        const result = await calculateStagePoints(stageId);
+        if (result.success) {
+          successCount++;
+        } else {
+          errorCount++;
+        }
+        // Kleine delay om de server niet te overbelasten
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Bereken Alle Stages';
+
+      if (errorCount === 0) {
+        showStatus(`✓ Klaar! ${successCount} stages succesvol berekend.`, 'success');
+      } else {
+        showStatus(`⚠ Klaar: ${successCount} succesvol, ${errorCount} met fouten.`, 'error');
+      }
+    }
+
+    async function checkStatus() {
+      showStatus('Status wordt gecontroleerd...', 'info');
+      log('Controleer status van stages...', 'info');
+      
+      // We kunnen dit niet direct doen zonder een extra functie
+      // Maar we kunnen wel proberen stages 1-10 te berekenen
+      log('Gebruik "Bereken Alle Stages" om punten te berekenen voor alle stages.', 'info');
+      showStatus('Gebruik "Bereken Alle Stages" om punten te berekenen.', 'info');
+    }
+  </script>
+</body>
+</html>
+

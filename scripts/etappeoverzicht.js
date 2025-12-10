@@ -90,8 +90,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   }
   
-  // Render the page with dummy data for other cards
-  renderStageInfo(stageData);
+  // Note: My riders and points are now loaded dynamically in loadStageData
+  // Other cards (day standings, jerseys) still use dummy data for now
   
   // Setup navigation buttons (this will also call updateNavigationButtons)
   setupNavigation();
@@ -208,6 +208,52 @@ function renderStageInfo(data) {
   renderJerseys(data.jerseys);
 }
 
+async function loadMyRiders(stageNumber) {
+  try {
+    // Get current user ID from auth
+    const userId = await getUserId();
+    
+    if (!userId) {
+      console.error('User not authenticated');
+      const list = document.getElementById('my-riders-list');
+      if (list) {
+        showNoData('my-riders-list', 'Niet ingelogd');
+      }
+      return;
+    }
+
+    const response = await fetch(`/.netlify/functions/get-my-stage-riders?userId=${encodeURIComponent(userId)}&stage_number=${stageNumber}`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (data.ok && data.riders) {
+      // Update total points in header
+      const pointsCount = document.querySelector('.points-count');
+      if (pointsCount) {
+        pointsCount.textContent = `(${data.totalPoints})`;
+      }
+      
+      // Render riders with points
+      renderMyRiders(data.riders);
+    } else {
+      const list = document.getElementById('my-riders-list');
+      if (list) {
+        showNoData('my-riders-list', 'Geen renners gevonden voor deze etappe.');
+      }
+    }
+  } catch (error) {
+    console.error('Error loading my riders:', error);
+    const list = document.getElementById('my-riders-list');
+    if (list) {
+      showNoData('my-riders-list', 'Fout bij laden van renners.');
+    }
+  }
+}
+
 function renderMyRiders(riders) {
   const list = document.getElementById('my-riders-list');
   if (!list) return;
@@ -226,6 +272,10 @@ function renderMyRiders(riders) {
     // Get initials for placeholder
     const initials = rider.name.split(' ').map(n => n[0]).join('').substring(0, 2);
     
+    // Format points
+    const pointsText = rider.points > 0 ? `${rider.points} punten` : '0 punten';
+    const positionText = rider.position ? `Positie ${rider.position}` : 'Niet gefinisht';
+    
     li.innerHTML = `
       <div class="rider-avatar">
         <img src="" alt="${sanitizeInput(rider.name)}" class="rider-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
@@ -234,7 +284,9 @@ function renderMyRiders(riders) {
       <div class="rider-info">
         <div class="rider-name">${sanitizeInput(rider.name)}</div>
         <div class="rider-team">${sanitizeInput(rider.team)}</div>
+        ${rider.position ? `<div class="rider-position">${positionText}</div>` : ''}
       </div>
+      <div class="rider-points">${pointsText}</div>
     `;
     
     list.appendChild(li);
@@ -367,6 +419,7 @@ function hideLoading(elementId) {
 
 async function loadStageData(stage) {
   // Show loading indicators
+  showLoading('my-riders-list');
   showLoading('stage-results-list');
   showLoading('jerseys-list');
   
@@ -388,6 +441,9 @@ async function loadStageData(stage) {
       routeElement.textContent = `${stage.start_location} - ${stage.end_location}${distance}`;
     }
   }
+  
+  // Load my riders with points
+  await loadMyRiders(stage.stage_number);
   
   // Load stage results
   await loadStageResults(stage.stage_number);

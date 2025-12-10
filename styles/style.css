@@ -2075,6 +2075,22 @@ button[aria-busy="true"] {
   line-height: 1.4;
 }
 
+.rider-position {
+  font-size: 12px;
+  font-weight: 400;
+  color: #668494;
+  line-height: 1.4;
+}
+
+.rider-points {
+  font-size: 15px;
+  font-weight: 500;
+  color: #00334e;
+  text-align: right;
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
 /* Standings List */
 .standings-list {
   list-style: none;

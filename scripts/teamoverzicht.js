@@ -257,10 +257,12 @@ async function loadTeamJerseys() {
     if (result.ok && result.jerseys) {
       renderJerseys(result.jerseys, result.allJerseysAssigned);
     } else {
+      // On error, show empty state with encouragement message
       renderJerseys([], false);
     }
   } catch (error) {
     console.error('Error loading team jerseys:', error);
+    // On error, show empty state with encouragement message
     renderJerseys([], false);
   }
 }
@@ -277,14 +279,21 @@ function renderJerseys(jerseys, allJerseysAssigned) {
   jerseysList.innerHTML = '';
   
   // Check if any jerseys are assigned
-  const hasAssignedJerseys = jerseys.some(j => j.assigned !== null);
+  const hasAssignedJerseys = jerseys.length > 0 && jerseys.some(j => j.assigned !== null);
   
   // Show/hide encouragement message and list
   if (noJerseysMessage) {
-    if (!hasAssignedJerseys && jerseys.length > 0) {
-      // Show message, hide list when nothing is assigned
+    if (!hasAssignedJerseys) {
+      // Show message, hide list when nothing is assigned OR when jerseys array is empty
       noJerseysMessage.style.display = 'block';
-      jerseysList.style.display = 'none';
+      if (jerseys.length === 0) {
+        // If no jerseys data at all, don't render list items
+        jerseysList.style.display = 'none';
+      } else {
+        // If jerseys exist but none assigned, still render the list (showing "Niet toegewezen")
+        // but show the encouragement message above it
+        jerseysList.style.display = 'block';
+      }
     } else {
       // Hide message, show list when there are assigned jerseys
       noJerseysMessage.style.display = 'none';

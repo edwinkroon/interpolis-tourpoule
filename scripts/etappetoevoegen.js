@@ -99,7 +99,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     originalResultsText = resultsText; // Store original text
     
     // Get stage number from select option text
-    const stageSelect = document.getElementById('stage-select');
     if (stageSelect) {
       const selectedOption = stageSelect.options[stageSelect.selectedIndex];
       if (selectedOption) {

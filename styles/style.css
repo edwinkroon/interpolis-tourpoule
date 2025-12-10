@@ -3282,7 +3282,7 @@ button[aria-busy="true"] {
   font-size: 10px;
   font-weight: 400;
   color: #9ca3af;
-  z-index: 1000;
+  z-index: 10000;
   font-family: 'Open Sans', system-ui, sans-serif;
   user-select: none;
   pointer-events: none;

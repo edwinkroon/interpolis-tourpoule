@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   
   // Setup modal handlers
   setupModalHandlers();
+  
+  // Setup info popup handlers
+  setupInfoPopupHandlers();
 });
 
 async function loadTeamData() {
@@ -518,5 +521,79 @@ async function handleAddRiders() {
       }
     }
   }
+}
+
+// Setup info popup handlers
+function setupInfoPopupHandlers() {
+  // Get all info buttons
+  const jerseysInfoButton = document.getElementById('jerseys-info-button');
+  const mainRidersInfoButton = document.getElementById('main-riders-info-button');
+  const reserveRidersInfoButton = document.getElementById('reserve-riders-info-button');
+  
+  // Get all popups
+  const jerseysPopup = document.getElementById('jerseys-info-popup');
+  const mainRidersPopup = document.getElementById('main-riders-info-popup');
+  const reserveRidersPopup = document.getElementById('reserve-riders-info-popup');
+  
+  // Open/close popups on button click
+  if (jerseysInfoButton && jerseysPopup) {
+    jerseysInfoButton.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const isOpen = jerseysPopup.style.display !== 'none';
+      
+      // Close all popups first
+      closeAllInfoPopups();
+      
+      // Toggle this popup
+      if (!isOpen) {
+        jerseysPopup.style.display = 'block';
+      }
+    });
+  }
+  
+  if (mainRidersInfoButton && mainRidersPopup) {
+    mainRidersInfoButton.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const isOpen = mainRidersPopup.style.display !== 'none';
+      
+      // Close all popups first
+      closeAllInfoPopups();
+      
+      // Toggle this popup
+      if (!isOpen) {
+        mainRidersPopup.style.display = 'block';
+      }
+    });
+  }
+  
+  if (reserveRidersInfoButton && reserveRidersPopup) {
+    reserveRidersInfoButton.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const isOpen = reserveRidersPopup.style.display !== 'none';
+      
+      // Close all popups first
+      closeAllInfoPopups();
+      
+      // Toggle this popup
+      if (!isOpen) {
+        reserveRidersPopup.style.display = 'block';
+      }
+    });
+  }
+  
+  // Close popups when clicking outside
+  document.addEventListener('click', function(e) {
+    const isClickInsidePopup = e.target.closest('.info-popup') || e.target.closest('.info-icon-button');
+    if (!isClickInsidePopup) {
+      closeAllInfoPopups();
+    }
+  });
+}
+
+function closeAllInfoPopups() {
+  const popups = document.querySelectorAll('.info-popup');
+  popups.forEach(popup => {
+    popup.style.display = 'none';
+  });
 }
 

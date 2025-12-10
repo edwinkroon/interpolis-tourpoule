@@ -102,7 +102,21 @@
 
             <!-- Jerseys Card -->
             <div class="team-card jerseys-card">
-              <h2 class="team-card-title">Truien</h2>
+              <div class="team-card-header">
+                <h2 class="team-card-title">Truien</h2>
+                <button class="info-icon-button" id="jerseys-info-button" aria-label="Informatie over truien">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    <text x="10" y="14" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">i</text>
+                  </svg>
+                </button>
+                <div class="info-popup" id="jerseys-info-popup" style="display: none;">
+                  <div class="info-popup-content">
+                    <h3>Truien</h3>
+                    <p>Wijs truien toe aan renners uit je team. Er zijn vier verschillende truien: de gele trui (algemeen klassement), groene trui (puntenklassement), bolkentrui (bergklassement) en witte trui (jongerenklassement).</p>
+                  </div>
+                </div>
+              </div>
               <ul class="jerseys-list" id="jerseys-list">
                 <!-- Static jerseys data -->
                 <li class="jersey-item">
@@ -161,7 +175,21 @@
           <div class="dashboard-column">
             <!-- Basisrenners Card -->
             <div class="team-card">
-              <h2 class="team-card-title">Basisrenners</h2>
+              <div class="team-card-header">
+                <h2 class="team-card-title">Basisrenners</h2>
+                <button class="info-icon-button" id="main-riders-info-button" aria-label="Informatie over basisrenners">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    <text x="10" y="14" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">i</text>
+                  </svg>
+                </button>
+                <div class="info-popup" id="main-riders-info-popup" style="display: none;">
+                  <div class="info-popup-content">
+                    <h3>Basisrenners</h3>
+                    <p>Selecteer 10 basisrenners waarmee je de ronde begint. Dit zijn de renners die vanaf het begin in je team zitten en punten kunnen verdienen.</p>
+                  </div>
+                </div>
+              </div>
               <div class="riders-list-container" id="main-riders-list-container">
                 <!-- Main riders will be loaded here -->
                 <div class="no-riders-message" id="no-main-riders-message" style="display: none;">
@@ -176,7 +204,21 @@
 
             <!-- Reserverenners Card -->
             <div class="team-card">
-              <h2 class="team-card-title">Reserverenners</h2>
+              <div class="team-card-header">
+                <h2 class="team-card-title">Reserverenners</h2>
+                <button class="info-icon-button" id="reserve-riders-info-button" aria-label="Informatie over reserverenners">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    <text x="10" y="14" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">i</text>
+                  </svg>
+                </button>
+                <div class="info-popup" id="reserve-riders-info-popup" style="display: none;">
+                  <div class="info-popup-content">
+                    <h3>Reserverenners</h3>
+                    <p>Selecteer 5 reserverenners die je team kunnen aanvullen. Als een basisrenner niet meer start of uitvalt, kan een reserverenner automatisch in je team komen.</p>
+                  </div>
+                </div>
+              </div>
               <div class="riders-list-container" id="reserve-riders-list-container">
                 <!-- Reserve riders will be loaded here -->
                 <div class="no-riders-message" id="no-reserve-riders-message" style="display: none;">

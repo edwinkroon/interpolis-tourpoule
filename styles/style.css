@@ -2247,12 +2247,91 @@ button[aria-busy="true"] {
   filter: drop-shadow(0 8px 16px rgba(0, 51, 78, 0.161));
 }
 
+.team-card-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
 .team-card-title {
   font-size: 20px;
   font-weight: 700;
   color: #00334e;
-  margin-bottom: 1.5rem;
+  margin: 0;
   text-transform: none;
+  flex: 1;
+}
+
+.info-icon-button {
+  background: transparent;
+  border: none;
+  color: #668494;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+  flex-shrink: 0;
+  margin-left: 0.5rem;
+}
+
+.info-icon-button:hover {
+  color: #00334e;
+}
+
+.info-icon-button svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.info-popup {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  z-index: 100;
+  min-width: 280px;
+  max-width: 400px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 51, 78, 0.2);
+  filter: drop-shadow(0 8px 24px rgba(0, 51, 78, 0.2));
+  border: 1px solid #cdd7dc;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.info-popup-content {
+  padding: 1.25rem;
+}
+
+.info-popup-content h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #00334e;
+  margin: 0 0 0.75rem 0;
+}
+
+.info-popup-content p {
+  font-size: 14px;
+  font-weight: 400;
+  color: #00334e;
+  line-height: 1.6;
+  margin: 0;
 }
 
 /* Team Info Card */

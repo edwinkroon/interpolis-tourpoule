@@ -1,4 +1,4 @@
-const { Client } = require('pg');
+const { getDbClient, handleDbError, missingDbConfigResponse } = require('./_shared/db');
 
 exports.handler = async function(event) {
   if (event.httpMethod !== 'GET') {
@@ -12,22 +12,10 @@ exports.handler = async function(event) {
   let client;
   try {
     if (!process.env.NEON_DATABASE_URL) {
-      return {
-        statusCode: 500,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          ok: false, 
-          error: 'Database configuration missing' 
-        })
-      };
+      return missingDbConfigResponse();
     }
 
-    client = new Client({
-      connectionString: process.env.NEON_DATABASE_URL,
-      ssl: { rejectUnauthorized: false }
-    });
-
-    await client.connect();
+    client = await getDbClient();
 
     // Check if stage 1 has results
     const query = `
@@ -56,27 +44,7 @@ exports.handler = async function(event) {
       })
     };
   } catch (err) {
-    if (client) {
-      try {
-        await client.end();
-      } catch (closeErr) {
-        // Silent fail
-      }
-    }
-
-    console.error('Error in check-first-stage-has-results:', err);
-
-    return {
-      statusCode: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      },
-      body: JSON.stringify({
-        ok: false,
-        error: err.message || 'Database error'
-      })
-    };
+    return await handleDbError(err, client);
   }
 };
 

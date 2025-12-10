@@ -1,4 +1,4 @@
-const { Client } = require('pg');
+const { getDbClient, handleDbError, missingDbConfigResponse } = require('./_shared/db');
 
 exports.handler = async function(event) {
   if (event.httpMethod !== 'GET') {
@@ -12,14 +12,7 @@ exports.handler = async function(event) {
   let client;
   try {
     if (!process.env.NEON_DATABASE_URL) {
-      return {
-        statusCode: 500,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          ok: false, 
-          error: 'Database configuration missing' 
-        })
-      };
+      return missingDbConfigResponse();
     }
 
     // Get stage_number from query parameters (default to latest stage with results)
@@ -27,12 +20,7 @@ exports.handler = async function(event) {
       ? parseInt(event.queryStringParameters.stage_number) 
       : null;
 
-    client = new Client({
-      connectionString: process.env.NEON_DATABASE_URL,
-      ssl: { rejectUnauthorized: false }
-    });
-
-    await client.connect();
+    client = await getDbClient();
 
     // Build query to get top 6 results for the stage
     let query;

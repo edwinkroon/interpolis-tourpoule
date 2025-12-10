@@ -1,6 +1,99 @@
 const { getDbClient, handleDbError, missingDbConfigResponse } = require('./_shared/db');
 const { calculateCumulativePoints } = require('./calculate-cumulative-points');
 
+// BUSINESS RULE: Activate reserve riders when main riders drop out
+// This function checks which main riders are no longer in stage results
+// and automatically activates the first reserve rider to take their place
+async function activateReservesForDroppedRiders(client, stageId) {
+  // Get all active main riders from all fantasy teams
+  const mainRidersQuery = await client.query(`
+    SELECT 
+      ftr.id,
+      ftr.fantasy_team_id,
+      ftr.rider_id,
+      ftr.slot_number,
+      ft.participant_id
+    FROM fantasy_team_riders ftr
+    JOIN fantasy_teams ft ON ftr.fantasy_team_id = ft.id
+    WHERE ftr.slot_type = 'main'
+      AND ftr.active = true
+    ORDER BY ft.participant_id, ftr.slot_number
+  `);
+  
+  // Get all riders that finished this stage (are in stage_results)
+  const finishedRidersQuery = await client.query(`
+    SELECT DISTINCT rider_id
+    FROM stage_results
+    WHERE stage_id = $1
+  `, [stageId]);
+  
+  const finishedRiderIds = new Set(finishedRidersQuery.rows.map(r => r.rider_id));
+  
+  // Group main riders by fantasy team
+  const teamMainRidersMap = new Map();
+  mainRidersQuery.rows.forEach(rider => {
+    if (!teamMainRidersMap.has(rider.fantasy_team_id)) {
+      teamMainRidersMap.set(rider.fantasy_team_id, []);
+    }
+    teamMainRidersMap.get(rider.fantasy_team_id).push(rider);
+  });
+  
+  // For each fantasy team, check for dropped main riders and activate reserves
+  for (const [fantasyTeamId, mainRiders] of teamMainRidersMap) {
+    const droppedMainRiders = mainRiders.filter(rider => !finishedRiderIds.has(rider.rider_id));
+    
+    if (droppedMainRiders.length > 0) {
+      // Get available reserve riders for this team, ordered by slot_number
+      const reserveRidersQuery = await client.query(`
+        SELECT 
+          id,
+          rider_id,
+          slot_number
+        FROM fantasy_team_riders
+        WHERE fantasy_team_id = $1
+          AND slot_type = 'reserve'
+          AND active = true
+        ORDER BY slot_number ASC
+      `, [fantasyTeamId]);
+      
+      const availableReserves = reserveRidersQuery.rows;
+      
+      // For each dropped main rider, activate the first available reserve
+      for (let i = 0; i < droppedMainRiders.length && i < availableReserves.length; i++) {
+        const droppedMain = droppedMainRiders[i];
+        const reserveToActivate = availableReserves[i];
+        
+        // First, deactivate the dropped main rider
+        await client.query(`
+          UPDATE fantasy_team_riders
+          SET active = false
+          WHERE id = $1
+        `, [droppedMain.id]);
+        
+        // Then, activate the reserve and change slot_type to 'main', slot_number to the dropped main's slot
+        // We need to temporarily set slot_number to avoid unique constraint conflicts
+        // First, set the reserve's slot_number to a temporary high value
+        await client.query(`
+          UPDATE fantasy_team_riders
+          SET slot_number = 999
+          WHERE id = $1
+        `, [reserveToActivate.id]);
+        
+        // Now update to the correct slot
+        await client.query(`
+          UPDATE fantasy_team_riders
+          SET slot_type = 'main',
+              slot_number = $1,
+              active = true
+          WHERE id = $2
+        `, [droppedMain.slot_number, reserveToActivate.id]);
+        
+        console.log(`Activated reserve rider ${reserveToActivate.rider_id} to replace dropped main rider ${droppedMain.rider_id} in slot ${droppedMain.slot_number} for team ${fantasyTeamId}`);
+      }
+    }
+  }
+}
+
 // Helper function to calculate stage points (shared with calculate-stage-points.js)
 async function calculateStagePoints(client, stageId) {
   if (!client) {
@@ -36,6 +129,7 @@ async function calculateStagePoints(client, stageId) {
   
 
   // Step 3: Get all fantasy teams with their riders
+  // BUSINESS RULE: Only main riders (slot_type = 'main') can earn points
   const fantasyTeams = await client.query(
     `SELECT 
        ft.id as fantasy_team_id,
@@ -45,7 +139,8 @@ async function calculateStagePoints(client, stageId) {
        ftr.active
      FROM fantasy_teams ft
      JOIN fantasy_team_riders ftr ON ft.id = ftr.fantasy_team_id
-     WHERE ftr.active = true`
+     WHERE ftr.active = true
+       AND ftr.slot_type = 'main'`
   );
   
 
@@ -364,6 +459,11 @@ exports.handler = async function(event) {
         );
       }
 
+      // BUSINESS RULE: Check for dropped main riders and activate reserves
+      // After importing stage results, check which main riders are no longer in results
+      // and automatically activate the first reserve rider to take their place
+      await activateReservesForDroppedRiders(client, stageId);
+      
       // Commit transaction
       await client.query('COMMIT');
       

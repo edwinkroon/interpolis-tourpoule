@@ -86,6 +86,7 @@ async function calculateStagePoints(client, stageId) {
   );
 
   // Step 3: Get all fantasy teams with their riders
+  // BUSINESS RULE: Only main riders (slot_type = 'main') can earn points
   const fantasyTeams = await client.query(
     `SELECT 
        ft.id as fantasy_team_id,
@@ -95,7 +96,8 @@ async function calculateStagePoints(client, stageId) {
        ftr.active
      FROM fantasy_teams ft
      JOIN fantasy_team_riders ftr ON ft.id = ftr.fantasy_team_id
-     WHERE ftr.active = true`
+     WHERE ftr.active = true
+       AND ftr.slot_type = 'main'`
   );
 
   // Step 4: Get jersey wearers for this stage and their points

@@ -265,7 +265,15 @@ function renderMyRiders(riders) {
     return;
   }
   
-  riders.forEach(rider => {
+  // Filter: alleen renners met punten (points > 0)
+  const ridersWithPoints = riders.filter(rider => rider.points > 0);
+  
+  if (ridersWithPoints.length === 0) {
+    list.innerHTML = '<li class="no-data">Geen renners met punten voor deze etappe</li>';
+    return;
+  }
+  
+  ridersWithPoints.forEach(rider => {
     const li = document.createElement('li');
     li.className = 'rider-item';
     

@@ -158,8 +158,10 @@ function renderRidersList(riders, type, statusInfo = null) {
   const ridersContainer = document.getElementById(containerId);
   const noRidersMessage = document.getElementById(messageId);
   
+  if (!ridersContainer) return;
+  
   // Update title with rider count
-  const cardElement = ridersContainer?.closest('.team-card');
+  const cardElement = ridersContainer.closest('.team-card');
   const titleElement = cardElement?.querySelector('.team-card-title');
   if (titleElement) {
     const baseTitle = type === 'main' ? 'Basisrenners' : 'Reserverenners';
@@ -196,8 +198,6 @@ function renderRidersList(riders, type, statusInfo = null) {
       deleteButton.style.display = 'none';
     }
   }
-  
-  if (!ridersContainer) return;
   
   if (riders.length > 0) {
     // Hide no riders message

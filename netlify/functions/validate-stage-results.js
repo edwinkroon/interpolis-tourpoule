@@ -453,6 +453,32 @@ exports.handler = async function(event) {
             reversedMatch = await client.query(reversedNameQuery, [result.lastName, result.firstName]);
           }
           
+          if (reversedMatch.rows.length === 0) {
+            // Strategy 3b: Try matching with normalized names (diacritics removed) - reversed order
+            // This helps with cases like "Wærenskjold Søren" -> "Soren Waerenskjold"
+            if (normalizedFirstName && normalizedLastName) {
+              try {
+                const normalizedReversedQuery = `
+                  SELECT id, first_name, last_name 
+                  FROM riders 
+                  WHERE (first_name_normalized IS NOT NULL AND last_name_normalized IS NOT NULL
+                    AND first_name_normalized = $1
+                    AND last_name_normalized = $2)
+                  LIMIT 1
+                `;
+                const normalizedReversedMatch = await client.query(normalizedReversedQuery, [
+                  normalizedLastName,
+                  normalizedFirstName
+                ]);
+                if (normalizedReversedMatch.rows.length > 0) {
+                  reversedMatch = normalizedReversedMatch;
+                }
+              } catch (queryErr) {
+                // Ignore - normalized columns might not exist
+              }
+            }
+          }
+          
           if (reversedMatch.rows.length > 0) {
             riderId = reversedMatch.rows[0].id;
             matchedRider = reversedMatch.rows[0];
@@ -525,10 +551,89 @@ exports.handler = async function(event) {
                   riderId = fuzzyMatch.rows[0].id;
                   matchedRider = fuzzyMatch.rows[0];
                 } else {
-                  // Strategy 6: Fallback - try matching with normalized names using LIKE for partial matches
-                  // This helps with diacritics when normalized fields don't exist
-                  // Skip this strategy as it's complex and may cause errors
-                  // The previous strategies should handle most cases
+                  // Strategy 6: Try matching with all possible combinations of the name parts
+                  // This helps with cases like "Johannessen Tobias Halland" where parsing might need adjustment
+                  if (result.riderName && result.riderName.split(/\s+/).length >= 3) {
+                    const allNameParts = result.riderName.trim().split(/\s+/);
+                    
+                    // Try different splits: for 3+ words, try last 2 words as first name
+                    if (allNameParts.length >= 3) {
+                      // Try: first word = last name, rest = first name (alternative parsing)
+                      const altLastName = allNameParts[0];
+                      const altFirstName = allNameParts.slice(1).join(' ');
+                      const altNormalizedFirstName = normalizeName(altFirstName);
+                      const altNormalizedLastName = normalizeName(altLastName);
+                      
+                      let altMatch;
+                      try {
+                        const altQuery = `
+                          SELECT id, first_name, last_name 
+                          FROM riders 
+                          WHERE (LOWER(TRIM(first_name)) = LOWER(TRIM($1))
+                            AND LOWER(TRIM(last_name)) = LOWER(TRIM($2)))
+                           OR (first_name_normalized IS NOT NULL AND last_name_normalized IS NOT NULL
+                               AND first_name_normalized = $3
+                               AND last_name_normalized = $4)
+                          LIMIT 1
+                        `;
+                        altMatch = await client.query(altQuery, [
+                          altFirstName,
+                          altLastName,
+                          altNormalizedFirstName,
+                          altNormalizedLastName
+                        ]);
+                      } catch (queryErr) {
+                        const altQuery = `
+                          SELECT id, first_name, last_name 
+                          FROM riders 
+                          WHERE LOWER(TRIM(first_name)) = LOWER(TRIM($1))
+                            AND LOWER(TRIM(last_name)) = LOWER(TRIM($2))
+                          LIMIT 1
+                        `;
+                        altMatch = await client.query(altQuery, [altFirstName, altLastName]);
+                      }
+                      
+                      if (altMatch.rows.length > 0) {
+                        riderId = altMatch.rows[0].id;
+                        matchedRider = altMatch.rows[0];
+                      } else if (normalizedFirstName && normalizedLastName) {
+                        // Strategy 6b: Try matching with normalized names on original fields (for diacritics)
+                        // This helps with cases like "Wærenskjold Søren" vs "Soren Waerenskjold"
+                        // Use LIKE to get candidates that might match after normalization
+                        try {
+                          // Get candidates by matching first few characters (more efficient than all riders)
+                          const firstChar = normalizedLastName.substring(0, 3);
+                          const candidatesQuery = `
+                            SELECT id, first_name, last_name 
+                            FROM riders 
+                            WHERE LOWER(SUBSTRING(TRIM(last_name), 1, 3)) = $1
+                               OR LOWER(SUBSTRING(TRIM(first_name), 1, 3)) = $2
+                            LIMIT 50
+                          `;
+                          const candidates = await client.query(candidatesQuery, [
+                            firstChar,
+                            normalizedFirstName.substring(0, 3)
+                          ]);
+                          
+                          // Match by normalized names in JavaScript
+                          for (const candidate of candidates.rows) {
+                            const candidateFirstNorm = normalizeName(candidate.first_name || '');
+                            const candidateLastNorm = normalizeName(candidate.last_name || '');
+                            
+                            // Try both orders: normal and reversed
+                            if ((candidateFirstNorm === normalizedFirstName && candidateLastNorm === normalizedLastName) ||
+                                (candidateFirstNorm === normalizedLastName && candidateLastNorm === normalizedFirstName)) {
+                              riderId = candidate.id;
+                              matchedRider = candidate;
+                              break;
+                            }
+                          }
+                        } catch (queryErr) {
+                          // Ignore - this is a fallback strategy
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }

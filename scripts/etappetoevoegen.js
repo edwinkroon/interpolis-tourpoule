@@ -343,6 +343,11 @@ document.addEventListener('DOMContentLoaded', async function() {
         setTimeout(() => {
           loadStagesWithoutResults();
         }, 1000);
+        
+        // Redirect to home after successful import
+        setTimeout(() => {
+          window.location.href = 'home.html';
+        }, 2000);
       } else {
         validationSuccess.style.display = 'none';
         validationErrors.style.display = 'block';

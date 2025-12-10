@@ -2245,7 +2245,6 @@ button[aria-busy="true"] {
   padding: 2rem;
   box-shadow: 0 8px 16px rgba(0, 51, 78, 0.16);
   filter: drop-shadow(0 8px 16px rgba(0, 51, 78, 0.161));
-  margin-bottom: 1.5rem;
 }
 
 .team-card-title {

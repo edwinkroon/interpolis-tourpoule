@@ -279,13 +279,20 @@ function renderJerseys(jerseys, allJerseysAssigned) {
   // Check if any jerseys are assigned
   const hasAssignedJerseys = jerseys.some(j => j.assigned !== null);
   
-  // Show/hide encouragement message
+  // Show/hide encouragement message and list
   if (noJerseysMessage) {
     if (!hasAssignedJerseys && jerseys.length > 0) {
+      // Show message, hide list when nothing is assigned
       noJerseysMessage.style.display = 'block';
+      jerseysList.style.display = 'none';
     } else {
+      // Hide message, show list when there are assigned jerseys
       noJerseysMessage.style.display = 'none';
+      jerseysList.style.display = 'block';
     }
+  } else {
+    // Fallback: always show list if message element doesn't exist
+    jerseysList.style.display = 'block';
   }
   
   // Map jersey type to class name and title

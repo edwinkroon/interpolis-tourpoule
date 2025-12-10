@@ -155,8 +155,35 @@ exports.handler = async function(event) {
       const teamRidersResult = await client.query(teamRidersQuery, [fantasyTeamId]);
       const teamRiderIds = new Set(teamRidersResult.rows.map(row => row.rider_id));
 
-      // Validate assignments - all riders must be in the team
+      // Get all valid jersey IDs from database
+      const validJerseysQuery = 'SELECT id FROM jerseys';
+      const validJerseysResult = await client.query(validJerseysQuery);
+      const validJerseyIds = new Set(validJerseysResult.rows.map(row => row.id));
+
+      // Validate assignments - all riders must be in the team and jersey IDs must exist
       for (const assignment of assignments) {
+        if (!assignment.jerseyId) {
+          continue; // Skip assignments without jerseyId
+        }
+
+        // Validate jersey ID exists
+        if (!validJerseyIds.has(assignment.jerseyId)) {
+          await client.query('ROLLBACK');
+          await client.end();
+          return {
+            statusCode: 400,
+            headers: { 
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*'
+            },
+            body: JSON.stringify({ 
+              ok: false, 
+              error: `Jersey ID ${assignment.jerseyId} does not exist in the database` 
+            })
+          };
+        }
+
+        // Validate rider ID if provided
         if (assignment.riderId && !teamRiderIds.has(assignment.riderId)) {
           await client.query('ROLLBACK');
           await client.end();
@@ -180,9 +207,9 @@ exports.handler = async function(event) {
         [fantasyTeamId]
       );
 
-      // Insert new assignments (only those with a riderId)
+      // Insert new assignments (only those with a riderId and valid jerseyId)
       for (const assignment of assignments) {
-        if (assignment.riderId && assignment.jerseyId) {
+        if (assignment.riderId && assignment.jerseyId && validJerseyIds.has(assignment.jerseyId)) {
           await client.query(
             `INSERT INTO fantasy_team_jerseys (fantasy_team_id, jersey_id, rider_id, updated_at)
              VALUES ($1, $2, $3, NOW())

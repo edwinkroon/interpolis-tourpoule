@@ -143,14 +143,10 @@ async function renderJerseyAssignments() {
     }
   }
   
-  // If no jerseys loaded, use default list
+  // If no jerseys loaded, show error message
   if (jerseys.length === 0) {
-    jerseys = [
-      { id: 1, type: 'geel', name: 'Gele trui' },
-      { id: 2, type: 'groen', name: 'Groene trui' },
-      { id: 3, type: 'bolletjes', name: 'Bolkentrui' },
-      { id: 4, type: 'wit', name: 'Witte trui' }
-    ];
+    container.innerHTML = '<p style="color: #d32f2f; padding: 1rem;">Geen truien beschikbaar in de database. Neem contact op met de beheerder.</p>';
+    return;
   }
   
   container.innerHTML = '';

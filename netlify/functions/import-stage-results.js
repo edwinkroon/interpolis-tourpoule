@@ -109,6 +109,12 @@ async function activateReservesForDroppedRiders(client, stageId) {
           
           if (updateResult.rowCount === 0) {
             console.warn(`Failed to update reserve rider ${reserveToActivate.id} - no rows affected`);
+            // Revert slot_number change
+            await client.query(`
+              UPDATE fantasy_team_riders
+              SET slot_number = $1
+              WHERE id = $2
+            `, [reserveToActivate.slot_number, reserveToActivate.id]);
             continue;
           }
           
@@ -126,8 +132,15 @@ async function activateReservesForDroppedRiders(client, stageId) {
               `, [reserveToActivate.slot_number, reserveToActivate.id]);
             } catch (revertError) {
               console.error(`Failed to revert slot_number for reserve ${reserveToActivate.id}:`, revertError.message);
+              // If revert fails, we need to rollback the transaction
+              throw new Error(`Failed to activate reserve and revert failed: ${revertError.message}`);
             }
             continue;
+          }
+          // Check if transaction is aborted
+          if (updateError.code === '25P02') {
+            // Transaction is aborted, we can't continue
+            throw updateError;
           }
           // For other errors, rethrow
           throw updateError;
@@ -567,13 +580,23 @@ exports.handler = async function(event) {
         );
       }
 
+      // Commit transaction BEFORE activating reserves
+      // This prevents transaction abort errors if reserve activation fails
+      await client.query('COMMIT');
+      
       // BUSINESS RULE: Check for dropped main riders and activate reserves
       // After importing stage results, check which main riders are no longer in results
       // and automatically activate the first reserve rider to take their place
-      await activateReservesForDroppedRiders(client, stageId);
-      
-      // Commit transaction
-      await client.query('COMMIT');
+      // This is done AFTER commit to avoid transaction abort issues
+      try {
+        await activateReservesForDroppedRiders(client, stageId);
+      } catch (reserveError) {
+        console.error('Error activating reserves (non-fatal):', reserveError);
+        console.error('Error code:', reserveError.code);
+        console.error('Error message:', reserveError.message);
+        // Reserve activation failure doesn't fail the import
+        // The stage results are already imported successfully
+      }
       
       // Calculate fantasy stage points after importing results
       // This is done after commit to avoid long-running transactions
@@ -652,16 +675,39 @@ exports.handler = async function(event) {
         })
       };
     } catch (err) {
-      await client.query('ROLLBACK');
+      // Check if transaction is already aborted
+      if (err.code === '25P02' || err.message.includes('current transaction is aborted')) {
+        // Transaction is aborted, try to rollback
+        try {
+          await client.query('ROLLBACK');
+        } catch (rollbackErr) {
+          // Transaction might already be rolled back, that's ok
+          console.error('Error during rollback (transaction may already be aborted):', rollbackErr.message);
+        }
+      } else {
+        // Normal error, rollback transaction
+        try {
+          await client.query('ROLLBACK');
+        } catch (rollbackErr) {
+          console.error('Error during rollback:', rollbackErr.message);
+        }
+      }
       throw err;
     }
   } catch (err) {
     // Try to rollback if in transaction
     if (client) {
       try {
-        await client.query('ROLLBACK');
+        // Check if transaction is already aborted
+        if (err.code === '25P02' || err.message.includes('current transaction is aborted')) {
+          // Try to rollback, but don't fail if it's already aborted
+          await client.query('ROLLBACK');
+        } else {
+          await client.query('ROLLBACK');
+        }
       } catch (rollbackErr) {
-        // Transaction might already be aborted, that's ok
+        // Transaction might already be aborted or rolled back, that's ok
+        console.error('Error during rollback in outer catch:', rollbackErr.message);
       }
     }
     return await handleDbError(err, client);

@@ -250,22 +250,21 @@ async function renderJerseyAssignments() {
     const assignmentDiv = document.createElement('div');
     assignmentDiv.className = 'jersey-assignment-item';
     
-    const jerseyClassMap = {
-      'geel': 'jersey-geel',
-      'groen': 'jersey-groen',
-      'bolletjes': 'jersey-bolletjes',
-      'wit': 'jersey-wit'
+    const jerseyIconMap = {
+      'geel': { icon: 'icons/Truien/geletrui.svg', title: 'Gele trui' },
+      'groen': { icon: 'icons/Truien/groenetrui.svg', title: 'Groene trui' },
+      'bolletjes': { icon: 'icons/Truien/bolletjestrui.svg', title: 'Bolkentrui' },
+      'wit': { icon: 'icons/Truien/wittetrui.svg', title: 'Witte trui' }
     };
     
-    const jerseyClass = jerseyClassMap[jersey.type] || 'jersey-geel';
-    const jerseyName = jersey.name || (jersey.type === 'geel' ? 'Gele trui' : 
-                      jersey.type === 'groen' ? 'Groene trui' :
-                      jersey.type === 'bolletjes' ? 'Bolkentrui' :
-                      jersey.type === 'wit' ? 'Witte trui' : 'Trui');
+    const jerseyInfo = jerseyIconMap[jersey.type] || { icon: 'icons/Truien/geletrui.svg', title: 'Trui' };
+    const jerseyName = jersey.name || jerseyInfo.title;
     
     assignmentDiv.innerHTML = `
       <div class="jersey-assignment-header">
-        <div class="jersey-icon ${jerseyClass}" title="${sanitizeInput(jerseyName)}"></div>
+        <div class="jersey-icon" title="${sanitizeInput(jerseyName)}">
+          <img src="${sanitizeInput(jerseyInfo.icon)}" alt="${sanitizeInput(jerseyName)}" />
+        </div>
         <label for="jersey-${jersey.id}-select" class="jersey-assignment-label">${sanitizeInput(jerseyName)}</label>
       </div>
       <select 
@@ -728,12 +727,12 @@ function renderJerseys(jerseys, allJerseysAssigned) {
     }
   }
   
-  // Map jersey type to class name and title
-  const jerseyClassMap = {
-    'geel': { class: 'jersey-geel', title: 'Gele trui' },
-    'groen': { class: 'jersey-groen', title: 'Groene trui' },
-    'bolletjes': { class: 'jersey-bolletjes', title: 'Bolkentrui' },
-    'wit': { class: 'jersey-wit', title: 'Witte trui' }
+  // Map jersey type to icon path and title
+  const jerseyIconMap = {
+    'geel': { icon: 'icons/Truien/geletrui.svg', title: 'Gele trui' },
+    'groen': { icon: 'icons/Truien/groenetrui.svg', title: 'Groene trui' },
+    'bolletjes': { icon: 'icons/Truien/bolletjestrui.svg', title: 'Bolkentrui' },
+    'wit': { icon: 'icons/Truien/wittetrui.svg', title: 'Witte trui' }
   };
   
   // Render jerseys if there are any
@@ -742,7 +741,7 @@ function renderJerseys(jerseys, allJerseysAssigned) {
       const jerseyItem = document.createElement('div');
       jerseyItem.className = 'team-rider-item';
       
-      const jerseyInfo = jerseyClassMap[jersey.type] || { class: 'jersey-geel', title: 'Trui' };
+      const jerseyInfo = jerseyIconMap[jersey.type] || { icon: 'icons/Truien/geletrui.svg', title: 'Trui' };
       
       if (jersey.assigned) {
         // Jersey is assigned to a rider
@@ -759,7 +758,9 @@ function renderJerseys(jerseys, allJerseysAssigned) {
             <div class="rider-name">${sanitizeInput(jersey.assigned.first_name || '')} ${sanitizeInput(jersey.assigned.last_name || '')}</div>
             <div class="rider-team">${sanitizeInput(jersey.assigned.team_name || '')}</div>
           </div>
-          <div class="jersey-icon ${jerseyInfo.class}" title="${sanitizeInput(jerseyInfo.title)}"></div>
+          <div class="jersey-icon" title="${sanitizeInput(jerseyInfo.title)}">
+            <img src="${sanitizeInput(jerseyInfo.icon)}" alt="${sanitizeInput(jerseyInfo.title)}" />
+          </div>
         `;
       } else {
         // Jersey is not assigned
@@ -771,7 +772,9 @@ function renderJerseys(jerseys, allJerseysAssigned) {
             <div class="rider-name" style="color: #668494;">Niet toegewezen</div>
             <div class="rider-team" style="color: #668494; font-style: italic;">Selecteer een renner</div>
           </div>
-          <div class="jersey-icon ${jerseyInfo.class}" title="${sanitizeInput(jerseyInfo.title)}"></div>
+          <div class="jersey-icon" title="${sanitizeInput(jerseyInfo.title)}">
+            <img src="${sanitizeInput(jerseyInfo.icon)}" alt="${sanitizeInput(jerseyInfo.title)}" />
+          </div>
         `;
       }
       

@@ -63,20 +63,23 @@
 
       <!-- Content Area -->
       <div class="content-area col-9">
-        <!-- Team Selection -->
+        <!-- Team Selection with Integrated Filters -->
         <div class="team-compare-selection">
           <div class="team-compare-select-container">
             <label for="compare-team-select" class="team-compare-label">Vergelijk met:</label>
-            <select id="compare-team-select" class="team-compare-select">
-              <option value="">Selecteer een team...</option>
-            </select>
+            <div class="team-compare-select-wrapper">
+              <select id="compare-team-select" class="team-compare-select" disabled>
+                <option value="">Gegevens aan het ophalen...</option>
+              </select>
+              <div class="team-compare-select-display" id="team-compare-select-display">
+                <span class="team-compare-select-text">Gegevens aan het ophalen...</span>
+                <img src="assets/arrow.svg" alt="" class="team-compare-select-arrow" aria-hidden="true" style="display: none;">
+              </div>
+            </div>
           </div>
-        </div>
-
-        <!-- Team Comparison -->
-        <div class="team-compare-container" id="team-compare-container" style="display: none;">
-          <!-- Filters (shown above both teams) -->
-          <div class="team-compare-filters-container">
+          
+          <!-- Filters (shown when team is selected) -->
+          <div class="team-compare-filters-container" id="team-compare-filters-container" style="display: none;">
             <div class="team-compare-filters">
               <label class="team-compare-filter-label">
                 <input type="checkbox" class="team-compare-filter-checkbox" id="filter-main-riders" checked>
@@ -88,14 +91,37 @@
               </label>
               <label class="team-compare-filter-label">
                 <input type="checkbox" class="team-compare-filter-checkbox" id="filter-inactive-riders" checked>
-                <span>Niet meer meedoen</span>
+                <span>Heeft ronde verlaten</span>
               </label>
               <label class="team-compare-filter-label">
                 <input type="checkbox" class="team-compare-filter-checkbox" id="filter-shared-riders" checked>
                 <span>Gedeelde renners</span>
               </label>
             </div>
+            
+            <!-- Legend -->
+            <div class="team-compare-legend">
+              <div class="team-compare-legend-title">Legenda:</div>
+              <div class="team-compare-legend-items">
+                <div class="team-compare-legend-item">
+                  <div class="team-compare-legend-color team-compare-legend-reserve"></div>
+                  <span>Reserverenner</span>
+                </div>
+                <div class="team-compare-legend-item">
+                  <div class="team-compare-legend-color team-compare-legend-inactive"></div>
+                  <span>Heeft ronde verlaten</span>
+                </div>
+                <div class="team-compare-legend-item">
+                  <div class="team-compare-legend-color team-compare-legend-shared"></div>
+                  <span>Gedeelde renner</span>
+                </div>
+              </div>
+            </div>
           </div>
+        </div>
+
+        <!-- Team Comparison -->
+        <div class="team-compare-container" id="team-compare-container" style="display: none;">
           
           <div class="team-compare-grid">
             <!-- Your Team -->

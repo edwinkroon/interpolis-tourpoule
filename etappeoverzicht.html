@@ -89,7 +89,21 @@
           <div class="dashboard-column">
             <!-- Mijn punten Card -->
             <div class="dashboard-section points-section">
-              <h2 class="dashboard-section-title">Mijn punten <span class="points-count"></span></h2>
+              <div class="team-card-header">
+                <h2 class="dashboard-section-title">Mijn punten <span class="points-count"></span></h2>
+                <button class="info-icon-button" id="my-points-info-button" aria-label="Informatie over mijn punten">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    <text x="10" y="14" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">i</text>
+                  </svg>
+                </button>
+                <div class="info-popup" id="my-points-info-popup" style="display: none;">
+                  <div class="info-popup-content">
+                    <h3>Mijn punten</h3>
+                    <p>Hier zie je welke renners uit jouw team punten hebben behaald bij deze etappe. Alleen renners die punten hebben gescoord worden getoond. Het totaal aantal punten staat tussen haakjes naast de titel.</p>
+                  </div>
+                </div>
+              </div>
               <ul class="riders-list" id="my-riders-list">
                 <!-- Data wordt geladen vanuit JSON -->
               </ul>
@@ -101,7 +115,21 @@
 
             <!-- Dag uitslag Card -->
             <div class="dashboard-section dag-uitslag-section">
-              <h2 class="dashboard-section-title">Beste teams van de dag</h2>
+              <div class="team-card-header">
+                <h2 class="dashboard-section-title">Beste teams van de dag</h2>
+                <button class="info-icon-button" id="day-standings-info-button" aria-label="Informatie over beste teams van de dag">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    <text x="10" y="14" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">i</text>
+                  </svg>
+                </button>
+                <div class="info-popup" id="day-standings-info-popup" style="display: none;">
+                  <div class="info-popup-content">
+                    <h3>Beste teams van de dag</h3>
+                    <p>Hier zie je de top 3 teams die de meeste punten hebben behaald bij deze etappe. De teams worden gesorteerd op basis van het aantal punten dat ze hebben behaald bij deze specifieke etappe.</p>
+                  </div>
+                </div>
+              </div>
               <ol class="standings-list" id="day-standings-list">
                 <!-- Data wordt geladen vanuit JSON -->
               </ol>
@@ -116,7 +144,21 @@
           <div class="dashboard-column">
             <!-- Etappe uitslag Card -->
             <div class="dashboard-section etappe-uitslag-section">
-              <h2 class="dashboard-section-title">Etappe uitslag</h2>
+              <div class="team-card-header">
+                <h2 class="dashboard-section-title">Etappe uitslag</h2>
+                <button class="info-icon-button" id="stage-results-info-button" aria-label="Informatie over etappe uitslag">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    <text x="10" y="14" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">i</text>
+                  </svg>
+                </button>
+                <div class="info-popup" id="stage-results-info-popup" style="display: none;">
+                  <div class="info-popup-content">
+                    <h3>Etappe uitslag</h3>
+                    <p>Hier zie je de top 6 renners van deze etappe met hun eindtijd. De renners zijn gesorteerd op basis van hun eindpositie in de etappe.</p>
+                  </div>
+                </div>
+              </div>
               <ol class="results-list list-with-time" id="stage-results-list">
                 <!-- Data wordt geladen vanuit JSON -->
               </ol>
@@ -130,6 +172,18 @@
             <div class="dashboard-section">
               <div class="team-card-header">
                 <h2 class="team-card-title">Truidragers</h2>
+                <button class="info-icon-button" id="jerseys-info-button" aria-label="Informatie over truidragers">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    <text x="10" y="14" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">i</text>
+                  </svg>
+                </button>
+                <div class="info-popup" id="jerseys-info-popup" style="display: none;">
+                  <div class="info-popup-content">
+                    <h3>Truidragers</h3>
+                    <p>Hier zie je welke renners de leidende truien dragen na deze etappe: de gele trui (algemeen klassement), groene trui (puntenklassement), bolkentrui (bergklassement) en witte trui (jongerenklassement).</p>
+                  </div>
+                </div>
               </div>
               <div class="riders-list-container" id="jerseys-list-container">
                 <div id="jerseys-list">

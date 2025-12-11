@@ -601,11 +601,14 @@ function renderDayWinners(dayWinners, latestStageRoute = null) {
     
     // If points are different from previous, update medal rank
     if (previousPoints !== null && points < previousPoints) {
+      // Points decreased, so this is a new rank
+      // Count how many previous winners had different points
       currentMedalRank = index + 1;
-    } else if (previousPoints === null || points > previousPoints) {
-      currentMedalRank = index + 1;
+    } else if (previousPoints === null) {
+      // First winner
+      currentMedalRank = 1;
     }
-    // If points are same as previous, keep same medal rank
+    // If points are same as previous, keep same medal rank (already set)
     
     previousPoints = points;
     
@@ -615,47 +618,76 @@ function renderDayWinners(dayWinners, latestStageRoute = null) {
     };
   });
   
-  winnersWithMedals.forEach((winner) => {
-    const winnerItem = document.createElement('div');
-    winnerItem.className = 'day-winner-item';
+  // Take top 3 winners for display
+  const top3Winners = winnersWithMedals.slice(0, 3);
+  
+  // Ensure we have winners for positions 1, 2, and 3
+  // If there are ties, we might need to adjust
+  console.log('Top 3 winners:', top3Winners.map(w => ({ name: w.team || w.name, points: w.points, medalRank: w.medalRank })));
+  
+  // Create podium container
+  const podiumContainer = document.createElement('div');
+  podiumContainer.className = 'day-winners-podium';
+  
+  // Create podium SVG background
+  const podiumSvg = document.createElement('div');
+  podiumSvg.className = 'day-winners-podium-svg';
+  podiumSvg.innerHTML = '<img src="icons/podium.svg" alt="Podium" />';
+  
+  // Create podium structure with absolute positioned content
+  const podiumStructure = document.createElement('div');
+  podiumStructure.className = 'day-winners-podium-structure';
+  
+  // Podium order: 2nd place (left), 1st place (center, highest), 3rd place (right)
+  const podiumOrder = [2, 1, 3];
+  
+  podiumOrder.forEach((rank) => {
+    // Find winner by medalRank, or by index if medalRank doesn't match
+    let winner = top3Winners.find(w => w.medalRank === rank);
     
-    const medalRank = winner.medalRank;
-    const avatarColor = avatarColors[medalRank - 1] || '#cdd7dc';
-    
-    // Medal based on rank (1 = gold, 2 = silver, 3 = bronze)
-    let medalIcon = '';
-    if (medalRank === 1) {
-      medalIcon = '<img src="icons/eersteplaatsmedaille.svg" alt="1e plaats" class="day-winner-medal-icon">';
-    } else if (medalRank === 2) {
-      medalIcon = '<img src="icons/tweedeplaatsmedaille.svg" alt="2e plaats" class="day-winner-medal-icon">';
-    } else if (medalRank === 3) {
-      medalIcon = '<img src="icons/derdeplaatsmedaille.svg" alt="3e plaats" class="day-winner-medal-icon">';
+    // If no winner found with exact medalRank, try to find by position
+    // This handles cases where there are ties (e.g., two teams with rank 1, then rank 3)
+    if (!winner && rank <= top3Winners.length) {
+      // Use index-based approach: rank 1 = index 0, rank 2 = index 1, rank 3 = index 2
+      winner = top3Winners[rank - 1];
     }
+    
+    if (!winner) {
+      console.warn(`No winner found for podium rank ${rank}`);
+      return;
+    }
+    
+    console.log(`Adding podium block for rank ${rank}:`, winner.team || winner.name, 'medalRank:', winner.medalRank);
+    
+    const podiumBlock = document.createElement('div');
+    podiumBlock.className = `day-winner-podium-block day-winner-podium-${rank}`;
+    
+    const avatarColor = avatarColors[winner.medalRank - 1] || '#cdd7dc';
     
     // Use photo if available, otherwise use generated avatar or colored fallback
     let avatarHtml = '';
     if (winner.photoUrl) {
-      avatarHtml = `<div class="day-winner-avatar"><img src="${sanitizeInput(winner.photoUrl)}" alt="${sanitizeInput(winner.team || winner.name)}" class="day-winner-avatar-img"></div>`;
+      avatarHtml = `<div class="day-winner-podium-avatar"><img src="${sanitizeInput(winner.photoUrl)}" alt="${sanitizeInput(winner.team || winner.name)}" class="day-winner-podium-avatar-img"></div>`;
     } else {
       // Generate avatar using UI Avatars service based on team name or participant name
       const nameForAvatar = winner.team || winner.name;
       const initials = nameForAvatar.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
-      const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(nameForAvatar)}&size=76&background=${avatarColor.replace('#', '')}&color=ffffff&bold=true&font-size=0.5`;
-      avatarHtml = `<div class="day-winner-avatar"><img src="${avatarUrl}" alt="${sanitizeInput(nameForAvatar)}" class="day-winner-avatar-img" onerror="this.parentElement.style.backgroundColor='${avatarColor}'"></div>`;
+      const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(nameForAvatar)}&size=152&background=${avatarColor.replace('#', '')}&color=ffffff&bold=true&font-size=0.5`;
+      avatarHtml = `<div class="day-winner-podium-avatar"><img src="${avatarUrl}" alt="${sanitizeInput(nameForAvatar)}" class="day-winner-podium-avatar-img" onerror="this.parentElement.style.backgroundColor='${avatarColor}'; this.parentElement.innerHTML='${initials}'"></div>`;
     }
     
-    winnerItem.innerHTML = `
+    // Structure: Avatar and name on the podium itself
+    podiumBlock.innerHTML = `
       ${avatarHtml}
-      <div class="day-winner-info">
-        <div class="day-winner-name">${sanitizeInput(winner.team || 'Team')}</div>
-        <div class="day-winner-team">${sanitizeInput(winner.name)}</div>
-      </div>
-      ${medalIcon ? `<div class="day-winner-medal">${medalIcon}</div>` : '<div class="day-winner-medal"></div>'}
-      <div class="day-winner-points">${sanitizeInput(String(winner.points || 0))}</div>
+      <div class="day-winner-podium-name">${sanitizeInput(winner.team || winner.name || 'Team')}</div>
     `;
     
-    dayWinnersList.appendChild(winnerItem);
+    podiumStructure.appendChild(podiumBlock);
   });
+  
+  podiumContainer.appendChild(podiumStructure);
+  podiumContainer.appendChild(podiumSvg);
+  dayWinnersList.appendChild(podiumContainer);
 }
 
 async function loadRiderPhotos(pointsRiders) {

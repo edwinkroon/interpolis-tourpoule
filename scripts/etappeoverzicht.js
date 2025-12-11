@@ -113,6 +113,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   
   // Update navigation buttons after stages are loaded
   updateNavigationButtons();
+  
+  // Setup info popup handlers
+  setupInfoPopupHandlers();
 });
 
 async function loadLatestStage() {
@@ -454,15 +457,15 @@ function renderJerseys(jerseys) {
     // Get initials for placeholder
     const initials = jersey.rider.split(' ').map(n => n[0]).join('').substring(0, 2);
     
-    // Map jersey type to class name and title
-    const jerseyClassMap = {
-      'geel': { class: 'jersey-geel', title: 'Gele trui' },
-      'groen': { class: 'jersey-groen', title: 'Groene trui' },
-      'bolletjes': { class: 'jersey-bolletjes', title: 'Bolkentrui' },
-      'wit': { class: 'jersey-wit', title: 'Witte trui' }
+    // Map jersey type to icon path and title
+    const jerseyIconMap = {
+      'geel': { icon: 'icons/Truien/geletrui.svg', title: 'Gele trui' },
+      'groen': { icon: 'icons/Truien/groenetrui.svg', title: 'Groene trui' },
+      'bolletjes': { icon: 'icons/Truien/bolletjestrui.svg', title: 'Bolkentrui' },
+      'wit': { icon: 'icons/Truien/wittetrui.svg', title: 'Witte trui' }
     };
     
-    const jerseyInfo = jerseyClassMap[jersey.type] || { class: 'jersey-geel', title: 'Trui' };
+    const jerseyInfo = jerseyIconMap[jersey.type] || { icon: 'icons/Truien/geletrui.svg', title: 'Trui' };
     
     // Use photo URL if available, otherwise use placeholder
     let avatarHtml = '';
@@ -481,7 +484,9 @@ function renderJerseys(jerseys) {
         <div class="rider-name">${sanitizeInput(jersey.rider)}</div>
         <div class="rider-team">${sanitizeInput(jersey.team)}</div>
       </div>
-      <div class="jersey-icon ${jerseyInfo.class}" title="${sanitizeInput(jerseyInfo.title)}"></div>
+      <div class="jersey-icon" title="${sanitizeInput(jerseyInfo.title)}">
+        <img src="${sanitizeInput(jerseyInfo.icon)}" alt="${sanitizeInput(jerseyInfo.title)}" />
+      </div>
     `;
     
     container.appendChild(jerseyItem);
@@ -651,4 +656,43 @@ function updateNavigationButtons() {
       nextButton.style.opacity = '0.5';
     }
   }
+}
+
+// Setup info popup handlers
+function setupInfoPopupHandlers() {
+  const infoButtons = document.querySelectorAll('.info-icon-button');
+  
+  infoButtons.forEach(button => {
+    button.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const popupId = this.id.replace('-button', '-popup');
+      const popup = document.getElementById(popupId);
+      
+      if (popup) {
+        // Close all other popups
+        document.querySelectorAll('.info-popup').forEach(p => {
+          if (p.id !== popupId) {
+            p.style.display = 'none';
+          }
+        });
+        
+        // Toggle current popup
+        if (popup.style.display === 'none' || !popup.style.display) {
+          popup.style.display = 'block';
+        } else {
+          popup.style.display = 'none';
+        }
+      }
+    });
+  });
+  
+  // Close popups when clicking outside
+  document.addEventListener('click', function(e) {
+    const isClickInsidePopup = e.target.closest('.info-popup') || e.target.closest('.info-icon-button');
+    if (!isClickInsidePopup) {
+      document.querySelectorAll('.info-popup').forEach(popup => {
+        popup.style.display = 'none';
+      });
+    }
+  });
 }

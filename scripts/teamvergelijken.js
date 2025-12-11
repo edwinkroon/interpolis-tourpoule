@@ -62,6 +62,25 @@ async function loadMyTeam() {
 
 // Load all teams for dropdown
 async function loadAllTeams() {
+  const display = document.getElementById('team-compare-select-display');
+  const select = document.getElementById('compare-team-select');
+  const arrow = display ? display.querySelector('.team-compare-select-arrow') : null;
+  
+  // Show loading state and hide arrow
+  if (display) {
+    display.classList.add('loading');
+    updateSelectDisplay(display, 'Gegevens aan het ophalen...');
+    if (arrow) {
+      arrow.style.display = 'none';
+    }
+  }
+  
+  // Keep select disabled and show loading message
+  if (select) {
+    select.disabled = true;
+    select.innerHTML = '<option value="">Gegevens aan het ophalen...</option>';
+  }
+  
   try {
     const response = await fetch('/.netlify/functions/get-standings');
     const result = await response.json();
@@ -77,15 +96,18 @@ async function loadAllTeams() {
       const myParticipantId = userResult.participant?.id;
       
       // Populate dropdown (exclude my team)
-      const select = document.getElementById('compare-team-select');
       if (select) {
         select.innerHTML = '<option value="">Selecteer een team...</option>';
         
         allTeams.forEach(team => {
-          if (team.participantId !== myParticipantId) {
+          // Check both participantId and id fields
+          const teamParticipantId = team.participantId || team.id;
+          if (teamParticipantId !== myParticipantId) {
             const option = document.createElement('option');
-            option.value = team.participantId;
-            option.textContent = team.teamName;
+            option.value = teamParticipantId;
+            option.dataset.avatarUrl = team.avatarUrl || team.avatar_url || '';
+            option.dataset.teamName = team.teamName || team.team_name || team.name || '';
+            option.textContent = team.teamName || team.team_name || team.name || 'Onbekend team';
             select.appendChild(option);
           }
         });
@@ -93,23 +115,88 @@ async function loadAllTeams() {
     }
   } catch (error) {
     console.error('Error loading teams:', error);
+    if (display) {
+      updateSelectDisplay(display, 'Fout bij laden');
+    }
+    if (select) {
+      select.innerHTML = '<option value="">Fout bij laden</option>';
+    }
+  } finally {
+    // Remove loading state and show arrow
+    if (display) {
+      display.classList.remove('loading');
+      updateSelectDisplay(display, 'Selecteer een team...');
+      const arrow = display.querySelector('.team-compare-select-arrow');
+      if (arrow) {
+        arrow.style.display = 'block';
+      }
+    }
+    
+    // Enable select after loading
+    if (select) {
+      select.disabled = false;
+    }
   }
 }
 
 // Setup team select handler
 function setupTeamSelect() {
   const select = document.getElementById('compare-team-select');
-  if (select) {
+  const display = document.getElementById('team-compare-select-display');
+  
+  if (select && display) {
+    // Update display when select changes
     select.addEventListener('change', async function() {
       const participantId = this.value;
+      const selectedOption = this.options[this.selectedIndex];
       
       if (!participantId) {
+        updateSelectDisplay(display, 'Selecteer een team...');
         hideComparison();
+        hideFilters();
         return;
       }
       
+      const teamName = selectedOption.dataset.teamName || selectedOption.textContent;
+      updateSelectDisplay(display, teamName);
+      
+      showFilters();
       await loadCompareTeam(participantId);
     });
+    
+    // Make display clickable to open select
+    display.addEventListener('click', function() {
+      select.focus();
+      select.click();
+    });
+    
+    // Reset arrow when select loses focus (dropdown closes)
+    select.addEventListener('blur', function() {
+      // Small delay to ensure the state is updated
+      setTimeout(() => {
+        if (!select.matches(':focus')) {
+          // Arrow will automatically reset via CSS
+        }
+      }, 100);
+    });
+    
+    // Sync display with select on load
+    const selectedOption = select.options[select.selectedIndex];
+    if (selectedOption && selectedOption.value) {
+      const teamName = selectedOption.dataset.teamName || selectedOption.textContent;
+      updateSelectDisplay(display, teamName);
+    }
+  }
+}
+
+// Update select display
+function updateSelectDisplay(display, displayText) {
+  if (!display) return;
+  
+  const textSpan = display.querySelector('.team-compare-select-text');
+  
+  if (textSpan) {
+    textSpan.textContent = displayText;
   }
 }
 
@@ -289,31 +376,30 @@ function renderRiders(riders, containerId, otherTeamRiders = []) {
     const name = `${rider.firstName || ''} ${rider.lastName || ''}`.trim();
     const initials = getRiderInitials(rider.firstName, rider.lastName);
     
-    // Build jersey badges (only show if rider has jerseys) - use same circles as in jersey tile
+    // Build jersey badges (only show if rider has jerseys) - use SVG icons
     let jerseyBadges = '';
     if (rider.jerseys && rider.jerseys.length > 0) {
-      const jerseyClassMap = {
-        'geel': 'jersey-geel',
-        'groen': 'jersey-groen',
-        'bolletjes': 'jersey-bolletjes',
-        'wit': 'jersey-wit'
+      const jerseyIconMap = {
+        'geel': { icon: 'icons/Truien/geletrui.svg', title: 'Gele trui' },
+        'groen': { icon: 'icons/Truien/groenetrui.svg', title: 'Groene trui' },
+        'bolletjes': { icon: 'icons/Truien/bolletjestrui.svg', title: 'Bolkentrui' },
+        'wit': { icon: 'icons/Truien/wittetrui.svg', title: 'Witte trui' }
       };
       
       jerseyBadges = rider.jerseys.map(jersey => {
         const jerseyType = jersey.type || '';
-        const jerseyClass = jerseyClassMap[jerseyType] || 'jersey-geel';
-        const jerseyName = jersey.name || 'Trui';
-        return `<div class="jersey-icon ${jerseyClass}" title="${sanitizeInput(jerseyName)}"></div>`;
+        const jerseyInfo = jerseyIconMap[jerseyType] || { icon: 'icons/Truien/geletrui.svg', title: 'Trui' };
+        const jerseyName = jersey.name || jerseyInfo.title;
+        return `<div class="jersey-icon" title="${sanitizeInput(jerseyName)}">
+          <img src="${sanitizeInput(jerseyInfo.icon)}" alt="${sanitizeInput(jerseyName)}" />
+        </div>`;
       }).join('');
     }
     
-    // Build rider type indicator
+    // Build rider type indicator (only for reserve)
     let typeIndicator = '';
     if (slotType === 'reserve') {
       typeIndicator = '<span class="team-compare-rider-type-badge team-compare-rider-type-reserve">Reserve</span>';
-    }
-    if (!isActive) {
-      typeIndicator = '<span class="team-compare-rider-type-badge team-compare-rider-type-inactive">Niet meer meedoen</span>';
     }
     
     riderItem.innerHTML = `
@@ -415,5 +501,21 @@ function hideComparison() {
   
   if (container) container.style.display = 'none';
   if (empty) empty.style.display = 'block';
+}
+
+// Show filters
+function showFilters() {
+  const filtersContainer = document.getElementById('team-compare-filters-container');
+  if (filtersContainer) {
+    filtersContainer.style.display = 'block';
+  }
+}
+
+// Hide filters
+function hideFilters() {
+  const filtersContainer = document.getElementById('team-compare-filters-container');
+  if (filtersContainer) {
+    filtersContainer.style.display = 'none';
+  }
 }
 

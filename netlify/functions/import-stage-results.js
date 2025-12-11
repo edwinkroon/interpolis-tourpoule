@@ -59,37 +59,79 @@ async function activateReservesForDroppedRiders(client, stageId) {
       
       const availableReserves = reserveRidersQuery.rows;
       
-      // For each dropped main rider, activate the first available reserve
-      for (let i = 0; i < droppedMainRiders.length && i < availableReserves.length; i++) {
-        const droppedMain = droppedMainRiders[i];
-        const reserveToActivate = availableReserves[i];
-        
-        // First, deactivate the dropped main rider
+      // STEP 1: First, deactivate ALL dropped main riders
+      for (const droppedMain of droppedMainRiders) {
         await client.query(`
           UPDATE fantasy_team_riders
           SET active = false
           WHERE id = $1
         `, [droppedMain.id]);
+      }
+      
+      // STEP 2: Then, activate reserves to replace dropped main riders
+      // We need to be careful about unique constraint on (fantasy_team_id, slot_type, slot_number)
+      for (let i = 0; i < droppedMainRiders.length && i < availableReserves.length; i++) {
+        const droppedMain = droppedMainRiders[i];
+        const reserveToActivate = availableReserves[i];
         
-        // Then, activate the reserve and change slot_type to 'main', slot_number to the dropped main's slot
-        // We need to temporarily set slot_number to avoid unique constraint conflicts
-        // First, set the reserve's slot_number to a temporary high value
-        await client.query(`
-          UPDATE fantasy_team_riders
-          SET slot_number = 999
-          WHERE id = $1
-        `, [reserveToActivate.id]);
+        // Check if the slot is already occupied by another active main rider
+        // (This shouldn't happen after deactivating dropped riders, but let's be safe)
+        const slotCheck = await client.query(`
+          SELECT id FROM fantasy_team_riders
+          WHERE fantasy_team_id = $1
+            AND slot_type = 'main'
+            AND slot_number = $2
+            AND active = true
+            AND id != $3
+        `, [fantasyTeamId, droppedMain.slot_number, droppedMain.id]);
         
-        // Now update to the correct slot
-        await client.query(`
-          UPDATE fantasy_team_riders
-          SET slot_type = 'main',
-              slot_number = $1,
-              active = true
-          WHERE id = $2
-        `, [droppedMain.slot_number, reserveToActivate.id]);
+        if (slotCheck.rows.length > 0) {
+          console.warn(`Slot ${droppedMain.slot_number} is already occupied for team ${fantasyTeamId}, skipping reserve activation`);
+          continue;
+        }
         
-        console.log(`Activated reserve rider ${reserveToActivate.rider_id} to replace dropped main rider ${droppedMain.rider_id} in slot ${droppedMain.slot_number} for team ${fantasyTeamId}`);
+        try {
+          // Temporarily set the reserve's slot_number to a high value to avoid unique constraint conflicts
+          await client.query(`
+            UPDATE fantasy_team_riders
+            SET slot_number = 999
+            WHERE id = $1
+          `, [reserveToActivate.id]);
+          
+          // Now update to the correct slot
+          const updateResult = await client.query(`
+            UPDATE fantasy_team_riders
+            SET slot_type = 'main',
+                slot_number = $1,
+                active = true
+            WHERE id = $2
+          `, [droppedMain.slot_number, reserveToActivate.id]);
+          
+          if (updateResult.rowCount === 0) {
+            console.warn(`Failed to update reserve rider ${reserveToActivate.id} - no rows affected`);
+            continue;
+          }
+          
+          console.log(`Activated reserve rider ${reserveToActivate.rider_id} to replace dropped main rider ${droppedMain.rider_id} in slot ${droppedMain.slot_number} for team ${fantasyTeamId}`);
+        } catch (updateError) {
+          // If we get a unique constraint violation, log it and continue
+          if (updateError.code === '23505') { // PostgreSQL unique violation
+            console.error(`Unique constraint violation when activating reserve ${reserveToActivate.id} to slot ${droppedMain.slot_number} for team ${fantasyTeamId}:`, updateError.message);
+            // Try to revert the slot_number change
+            try {
+              await client.query(`
+                UPDATE fantasy_team_riders
+                SET slot_number = $1
+                WHERE id = $2
+              `, [reserveToActivate.slot_number, reserveToActivate.id]);
+            } catch (revertError) {
+              console.error(`Failed to revert slot_number for reserve ${reserveToActivate.id}:`, revertError.message);
+            }
+            continue;
+          }
+          // For other errors, rethrow
+          throw updateError;
+        }
       }
     }
   }

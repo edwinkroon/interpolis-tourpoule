@@ -64,11 +64,11 @@ function createGradient(ctx, colorStart, colorEnd) {
 // Load statistics data
 async function loadStatistics() {
   try {
-    // Load general stats
-    await loadGeneralStats();
-    
-    // Load chart data
-    await loadChartData();
+    // Load general stats + charts in parallel (faster overall)
+    await Promise.all([
+      loadGeneralStats(),
+      loadChartData()
+    ]);
   } catch (error) {
     console.error('Error loading statistics:', error);
   }
@@ -124,17 +124,20 @@ async function loadGeneralStats() {
 // Load chart data and create charts
 async function loadChartData() {
   try {
-    // Load top riders data
-    await loadTopRidersChart();
-    
-    // Load team performance data
-    await loadTeamPerformanceChart();
-    
-    // Load most selected riders
-    await loadMostSelectedRidersChart();
-    
-    // Load stage winners
-    await loadStageWinnersChart();
+    // Load all charts in parallel so the total load time is ~the slowest request, not the sum
+    const results = await Promise.allSettled([
+      loadTopRidersChart(),
+      loadTeamPerformanceChart(),
+      loadMostSelectedRidersChart(),
+      loadStageWinnersChart()
+    ]);
+
+    // Log errors per chart but don't block the others
+    results.forEach((res) => {
+      if (res.status === 'rejected') {
+        console.error('Chart load failed:', res.reason);
+      }
+    });
   } catch (error) {
     console.error('Error loading chart data:', error);
   }

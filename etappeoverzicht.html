@@ -113,27 +113,30 @@
               </a>
             </div>
 
-            <!-- Dag uitslag Card -->
-            <div class="dashboard-section dag-uitslag-section">
+            <!-- Dagwinnaars (zelfde tegel als Home) -->
+            <div class="dashboard-section day-winners-section">
               <div class="team-card-header">
-                <h2 class="dashboard-section-title">Beste teams van de dag</h2>
-                <button class="info-icon-button" id="day-standings-info-button" aria-label="Informatie over beste teams van de dag">
+                <div class="day-winners-header">
+                  <h2 class="dashboard-section-title">Dagwinnaars</h2>
+                  <div class="day-winners-route" id="day-winners-route"></div>
+                </div>
+                <button class="info-icon-button" id="day-winners-info-button" aria-label="Informatie over dagwinnaars">
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/>
                     <text x="10" y="14" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">i</text>
                   </svg>
                 </button>
-                <div class="info-popup" id="day-standings-info-popup" style="display: none;">
+                <div class="info-popup" id="day-winners-info-popup" style="display: none;">
                   <div class="info-popup-content">
-                    <h3>Beste teams van de dag</h3>
-                    <p>Hier zie je de top 3 teams die de meeste punten hebben behaald bij deze etappe. De teams worden gesorteerd op basis van het aantal punten dat ze hebben behaald bij deze specifieke etappe.</p>
+                    <h3>Dagwinnaars</h3>
+                    <p>Hier zie je de drie teams die de meeste punten hebben gehaald bij deze etappe. De teams worden gesorteerd op basis van het aantal punten dat ze hebben behaald bij deze etappe.</p>
                   </div>
                 </div>
               </div>
-              <ol class="standings-list" id="day-standings-list">
-                <!-- Data wordt geladen vanuit JSON -->
-              </ol>
-              <a href="daguitslag.html" class="card-link" id="dag-uitslag-link">
+              <div class="day-winners-list" id="day-winners-list">
+                <!-- Dagwinnaars worden hier gerenderd -->
+              </div>
+              <a href="daguitslag.html" class="day-winners-button" id="dag-uitslag-link" aria-label="Bekijk alle teams">
                 <span>bekijk alle teams</span>
                 <img src="assets/arrow.svg" alt="" class="action-arrow" aria-hidden="true">
               </a>
@@ -198,3 +201,4 @@
   </main>
 </body>
 </html>
+

@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   
   // Show loading indicators for cards that will be loaded
   showLoading('my-riders-list');
-  showLoading('day-standings-list');
+  showLoading('day-winners-list');
   showLoading('stage-results-list');
   showLoading('jerseys-list');
   
@@ -286,7 +286,14 @@ function renderMyRiders(riders) {
   }
   
   // Filter: alleen renners met punten (points > 0)
-  const ridersWithPoints = riders.filter(rider => rider.points > 0);
+  const ridersWithPoints = riders
+    .filter(rider => (rider.points || 0) > 0)
+    // Sort: hoogste punten eerst, dan (optioneel) op naam voor stabiele volgorde
+    .sort((a, b) => {
+      const diff = (b.points || 0) - (a.points || 0);
+      if (diff !== 0) return diff;
+      return String(a.name || '').localeCompare(String(b.name || ''), 'nl', { sensitivity: 'base' });
+    });
   
   if (ridersWithPoints.length === 0) {
     list.innerHTML = '<li class="no-data">Geen renners met punten voor deze etappe</li>';
@@ -323,7 +330,7 @@ function renderMyRiders(riders) {
 
 async function loadDayStandings(stageNumber) {
   try {
-    const response = await fetch(`/.netlify/functions/get-stage-team-points?stage_number=${stageNumber}`);
+    const response = await fetch(`/.netlify/functions/get-stage-team-points?stage_number=${stageNumber}&limit=3`);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -334,45 +341,109 @@ async function loadDayStandings(stageNumber) {
     if (data.ok && data.teams && data.teams.length > 0) {
       // Show only top 3 teams
       const top3Teams = data.teams.slice(0, 3);
-      renderDayStandings(top3Teams);
+      renderDayWinnersForStage(top3Teams, currentStage);
     } else {
-      const list = document.getElementById('day-standings-list');
+      const list = document.getElementById('day-winners-list');
       if (list) {
-        showNoData('day-standings-list', 'Geen teams gevonden voor deze etappe.');
+        showNoData('day-winners-list', 'Geen dagwinnaars gevonden voor deze etappe.');
       }
     }
   } catch (error) {
     console.error('Error loading day standings:', error);
-    const list = document.getElementById('day-standings-list');
+    const list = document.getElementById('day-winners-list');
     if (list) {
-      showNoData('day-standings-list', 'Fout bij laden van teams.');
+      showNoData('day-winners-list', 'Fout bij laden van dagwinnaars.');
     }
   }
 }
 
-function renderDayStandings(teams) {
-  const list = document.getElementById('day-standings-list');
-  if (!list) return;
+function renderDayWinnersForStage(top3Teams, stage = null) {
+  const dayWinnersList = document.getElementById('day-winners-list');
+  const dayWinnersRoute = document.getElementById('day-winners-route');
+  if (!dayWinnersList) return;
 
-  list.innerHTML = '';
-  
-  if (!teams || teams.length === 0) {
-    list.innerHTML = '<li class="no-data">Geen teams beschikbaar</li>';
+  dayWinnersList.innerHTML = '';
+
+  // Route text in header (match Home behavior)
+  if (dayWinnersRoute) {
+    if (stage?.route_text) {
+      dayWinnersRoute.textContent = stage.route_text;
+    } else if (stage?.start_location && stage?.end_location) {
+      const distance = stage.distance_km ? ` (${parseFloat(stage.distance_km).toFixed(0)}km)` : '';
+      dayWinnersRoute.textContent = `${stage.start_location} - ${stage.end_location}${distance}`;
+    } else {
+      dayWinnersRoute.textContent = '';
+    }
+  }
+
+  if (!top3Teams || top3Teams.length === 0) {
+    dayWinnersList.innerHTML = '<div class="no-data">Geen winnaars beschikbaar</div>';
     return;
   }
-  
-  teams.forEach(team => {
-    const li = document.createElement('li');
-    li.className = 'standings-item';
-    
-    li.innerHTML = `
-      <span class="standings-position">${team.rank}.</span>
-      <span class="standings-name">${sanitizeInput(team.teamName)}</span>
-      <span class="standings-points">${team.points}</span>
+
+  // Map API teams -> same shape as Home render expects
+  const winners = top3Teams.map(team => ({
+    id: team.participantId ?? team.participant_id ?? team.id,
+    name: team.participantName ?? team.participant_name ?? team.name,
+    team: team.teamName ?? team.team_name ?? team.team,
+    points: team.points ?? 0,
+    photoUrl: team.avatarUrl ?? team.avatar_url ?? null
+  }));
+
+  // Sort winners by points (highest first)
+  const sortedWinners = [...winners].sort((a, b) => (b.points || 0) - (a.points || 0));
+  const top3Winners = sortedWinners.slice(0, 3);
+
+  // Create podium container
+  const podiumContainer = document.createElement('div');
+  podiumContainer.className = 'day-winners-podium';
+
+  // Structure container (winners)
+  const podiumStructure = document.createElement('div');
+  podiumStructure.className = 'day-winners-podium-structure';
+
+  // SVG background
+  const podiumSvg = document.createElement('div');
+  podiumSvg.className = 'day-winners-podium-svg';
+  podiumSvg.innerHTML = '<img src="icons/podium.svg" alt="Podium" />';
+
+  // Podium order: 2nd place (left), 1st place (center), 3rd place (right)
+  const podiumOrder = [2, 1, 3];
+
+  podiumOrder.forEach((rank) => {
+    const winner = top3Winners[rank - 1];
+    if (!winner) return;
+
+    const podiumBlock = document.createElement('div');
+    podiumBlock.className = `day-winner-podium-block day-winner-podium-${rank}`;
+
+    // Use photo if available, otherwise use generated avatar or colored fallback
+    const avatarColors = ['#00334e', '#668494', '#cdd7dc'];
+    const avatarColor = avatarColors[rank - 1] || '#cdd7dc';
+
+    let avatarHtml = '';
+    if (winner.photoUrl) {
+      avatarHtml = `<div class="day-winner-podium-avatar"><img src="${sanitizeInput(winner.photoUrl)}" alt="${sanitizeInput(winner.team || winner.name)}" class="day-winner-podium-avatar-img"></div>`;
+    } else {
+      const nameForAvatar = winner.team || winner.name || 'Team';
+      const initials = nameForAvatar.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+      const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(nameForAvatar)}&size=152&background=${avatarColor.replace('#', '')}&color=ffffff&bold=true&font-size=0.5`;
+      avatarHtml = `<div class="day-winner-podium-avatar"><img src="${avatarUrl}" alt="${sanitizeInput(nameForAvatar)}" class="day-winner-podium-avatar-img" onerror="this.parentElement.style.backgroundColor='${avatarColor}'; this.parentElement.innerHTML='${initials}'"></div>`;
+    }
+
+    podiumBlock.innerHTML = `
+      ${avatarHtml}
+      <div class="day-winner-podium-name">${sanitizeInput(winner.team || winner.name || 'Team')}</div>
+      <div class="day-winner-podium-points">${sanitizeInput(String(winner.points || 0))}</div>
     `;
-    
-    list.appendChild(li);
+
+    podiumStructure.appendChild(podiumBlock);
   });
+
+  // IMPORTANT: structure above svg (matches current Home)
+  podiumContainer.appendChild(podiumStructure);
+  podiumContainer.appendChild(podiumSvg);
+  dayWinnersList.appendChild(podiumContainer);
 }
 
 function updateDagUitslagLink() {
@@ -397,7 +468,12 @@ function setupMijnTeamButton() {
 function showNoData(elementId, message) {
   const element = document.getElementById(elementId);
   if (element) {
-    element.innerHTML = `<li class="no-data">${message}</li>`;
+    const tag = (element.tagName || '').toUpperCase();
+    if (tag === 'UL' || tag === 'OL') {
+      element.innerHTML = `<li class="no-data">${message}</li>`;
+    } else {
+      element.innerHTML = `<div class="no-data">${message}</div>`;
+    }
   }
 }
 
@@ -531,7 +607,7 @@ function hideLoading(elementId) {
 async function loadStageData(stage) {
   // Show loading indicators
   showLoading('my-riders-list');
-  showLoading('day-standings-list');
+  showLoading('day-winners-list');
   showLoading('stage-results-list');
   showLoading('jerseys-list');
   
@@ -556,17 +632,13 @@ async function loadStageData(stage) {
     }
   }
   
-  // Load my riders with points
-  await loadMyRiders(stage.stage_number);
-  
-  // Load stage results
-  await loadStageResults(stage.stage_number);
-  
-  // Load day standings (top 3 teams)
-  await loadDayStandings(stage.stage_number);
-  
-  // Load jersey wearers
-  await loadJerseyWearers(stage.stage_number);
+  // Load cards in parallel (faster overall, no UX change because we already show loaders)
+  await Promise.all([
+    loadMyRiders(stage.stage_number),
+    loadStageResults(stage.stage_number),
+    loadDayStandings(stage.stage_number),
+    loadJerseyWearers(stage.stage_number)
+  ]);
   
   // Update URL without reload
   const newUrl = new URL(window.location);

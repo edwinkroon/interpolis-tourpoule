@@ -780,6 +780,8 @@ exports.handler = async function(event) {
       })
     };
   } catch (err) {
+    console.error('Error in validate-stage-results:', err);
+    console.error('Error stack:', err.stack);
     return await handleDbError(err, client);
   }
 };

@@ -2,3 +2,10 @@
   publish = "."
   functions = "netlify/functions"
   command = "cp package/package.json . && cp package/package-lock.json . && npm install"
+
+[dev]
+  # Increase function timeout for local development
+  # Some functions like validate-stage-results need more time
+  functionsPort = 9999
+  # Note: Function timeout is controlled by Netlify CLI
+  # For validate-stage-results, we need to increase it

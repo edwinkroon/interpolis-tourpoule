@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Check Auth0 Redirect URL</title>
+</head>
+<body>
+    <h1>Auth0 Redirect URL Checker</h1>
+    <p>De redirect URL die je moet toevoegen aan Auth0:</p>
+    <div id="redirect-url" style="background: #f0f0f0; padding: 10px; margin: 10px 0; font-family: monospace; word-break: break-all;"></div>
+    <p>Kopieer deze URL en voeg hem toe aan Auth0 Dashboard → Application Settings → Allowed Callback URLs</p>
+    
+    <script>
+        const getRedirectUri = () => {
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                return `${window.location.origin}/auth-callback.html`;
+            }
+            return 'https://interpolistourpoule.netlify.app/auth-callback.html';
+        };
+        
+        const redirectUrl = getRedirectUri();
+        document.getElementById('redirect-url').textContent = redirectUrl;
+        console.log('Redirect URL:', redirectUrl);
+    </script>
+</body>
+</html>
+

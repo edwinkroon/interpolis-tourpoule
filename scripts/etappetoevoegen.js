@@ -110,7 +110,19 @@ document.addEventListener('DOMContentLoaded', async function() {
       }
     }
 
+    // Show loading state
+    const validateButton = document.getElementById('validate-button');
+    const originalButtonText = validateButton ? validateButton.querySelector('span')?.textContent : 'Valideren';
+    if (validateButton) {
+      validateButton.disabled = true;
+      const buttonText = validateButton.querySelector('span');
+      if (buttonText) {
+        buttonText.textContent = 'Bezig met valideren...';
+      }
+    }
+
     try {
+      console.log('Starting validation for stage:', currentStageId);
       const response = await fetch('/.netlify/functions/validate-stage-results', {
         method: 'POST',
         headers: {
@@ -121,13 +133,25 @@ document.addEventListener('DOMContentLoaded', async function() {
           resultsText: resultsText
         })
       });
+      
+      console.log('Validation response status:', response.status);
 
       // Check if response is ok
       if (!response.ok) {
         let errorData;
         try {
-          errorData = await response.json();
+          const responseText = await response.text();
+          console.error('Error response body:', responseText);
+          try {
+            errorData = JSON.parse(responseText);
+          } catch (parseError) {
+            errorData = { 
+              error: `Server error: ${response.status} ${response.statusText}`,
+              details: responseText.substring(0, 500) // First 500 chars of response
+            };
+          }
         } catch (e) {
+          console.error('Error reading error response:', e);
           errorData = { error: `Server error: ${response.status} ${response.statusText}` };
         }
         
@@ -143,7 +167,10 @@ document.addEventListener('DOMContentLoaded', async function() {
           errorItem.innerHTML = `
             <div class="validation-error-message">Fout bij valideren: ${sanitizeInput(errorData.error || 'Onbekende fout')}</div>
             ${errorData.hint ? `<div class="validation-error-message" style="font-size: 12px; margin-top: 0.5rem; color: #668494;">${sanitizeInput(errorData.hint)}</div>` : ''}
-            ${errorData.details ? `<div class="validation-error-message" style="font-size: 11px; margin-top: 0.5rem; color: #9ca3af; font-family: monospace;">${sanitizeInput(errorData.details)}</div>` : ''}
+            ${errorData.details ? `<div class="validation-error-message" style="font-size: 11px; margin-top: 0.5rem; color: #9ca3af; font-family: monospace; white-space: pre-wrap; word-break: break-all;">${sanitizeInput(errorData.details)}</div>` : ''}
+            <div class="validation-error-message" style="font-size: 12px; margin-top: 0.5rem; color: #668494;">
+              💡 Controleer de terminal waar Netlify Dev draait voor meer details, of open de browser console (F12) → Network tab → klik op de failed request.
+            </div>
           `;
           errorsList.appendChild(errorItem);
         }
@@ -207,7 +234,36 @@ document.addEventListener('DOMContentLoaded', async function() {
       }
     } catch (error) {
       console.error('Error validating results:', error);
+      
+      // Show error in UI
+      validationResults.style.display = 'block';
+      validationSuccess.style.display = 'none';
+      validationErrors.style.display = 'block';
+      
+      const errorsList = document.getElementById('validation-errors-list');
+      if (errorsList) {
+        errorsList.innerHTML = '';
+        const errorItem = document.createElement('div');
+        errorItem.className = 'validation-error-item';
+        errorItem.innerHTML = `
+          <div class="validation-error-message">Fout bij valideren: ${sanitizeInput(error.message || 'Onbekende fout')}</div>
+          <div class="validation-error-message" style="font-size: 12px; margin-top: 0.5rem; color: #668494;">
+            Controleer de browser console (F12) voor meer details.
+          </div>
+        `;
+        errorsList.appendChild(errorItem);
+      }
+      
       alert('Er is een fout opgetreden bij het valideren: ' + error.message);
+    } finally {
+      // Restore button state
+      if (validateButton) {
+        validateButton.disabled = false;
+        const buttonText = validateButton.querySelector('span');
+        if (buttonText) {
+          buttonText.textContent = originalButtonText;
+        }
+      }
     }
   }
 
@@ -601,7 +657,14 @@ document.addEventListener('DOMContentLoaded', async function() {
   const stageSelect = document.getElementById('stage-select');
 
   if (validateButton) {
-    validateButton.addEventListener('click', validateResults);
+    console.log('Validate button found, adding event listener');
+    validateButton.addEventListener('click', function(e) {
+      e.preventDefault();
+      console.log('Validate button clicked');
+      validateResults();
+    });
+  } else {
+    console.error('Validate button not found!');
   }
 
   if (retryValidateButton) {

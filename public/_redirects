@@ -1,0 +1,5 @@
+/assets/*              /assets/:splat              200
+/icons/*               /icons/:splat               200
+
+# React SPA fallback (keep legacy .html URLs working)
+/*                    /index.html                 200!

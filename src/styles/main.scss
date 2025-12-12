@@ -1,0 +1,13 @@
+// New SASS entrypoint.
+// We keep legacy CSS imported from src/main.jsx during migration.
+
+:root {
+  --brand-teal: #00cac6;
+  --brand-navy: #00334e;
+  --text-muted: #668494;
+}
+
+// Small global tweaks for React app shell
+#root {
+  min-height: 100vh;
+}

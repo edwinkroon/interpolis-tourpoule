@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../utils/api';
 import { getUserId } from '../utils/auth0';
+import { PageTemplate } from '../layouts/PageTemplate';
 import { LoadingBlock } from '../components/LoadingBlock';
 import { StageNavigationBar } from '../components/StageNavigationBar';
 import { Tile } from '../components/Tile';
@@ -145,97 +146,72 @@ export function StagesOverviewPage() {
       });
   }, [myStage]);
 
+  const subtitle = currentStage
+    ? `${makeStageLabel(currentStage)}${makeRouteText(currentStage) ? ` – ${makeRouteText(currentStage)}` : ''}`
+    : undefined;
+
   return (
     <>
       <div id="build-info" className="build-info" />
 
-      <header className="header">
-        <div className="header-content page">
-          <div className="grid">
-            <div className="col-12">
-              <div className="header-top">
-                <a
-                  href="#"
-                  className="back-link"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    navigate('/home.html');
-                  }}
-                >
-                  <img src="/assets/arrow.svg" alt="" className="back-arrow" aria-hidden="true" />
-                  <span>Terug</span>
-                </a>
-                <div className="header-title">Interpolis tourspel</div>
-              </div>
-            </div>
-            <div className="col-12">
-              <div className="header-welcome-section">
-                <h1 className="welcome-heading">Etappe informatie</h1>
-                <div className="header-illustration">
-                  <img src="/assets/headerillustration.svg" alt="Fiets illustratie" className="illustration-svg" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <StageNavigationBar
-          stageLabel={makeStageLabel(currentStage)}
-          routeText={makeRouteText(currentStage)}
-          canPrev={canPrev}
-          canNext={canNext}
-          onPrev={() => {
-            if (!canPrev) return;
-            setCurrentStage(stages[currentIndex - 1]);
-          }}
-          onNext={() => {
-            if (!canNext) return;
-            setCurrentStage(stages[currentIndex + 1]);
-          }}
-        />
-      </header>
-
-      <main className="main-content page">
-        <div className="grid">
-          <div className="sidebar col-3">
-            <div className="action-buttons">
-              <button
-                className="action-button"
-                type="button"
-                onClick={() => navigate('/rules.html')}
-                aria-label="Bekijk spelregels"
-              >
-                <span>Spelregels</span>
+      <PageTemplate
+        title="Etappe informatie"
+        subtitle={subtitle}
+        backLink="/home.html"
+        stageNavigation={
+          <StageNavigationBar
+            stageLabel={makeStageLabel(currentStage)}
+            routeText={makeRouteText(currentStage)}
+            canPrev={canPrev}
+            canNext={canNext}
+            onPrev={() => {
+              if (!canPrev) return;
+              setCurrentStage(stages[currentIndex - 1]);
+            }}
+            onNext={() => {
+              if (!canNext) return;
+              setCurrentStage(stages[currentIndex + 1]);
+            }}
+          />
+        }
+        sidebar={
+          <>
+            <button
+              className="action-button"
+              type="button"
+              onClick={() => navigate('/rules.html')}
+              aria-label="Bekijk spelregels"
+            >
+              <span>Spelregels</span>
+              <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+            </button>
+            <button
+              className="action-button"
+              type="button"
+              onClick={() => navigate('/statistieken.html')}
+              aria-label="Bekijk statistieken"
+            >
+              <span>Statistieken</span>
+              <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+            </button>
+            <button
+              className="action-button"
+              type="button"
+              onClick={() => navigate('/etappetoevoegen.html')}
+              aria-label="Etappe toevoegen"
+            >
+              <span>Etappe toevoegen</span>
+              <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+            </button>
+            {isAdmin ? (
+              <button className="action-button" type="button" onClick={() => navigate('/admin.html')} aria-label="Admin">
+                <span>Admin</span>
                 <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
               </button>
-              <button
-                className="action-button"
-                type="button"
-                onClick={() => navigate('/statistieken.html')}
-                aria-label="Bekijk statistieken"
-              >
-                <span>Statistieken</span>
-                <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
-              </button>
-              <button
-                className="action-button"
-                type="button"
-                onClick={() => navigate('/etappetoevoegen.html')}
-                aria-label="Etappe toevoegen"
-              >
-                <span>Etappe toevoegen</span>
-                <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
-              </button>
-              {isAdmin ? (
-                <button className="action-button" type="button" onClick={() => navigate('/admin.html')} aria-label="Admin">
-                  <span>Admin</span>
-                  <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
-                </button>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="dashboard-content col-9">
+            ) : null}
+          </>
+        }
+      >
             <div className="dashboard-grid">
               <div className="dashboard-column">
                 <Tile
@@ -426,9 +402,7 @@ export function StagesOverviewPage() {
                 </Tile>
               </div>
             </div>
-          </div>
-        </div>
-      </main>
+      </PageTemplate>
     </>
   );
 }

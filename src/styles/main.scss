@@ -119,3 +119,27 @@
   flex-direction: column;
   min-height: 0;
 }
+
+// ---------------------------------------------
+// PageTemplate layout styles
+// ---------------------------------------------
+
+.header-title-content {
+  position: relative;
+  z-index: 2;
+}
+
+.header-subtitle {
+  font-size: 16px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 0.5rem;
+  line-height: 1.4;
+}
+
+.header-right-content {
+  margin-top: 1rem;
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+}

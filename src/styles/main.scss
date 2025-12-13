@@ -78,8 +78,8 @@
 
 // Lists inside a tile: subtle divider with 1rem spacing above/below divider.
 // Use className="tile-list" on the list container (ul/ol/div).
-// Note: .points-rider-item has its own divider system, so exclude it here.
-.tile-content .tile-list > * + *:not(.points-rider-item) {
+// Note: .points-rider-item and .list-item have their own divider system, so exclude them here.
+.tile-content .tile-list > * + *:not(.points-rider-item):not(.list-item) {
   border-top: 1px solid rgba(205, 215, 220, 0.5);
   margin-top: 1rem;
   padding-top: 1rem;
@@ -142,4 +142,127 @@
   font-size: 18px;
   font-weight: 600;
   color: #fff;
+}
+
+// ---------------------------------------------
+// ListItem component - herbruikbare list items
+// ---------------------------------------------
+
+// Base list item styling
+.list-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(205, 215, 220, 0.5);
+  position: relative;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  // Make clickable items interactive
+  &[role="button"] {
+    cursor: pointer;
+    transition: background-color 0.2s;
+    
+    &:hover {
+      background-color: rgba(0, 51, 78, 0.02);
+    }
+    
+    &:active {
+      background-color: rgba(0, 51, 78, 0.05);
+    }
+  }
+}
+
+// Left side: avatar or value
+.list-item-avatar {
+  flex-shrink: 0;
+}
+
+.list-item-avatar-container {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #f0f3f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.list-item-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.list-item-avatar-initials {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+// Left value (in plaats van avatar, bijv. positie/rank)
+.list-item-left-value {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--brand-navy);
+  min-width: 30px;
+  flex-shrink: 0;
+  text-align: left;
+}
+
+// Info section (titel + subtitel)
+.list-item-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.list-item-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--brand-navy);
+  line-height: 1.4;
+}
+
+.list-item-subtitle {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+// Right side: value (getal) or icon
+.list-item-value {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--brand-navy);
+  text-align: right;
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+// Right icon (in plaats van value, bijv. jersey icon)
+.list-item-right-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  width: 32px;
+  height: 32px;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
 }

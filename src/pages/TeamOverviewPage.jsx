@@ -4,7 +4,7 @@ import { getUserId } from '../utils/auth0';
 import { api } from '../utils/api';
 import { PageTemplate } from '../layouts/PageTemplate';
 import { Tile } from '../components/Tile';
-import { RiderAvatar } from '../components/RiderAvatar';
+import { ListItem } from '../components/ListItem';
 
 function initialsFromName(teamName) {
   if (!teamName) return 'U';
@@ -156,20 +156,14 @@ export function TeamOverviewPage() {
             <div className="tile-list" id="main-riders-list-container">
               {mainRiders.length === 0 ? <div className="no-riders-message" id="no-main-riders-message">Nog geen basisrenners</div> : null}
               {mainRiders.map((r) => (
-                <div key={r.id} className="team-rider-item">
-                  <RiderAvatar
-                    photoUrl={r.photo_url || ''}
-                    alt={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
-                    initials={`${(r.first_name || 'R')[0]}${(r.last_name || 'R')[0]}`.toUpperCase()}
-                    containerClassName="rider-avatar"
-                    imgClassName="rider-photo"
-                    placeholderClassName="rider-avatar-placeholder"
-                  />
-                  <div className="rider-info">
-                    <div className="rider-name">{`${r.first_name || ''} ${r.last_name || ''}`.trim()}</div>
-                    <div className="rider-team">{r.team_name || ''}</div>
-                  </div>
-                </div>
+                <ListItem
+                  key={r.id}
+                  avatarPhotoUrl={r.photo_url}
+                  avatarAlt={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
+                  avatarInitials={`${(r.first_name || 'R')[0]}${(r.last_name || 'R')[0]}`.toUpperCase()}
+                  title={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
+                  subtitle={r.team_name || undefined}
+                />
               ))}
             </div>
           </Tile>
@@ -183,20 +177,14 @@ export function TeamOverviewPage() {
             <div className="tile-list" id="reserve-riders-list-container">
               {reserveRiders.length === 0 ? <div className="no-riders-message" id="no-reserve-riders-message">Nog geen reserverenners</div> : null}
               {reserveRiders.map((r) => (
-                <div key={r.id} className="team-rider-item">
-                  <RiderAvatar
-                    photoUrl={r.photo_url || ''}
-                    alt={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
-                    initials={`${(r.first_name || 'R')[0]}${(r.last_name || 'R')[0]}`.toUpperCase()}
-                    containerClassName="rider-avatar"
-                    imgClassName="rider-photo"
-                    placeholderClassName="rider-avatar-placeholder"
-                  />
-                  <div className="rider-info">
-                    <div className="rider-name">{`${r.first_name || ''} ${r.last_name || ''}`.trim()}</div>
-                    <div className="rider-team">{r.team_name || ''}</div>
-                  </div>
-                </div>
+                <ListItem
+                  key={r.id}
+                  avatarPhotoUrl={r.photo_url}
+                  avatarAlt={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
+                  avatarInitials={`${(r.first_name || 'R')[0]}${(r.last_name || 'R')[0]}`.toUpperCase()}
+                  title={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
+                  subtitle={r.team_name || undefined}
+                />
               ))}
             </div>
           </Tile>
@@ -210,48 +198,34 @@ export function TeamOverviewPage() {
           >
             <div className="tile-list" id="jerseys-list-container">
               {teamJerseys.length === 0 ? <div className="no-jerseys-message" id="no-jerseys-message"><p>Geen truien gevonden</p></div> : null}
-              {teamJerseys.map((j) => (
-                <div key={j.id} className="team-rider-item">
-                  <div className="rider-avatar">
-                    {j.assigned ? (
-                      <RiderAvatar
-                        photoUrl={j.assigned.photo_url || ''}
-                        alt={`${j.assigned.first_name || ''} ${j.assigned.last_name || ''}`.trim()}
-                        initials={`${(j.assigned.first_name || 'R')[0]}${(j.assigned.last_name || 'R')[0]}`.toUpperCase()}
-                        containerClassName="rider-avatar"
-                        imgClassName="rider-photo"
-                        placeholderClassName="rider-avatar-placeholder"
-                      />
-                    ) : (
-                      <div className="rider-avatar-placeholder" style={{ display: 'block', background: '#f0f3f5', color: '#668494' }}>
-                        —
+              {teamJerseys.map((j) => {
+                const jerseyIconSrc =
+                  j.type === 'geel'
+                    ? '/icons/Truien/geletrui.svg'
+                    : j.type === 'groen'
+                    ? '/icons/Truien/groenetrui.svg'
+                    : j.type === 'bolletjes'
+                    ? '/icons/Truien/bolletjestrui.svg'
+                    : j.type === 'wit'
+                    ? '/icons/Truien/wittetrui.svg'
+                    : '/icons/Truien/geletrui.svg';
+
+                return (
+                  <ListItem
+                    key={j.id}
+                    avatarPhotoUrl={j.assigned?.photo_url}
+                    avatarAlt={j.assigned ? `${j.assigned.first_name || ''} ${j.assigned.last_name || ''}`.trim() : undefined}
+                    avatarInitials={j.assigned ? `${(j.assigned.first_name || 'R')[0]}${(j.assigned.last_name || 'R')[0]}`.toUpperCase() : undefined}
+                    title={j.assigned ? `${j.assigned.first_name || ''} ${j.assigned.last_name || ''}`.trim() : 'Niet toegewezen'}
+                    subtitle={j.assigned?.team_name || (j.assigned ? undefined : 'Selecteer een renner')}
+                    rightIcon={
+                      <div className="jersey-icon" title={j.name || j.type}>
+                        <img src={jerseyIconSrc} alt={j.name || j.type} />
                       </div>
-                    )}
-                  </div>
-                  <div className="rider-info">
-                    <div className="rider-name">
-                      {j.assigned ? `${j.assigned.first_name || ''} ${j.assigned.last_name || ''}`.trim() : 'Niet toegewezen'}
-                    </div>
-                    <div className="rider-team">{j.assigned?.team_name || (j.assigned ? '' : 'Selecteer een renner')}</div>
-                  </div>
-                  <div className="jersey-icon" title={j.name || j.type}>
-                    <img
-                      src={
-                        j.type === 'geel'
-                          ? '/icons/Truien/geletrui.svg'
-                          : j.type === 'groen'
-                          ? '/icons/Truien/groenetrui.svg'
-                          : j.type === 'bolletjes'
-                          ? '/icons/Truien/bolletjestrui.svg'
-                          : j.type === 'wit'
-                          ? '/icons/Truien/wittetrui.svg'
-                          : '/icons/Truien/geletrui.svg'
-                      }
-                      alt={j.name || j.type}
-                    />
-                  </div>
-                </div>
-              ))}
+                    }
+                  />
+                );
+              })}
             </div>
           </Tile>
         </div>

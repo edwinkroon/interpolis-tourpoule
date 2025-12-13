@@ -6,6 +6,7 @@ import { PageTemplate } from '../layouts/PageTemplate';
 import { LoadingBlock } from '../components/LoadingBlock';
 import { StageNavigationBar } from '../components/StageNavigationBar';
 import { Tile } from '../components/Tile';
+import { ListItem } from '../components/ListItem';
 
 function makeStageLabel(stage) {
   if (!stage) return '';
@@ -246,20 +247,13 @@ export function StagesOverviewPage() {
                       <li className="no-data">Geen renners met punten voor deze etappe</li>
                     ) : (
                       ridersWithPoints.map((r) => (
-                        <li key={r.id} className="rider-item">
-                          <div className="rider-avatar">
-                            <img src="" alt={r.name} className="rider-photo" style={{ display: 'none' }} />
-                            <div className="rider-avatar-placeholder" style={{ display: 'flex' }}>
-                              {initialsFromFullName(r.name)}
-                            </div>
-                          </div>
-                          <div className="rider-info">
-                            <div className="rider-name">{r.name}</div>
-                            <div className="rider-team">{r.team}</div>
-                            {r.position ? <div className="rider-position">Positie {r.position}</div> : null}
-                          </div>
-                          <div className="rider-points">{formatPointsLabel(r.points)}</div>
-                        </li>
+                        <ListItem
+                          key={r.id}
+                          avatarInitials={initialsFromFullName(r.name)}
+                          title={r.name}
+                          subtitle={r.position ? `Positie ${r.position} • ${r.team}` : r.team}
+                          value={formatPointsLabel(r.points)}
+                        />
                       ))
                     )}
                   </ul>
@@ -339,11 +333,12 @@ export function StagesOverviewPage() {
                       <li className="no-data">Geen resultaten beschikbaar</li>
                     ) : (
                       stageResults.results.map((r) => (
-                        <li key={r.position} className="result-item">
-                          <span className="result-position">{r.position}.</span>
-                          <span className="result-rider">{r.rider}</span>
-                          <span className="result-time">{r.time || ''}</span>
-                        </li>
+                        <ListItem
+                          key={r.position}
+                          leftValue={`${r.position}.`}
+                          title={r.rider}
+                          value={r.time || ''}
+                        />
                       ))
                     )}
                   </ol>
@@ -376,24 +371,19 @@ export function StagesOverviewPage() {
                               : '/icons/Truien/geletrui.svg';
 
                           return (
-                            <div key={`${j.type}-${j.riderId || j.rider}`} className="team-rider-item">
-                              <div className="rider-avatar">
-                                {j.photoUrl ? <img src={j.photoUrl} alt={j.rider} className="rider-photo" /> : null}
-                                <div
-                                  className="rider-avatar-placeholder"
-                                  style={{ display: j.photoUrl ? 'none' : 'flex' }}
-                                >
-                                  {initialsFromFullName(j.rider)}
+                            <ListItem
+                              key={`${j.type}-${j.riderId || j.rider}`}
+                              avatarPhotoUrl={j.photoUrl}
+                              avatarAlt={j.rider}
+                              avatarInitials={initialsFromFullName(j.rider)}
+                              title={j.rider}
+                              subtitle={j.team || undefined}
+                              rightIcon={
+                                <div className="jersey-icon" title={j.jerseyName || j.type}>
+                                  <img src={jerseyIcon} alt={j.jerseyName || j.type} />
                                 </div>
-                              </div>
-                              <div className="rider-info">
-                                <div className="rider-name">{j.rider}</div>
-                                <div className="rider-team">{j.team || ''}</div>
-                              </div>
-                              <div className="jersey-icon" title={j.jerseyName || j.type}>
-                                <img src={jerseyIcon} alt={j.jerseyName || j.type} />
-                              </div>
-                            </div>
+                              }
+                            />
                           );
                         })
                       )}

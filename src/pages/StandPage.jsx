@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../utils/api';
 import { Tile } from '../components/Tile';
+import { ListItem } from '../components/ListItem';
 
 export function StandPage() {
   const navigate = useNavigate();
@@ -58,11 +59,12 @@ export function StandPage() {
             <div className="standings-full-list tile-list" id="standings-full-list">
               {!loading && standings.length === 0 ? <div className="no-data">Nog geen stand beschikbaar</div> : null}
               {standings.map((team) => (
-                <div key={team.participantId || team.rank} className="standing-item">
-                  <div className="standing-rank">{team.rank}</div>
-                  <div className="standing-name">{team.teamName}</div>
-                  <div className="standing-points">{team.totalPoints}</div>
-                </div>
+                <ListItem
+                  key={team.participantId || team.rank}
+                  leftValue={team.rank}
+                  title={team.teamName}
+                  value={team.totalPoints}
+                />
               ))}
             </div>
           </Tile>

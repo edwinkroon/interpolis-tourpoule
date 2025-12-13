@@ -4,6 +4,7 @@ import { api } from '../utils/api';
 import { LoadingBlock } from '../components/LoadingBlock';
 import { StageNavigationBar } from '../components/StageNavigationBar';
 import { Tile } from '../components/Tile';
+import { ListItem } from '../components/ListItem';
 
 function makeStageLabel(stage) {
   if (!stage) return '';
@@ -154,15 +155,16 @@ export function DagUitslagPage() {
               ) : teams.length === 0 ? (
                 <div className="no-data">Geen uitslag beschikbaar</div>
               ) : (
-                <ol className="standings-list tile-list" id="day-standings-list">
+                <div className="standings-list tile-list" id="day-standings-list">
                   {teams.map((t) => (
-                    <li key={t.participantId || `${t.rank}-${t.teamName}`} className="standing-item">
-                      <span className="standing-rank">{t.rank}</span>
-                      <span className="standing-name">{t.teamName}</span>
-                      <span className="standing-points">{t.points}</span>
-                    </li>
+                    <ListItem
+                      key={t.participantId || `${t.rank}-${t.teamName}`}
+                      leftValue={t.rank}
+                      title={t.teamName}
+                      value={t.points}
+                    />
                   ))}
-                </ol>
+                </div>
               )}
             </Tile>
           </div>

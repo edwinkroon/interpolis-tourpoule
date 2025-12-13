@@ -261,3 +261,153 @@ import { PageTemplate } from '../layouts/PageTemplate';
 **ALTIJD** gebruiken:
 - ✅ `PageTemplate` component voor alle pagina layouts
 - ✅ `Tile` component voor alle tegels/kaartjes binnen de content
+
+---
+
+# ListItem Component Rules
+
+## ALTIJD ListItem gebruiken voor list items met avatar/getal links, titel, subtitel en getal/icoon rechts
+
+**NOOIT** nieuwe list item HTML/CSS schrijven. Gebruik ALTIJD `@ListItem` component.
+
+### Import
+```jsx
+import { ListItem } from '../components/ListItem';
+```
+
+### Props
+- `avatarPhotoUrl` (optional): string - URL van de avatar foto (links)
+- `avatarAlt` (optional): string - Alt tekst voor de avatar (defaults naar title)
+- `avatarInitials` (optional): string - Initialen voor placeholder (bijv. "JD")
+- `leftValue` (optional): string | number - Getal links (in plaats van avatar, bijv. positie/rank bij stand)
+- `title` (optional): string - Titel/naam (wordt vet weergegeven)
+- `subtitle` (optional): string - Subtitel (kleinere font, optioneel)
+- `value` (optional): string | number - Getal rechts uitgelijnd
+- `rightIcon` (optional): React.ReactNode - Icoon rechts (in plaats van value, bijv. jersey icon)
+- `className` (optional): string - Extra CSS classes voor de list item container
+- `onClick` (optional): function - Click handler (maakt item klikbaar/interactief)
+
+### Structuur
+- **Links**: Avatar OF getal (leftValue heeft voorrang over avatar)
+- **Midden**: Titel (vet) en subtitel (kleinere font) gestapeld
+- **Rechts**: Getal (value) OF icoon (rightIcon heeft voorrang over value)
+
+### Voorbeelden
+
+#### Simpel list item met avatar, naam en punten
+```jsx
+<div className="tile-list">
+  {riders.map((rider) => (
+    <ListItem
+      key={rider.id}
+      avatarPhotoUrl={rider.photoUrl}
+      avatarAlt={rider.name}
+      avatarInitials={initialsFromFullName(rider.name)}
+      title={rider.name}
+      subtitle={rider.team}
+      value={rider.points}
+    />
+  ))}
+</div>
+```
+
+#### List item zonder avatar
+```jsx
+<ListItem
+  title="Naam"
+  subtitle="Extra info"
+  value={123}
+/>
+```
+
+#### List item zonder subtitel
+```jsx
+<ListItem
+  avatarPhotoUrl="/photo.jpg"
+  avatarAlt="Naam"
+  avatarInitials="JD"
+  title="Naam"
+  value={456}
+/>
+```
+
+#### Klikbaar list item
+```jsx
+<ListItem
+  avatarPhotoUrl={rider.photoUrl}
+  avatarAlt={rider.name}
+  avatarInitials={initialsFromFullName(rider.name)}
+  title={rider.name}
+  subtitle={rider.team}
+  value={rider.points}
+  onClick={() => navigate(`/rider/${rider.id}`)}
+/>
+```
+
+#### List item met alleen titel en getal (geen avatar, geen subtitel)
+```jsx
+<ListItem
+  title="Totaal punten"
+  value={1234}
+/>
+```
+
+#### List item met positie nummer links (bijv. stand/ranking)
+```jsx
+<div className="tile-list">
+  {standings.map((standing) => (
+    <ListItem
+      key={standing.participantId}
+      leftValue={standing.rank}
+      title={standing.teamName}
+      value={standing.totalPoints}
+    />
+  ))}
+</div>
+```
+
+#### List item met icoon rechts (bijv. jersey icon)
+```jsx
+<ListItem
+  avatarPhotoUrl={rider.photoUrl}
+  avatarAlt={rider.name}
+  avatarInitials={initialsFromFullName(rider.name)}
+  title={rider.name}
+  subtitle={rider.team}
+  rightIcon={
+    <div className="jersey-icon" title="Gele trui">
+      <img src="/Truien/geletrui.svg" alt="Gele trui" />
+    </div>
+  }
+/>
+```
+
+#### List item met positie links en icoon rechts
+```jsx
+<ListItem
+  leftValue={1}
+  title="Team Naam"
+  subtitle="Extra info"
+  rightIcon={<img src="/icon.svg" alt="Icon" />}
+/>
+```
+
+### Styling
+- Gebruik `tile-list` class op de container voor automatische dividers tussen items
+- ListItem heeft automatisch padding en border-bottom styling
+- Avatar is standaard 48x48px (kan worden overschreven met custom CSS)
+- Left value (positie) is 16px, min-width 30px
+- Titel is 16px, subtitel is 14px
+- Getal rechts is 15px, rechts uitgelijnd met min-width 80px
+- Right icon is 32x32px container
+
+### Legacy patterns
+**NOOIT** meer gebruiken:
+- ❌ `.points-rider-item` met handmatige HTML structuur
+- ❌ `.rider-item` met handmatige HTML structuur
+- ❌ `.standings-item` met handmatige HTML structuur
+- ❌ Handmatige avatar + info + value structuur
+
+**ALTIJD** gebruiken:
+- ✅ `ListItem` component voor alle list items met avatar/titel/subtitel/getal structuur
+- ✅ `tile-list` class op de container voor automatische dividers

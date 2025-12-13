@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../utils/api';
 import { Tile } from '../components/Tile';
-import { RiderAvatar } from '../components/RiderAvatar';
+import { ListItem } from '../components/ListItem';
 
 function initialsFromFullName(name) {
   if (!name) return '?';
@@ -164,22 +164,15 @@ export function HomePage() {
                   <div className="points-riders-list tile-list">
                     {points.riders.length === 0 ? <div className="no-data">Geen punten beschikbaar</div> : null}
                     {points.riders.map((r) => (
-                      <div key={r.id || r.name} className="points-rider-item">
-                        <RiderAvatar
-                          photoUrl={r.photoUrl || ''}
-                          alt={r.name}
-                          initials={initialsFromFullName(r.name)}
-                          containerClassName="points-rider-avatar"
-                          imgClassName="points-rider-avatar-img"
-                          placeholderClassName="points-rider-avatar"
-                          placeholderInnerClassName="points-rider-avatar-initials"
-                        />
-                        <div className="points-rider-info">
-                          <div className="points-rider-name">{r.name}</div>
-                          {r.route || points.route ? <div className="points-rider-route">{r.route || points.route}</div> : null}
-                        </div>
-                        <div className="points-rider-points">{r.points || 0}</div>
-                      </div>
+                      <ListItem
+                        key={r.id || r.name}
+                        avatarPhotoUrl={r.photoUrl}
+                        avatarAlt={r.name}
+                        avatarInitials={initialsFromFullName(r.name)}
+                        title={r.name}
+                        subtitle={r.route || points.route || undefined}
+                        value={r.points || 0}
+                      />
                     ))}
                   </div>
                 </Tile>

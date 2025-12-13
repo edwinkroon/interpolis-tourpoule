@@ -187,8 +187,8 @@
 
 // Lists inside a tile: subtle divider with 1rem spacing above/below divider.
 // Use className="tile-list" on the list container (ul/ol/div).
-// Note: .points-rider-item and .list-item have their own divider system, so exclude them here.
-.tile-content .tile-list > * + *:not(.points-rider-item):not(.list-item) {
+// Note: .points-rider-item, .list-item, and .standing-item have their own divider system, so exclude them here.
+.tile-content .tile-list > * + *:not(.points-rider-item):not(.list-item):not(.standing-item) {
   border-top: 1px solid rgba(205, 215, 220, 0.5);
   margin-top: 1rem;
   padding-top: 1rem;
@@ -385,10 +385,6 @@
     color: var(--text-muted);
   }
   
-  &-neutral &-arrow {
-    filter: brightness(0) saturate(100%) invert(45%) sepia(8%) saturate(800%) hue-rotate(170deg) brightness(95%) contrast(85%);
-  }
-  
   &-arrow {
     flex-shrink: 0;
     width: 9px;
@@ -397,15 +393,18 @@
     
     &-up {
       transform: rotate(-90deg);
+      filter: brightness(0) saturate(100%) invert(45%) sepia(100%) saturate(2000%) hue-rotate(90deg) brightness(0.9) contrast(1.2);
     }
     
     &-down {
       transform: rotate(90deg);
+      filter: brightness(0) saturate(100%) invert(15%) sepia(100%) saturate(5000%) hue-rotate(0deg) brightness(0.8) contrast(1.2);
     }
     
     &-neutral {
-      // Arrow points to the right for "no change"
-      transform: rotate(0deg);
+      // Arrow points to the left for "no change"
+      transform: rotate(180deg);
+      filter: brightness(0) saturate(100%) invert(45%) sepia(8%) saturate(800%) hue-rotate(170deg) brightness(95%) contrast(85%);
     }
   }
 }

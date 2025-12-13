@@ -48,6 +48,7 @@ exports.handler = async function(event) {
     const teamsCount = parseInt(teamsQuery.rows[0].count) || 0;
 
     // Get average points per team
+    // First try to get from cumulative points (most accurate)
     const latestStageQuery = await client.query(`
       SELECT s.id, s.stage_number
       FROM stages s
@@ -62,25 +63,55 @@ exports.handler = async function(event) {
     if (latestStageQuery.rows.length > 0) {
       const latestStageId = latestStageQuery.rows[0].id;
       
-      // Try to get from cumulative points
+      // Try to get from cumulative points first
       const cumulativeQuery = await client.query(`
         SELECT AVG(total_points) as avg_points
         FROM fantasy_cumulative_points
         WHERE after_stage_id = $1
       `, [latestStageId]);
       
-      if (cumulativeQuery.rows[0].avg_points !== null) {
+      if (cumulativeQuery.rows.length > 0 && cumulativeQuery.rows[0].avg_points !== null) {
         averagePoints = parseFloat(cumulativeQuery.rows[0].avg_points) || 0;
       } else {
-        // Fallback to sum of stage points
+        // Fallback: calculate sum of all stage points per participant
+        // Use COALESCE to handle NULL total_points and calculate from components if needed
         const stagePointsQuery = await client.query(`
-          SELECT AVG(total_points) as avg_points
+          SELECT AVG(team_total) as avg_points
           FROM (
-            SELECT participant_id, COALESCE(SUM(total_points), 0) as total_points
+            SELECT 
+              participant_id, 
+              COALESCE(
+                SUM(COALESCE(total_points, points_stage + points_jerseys + COALESCE(points_bonus, 0))),
+                0
+              ) as team_total
             FROM fantasy_stage_points
             GROUP BY participant_id
           ) as team_points
+          WHERE team_total > 0
         `);
+        
+        if (stagePointsQuery.rows.length > 0 && stagePointsQuery.rows[0].avg_points !== null) {
+          averagePoints = parseFloat(stagePointsQuery.rows[0].avg_points) || 0;
+        }
+      }
+    } else {
+      // No stages with results yet, but try to get points anyway
+      const stagePointsQuery = await client.query(`
+        SELECT AVG(team_total) as avg_points
+        FROM (
+          SELECT 
+            participant_id, 
+            COALESCE(
+              SUM(COALESCE(total_points, points_stage + points_jerseys + COALESCE(points_bonus, 0))),
+              0
+            ) as team_total
+          FROM fantasy_stage_points
+          GROUP BY participant_id
+        ) as team_points
+        WHERE team_total > 0
+      `);
+      
+      if (stagePointsQuery.rows.length > 0 && stagePointsQuery.rows[0].avg_points !== null) {
         averagePoints = parseFloat(stagePointsQuery.rows[0].avg_points) || 0;
       }
     }

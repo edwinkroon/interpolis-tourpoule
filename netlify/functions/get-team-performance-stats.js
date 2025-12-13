@@ -46,7 +46,8 @@ exports.handler = async function(event) {
     }
 
     const stages = stagesQuery.rows;
-    const stageLabels = stages.map(s => `Etappe ${s.stage_number}`);
+    // Add "Begin" label at the start, then all stages
+    const stageLabels = ['Begin', ...stages.map(s => `Etappe ${s.stage_number}`)];
 
     // Get all participants with fantasy teams
     const participantsQuery = await client.query(`
@@ -65,31 +66,38 @@ exports.handler = async function(event) {
         points: []
       };
 
+      // Start with 0 points (begin tour)
+      let previousPoints = 0;
+      teamData.points.push(0);
+
       // Get cumulative points for each stage
       for (const stage of stages) {
-        // Try to get from cumulative points first
-        const cumulativeQuery = await client.query(`
-          SELECT total_points
-          FROM fantasy_cumulative_points
-          WHERE participant_id = $1 AND after_stage_id = $2
-          LIMIT 1
-        `, [participant.id, stage.id]);
-
-        if (cumulativeQuery.rows.length > 0) {
-          teamData.points.push(cumulativeQuery.rows[0].total_points || 0);
-        } else {
-          // Fallback: sum of stage points up to this stage
-          const stagePointsQuery = await client.query(`
-            SELECT COALESCE(SUM(total_points), 0) as total_points
-            FROM fantasy_stage_points
-            WHERE participant_id = $1
-              AND stage_id IN (
-                SELECT id FROM stages WHERE stage_number <= $2
-              )
-          `, [participant.id, stage.stage_number]);
-          
-          teamData.points.push(parseFloat(stagePointsQuery.rows[0].total_points) || 0);
-        }
+        // Always calculate cumulative points directly from fantasy_stage_points
+        // This ensures consistency and that points always increase or stay the same
+        const stagePointsQuery = await client.query(`
+          SELECT 
+            COALESCE(
+              SUM(COALESCE(total_points, points_stage + points_jerseys + COALESCE(points_bonus, 0))),
+              0
+            ) as total_points
+          FROM fantasy_stage_points
+          WHERE participant_id = $1
+            AND stage_id IN (
+              SELECT id FROM stages 
+              WHERE stage_number <= $2
+                AND EXISTS (SELECT 1 FROM stage_results sr WHERE sr.stage_id = stages.id)
+            )
+        `, [participant.id, stage.stage_number]);
+        
+        let totalPoints = stagePointsQuery.rows[0]?.total_points;
+        totalPoints = totalPoints ? parseInt(totalPoints) : 0;
+        
+        // Ensure points never decrease (cumulative should always increase or stay same)
+        // Use the maximum of calculated points and previous points
+        totalPoints = Math.max(totalPoints, previousPoints);
+        
+        teamData.points.push(totalPoints);
+        previousPoints = totalPoints;
       }
 
       teams.push(teamData);
@@ -113,4 +121,3 @@ exports.handler = async function(event) {
     return await handleDbError(err, client);
   }
 };
-

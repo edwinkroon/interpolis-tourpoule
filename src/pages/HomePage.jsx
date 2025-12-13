@@ -218,30 +218,33 @@ export function HomePage() {
                       // positionChange kan number, null, of undefined zijn
                       // null/undefined = geen vorige data, number (inclusief 0) = wel data
                       const hasPositionChange = t.positionChange !== undefined && t.positionChange !== null;
-                      const positionChange = hasPositionChange ? Number(t.positionChange) : 0;
-                      const changeType = positionChange > 0 ? 'up' : positionChange < 0 ? 'down' : 'neutral';
-                      const changeValue = Math.abs(positionChange);
+                      const positionChange = hasPositionChange ? Number(t.positionChange) : null;
+                      const changeType = positionChange === null ? null : positionChange > 0 ? 'up' : positionChange < 0 ? 'down' : 'neutral';
+                      const changeValue = positionChange !== null ? Math.abs(positionChange) : 0;
+                      const showChange = hasPositionChange && positionChange !== 0;
                       
                       return (
                         <div key={t.participantId || t.rank} className="standing-item">
                           <div className="standing-rank">{t.rank}</div>
                           <div className="standing-name">{t.teamName}</div>
                           <div className="standing-points">{t.totalPoints}</div>
-                          <div className={`standing-change standing-change-${changeType}`} aria-label="Positiewijziging">
-                            <span className="standing-change-value">{hasPositionChange ? changeValue : 0}</span>
-                            <img
-                              src="/assets/arrow.svg"
-                              alt=""
-                              className={`standing-change-arrow ${
-                                changeType === 'up'
-                                  ? 'standing-change-arrow-up'
-                                  : changeType === 'down'
-                                    ? 'standing-change-arrow-down'
-                                    : 'standing-change-arrow-neutral'
-                              }`}
-                              aria-hidden="true"
-                            />
-                          </div>
+                          {hasPositionChange ? (
+                            <div className={`standing-change standing-change-${changeType}`} aria-label="Positiewijziging">
+                              {showChange ? <span className="standing-change-value">{changeValue}</span> : null}
+                              <img
+                                src="/assets/arrow.svg"
+                                alt=""
+                                className={`standing-change-arrow ${
+                                  changeType === 'up'
+                                    ? 'standing-change-arrow-up'
+                                    : changeType === 'down'
+                                      ? 'standing-change-arrow-down'
+                                      : 'standing-change-arrow-neutral'
+                                }`}
+                                aria-hidden="true"
+                              />
+                            </div>
+                          ) : null}
                         </div>
                       );
                     })}

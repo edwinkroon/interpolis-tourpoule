@@ -3,9 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../utils/api';
 import { getUserId } from '../utils/auth0';
 import { LoadingBlock } from '../components/LoadingBlock';
-import { InfoIconButton } from '../components/InfoIconButton';
-import { InfoPopup } from '../components/InfoPopup';
 import { StageNavigationBar } from '../components/StageNavigationBar';
+import { Tile } from '../components/Tile';
 
 function makeStageLabel(stage) {
   if (!stage) return '';
@@ -37,7 +36,7 @@ export function StagesOverviewPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [openPopup, setOpenPopup] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [stages, setStages] = useState([]);
   const [currentStage, setCurrentStage] = useState(null);
 
@@ -46,15 +45,6 @@ export function StagesOverviewPage() {
   const [stageResults, setStageResults] = useState(null);
   const [dayTeams, setDayTeams] = useState(null);
   const [jerseys, setJerseys] = useState(null);
-
-  useEffect(() => {
-    function onDocClick(e) {
-      const inside = e.target.closest?.('.info-popup') || e.target.closest?.('.info-icon-button');
-      if (!inside) setOpenPopup(null);
-    }
-    document.addEventListener('click', onDocClick);
-    return () => document.removeEventListener('click', onDocClick);
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -112,7 +102,8 @@ export function StagesOverviewPage() {
 
       const userId = await getUserId();
 
-      const [myStageRes, stageResultsRes, dayTeamsRes, jerseysRes] = await Promise.all([
+      const [adminRes, myStageRes, stageResultsRes, dayTeamsRes, jerseysRes] = await Promise.all([
+        userId ? api.checkAdmin(userId) : Promise.resolve(null),
         userId ? api.getMyStageRiders({ userId, stageNumber: currentStage.stage_number }) : Promise.resolve(null),
         api.getStageResults(currentStage.stage_number),
         api.getStageTeamPoints(currentStage.stage_number),
@@ -125,6 +116,7 @@ export function StagesOverviewPage() {
       setStageResults(stageResultsRes?.ok ? stageResultsRes : { ok: false, results: [] });
       setDayTeams(dayTeamsRes?.ok ? dayTeamsRes : { ok: false, teams: [] });
       setJerseys(jerseysRes?.ok ? jerseysRes : { ok: false, jerseys: [] });
+      setIsAdmin(Boolean(adminRes?.ok && adminRes?.isAdmin));
       setLoadingCards(false);
 
       setSearchParams({ stage: String(currentStage.stage_number) }, { replace: true });
@@ -234,31 +226,44 @@ export function StagesOverviewPage() {
                 <span>Etappe toevoegen</span>
                 <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
               </button>
+              {isAdmin ? (
+                <button className="action-button" type="button" onClick={() => navigate('/admin.html')} aria-label="Admin">
+                  <span>Admin</span>
+                  <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+                </button>
+              ) : null}
             </div>
           </div>
 
           <div className="dashboard-content col-9">
             <div className="dashboard-grid">
               <div className="dashboard-column">
-                <div className="dashboard-section points-section">
-                  <div className="team-card-header">
-                    <h2 className="dashboard-section-title">
+                <Tile
+                  className="points-section"
+                  title={
+                    <>
                       Mijn punten <span className="points-count">({myStage?.totalPoints ?? 0})</span>
-                    </h2>
-                    <InfoIconButton
-                      id="my-points-info-button"
-                      ariaLabel="Informatie over mijn punten"
+                    </>
+                  }
+                  info={{
+                    title: 'Mijn punten',
+                    text: 'Hier zie je welke renners uit jouw team punten hebben behaald bij deze etappe.',
+                  }}
+                  actions={
+                    <a
+                      href="#"
+                      className="card-link"
                       onClick={(e) => {
-                        e.stopPropagation();
-                        setOpenPopup(openPopup === 'mypoints' ? null : 'mypoints');
+                        e.preventDefault();
+                        navigate('/teamoverzicht.html');
                       }}
-                    />
-                    <InfoPopup id="my-points-info-popup" isOpen={openPopup === 'mypoints'} title="Mijn punten">
-                      Hier zie je welke renners uit jouw team punten hebben behaald bij deze etappe.
-                    </InfoPopup>
-                  </div>
-
-                  <ul className="riders-list" id="my-riders-list">
+                    >
+                      <span>mijn team</span>
+                      <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+                    </a>
+                  }
+                >
+                  <ul className="riders-list tile-list" id="my-riders-list">
                     {loadingCards ? (
                       <LoadingBlock />
                     ) : ridersWithPoints.length === 0 ? (
@@ -282,42 +287,27 @@ export function StagesOverviewPage() {
                       ))
                     )}
                   </ul>
+                </Tile>
 
-                  <a
-                    href="#"
-                    className="card-link"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      navigate('/teamoverzicht.html');
-                    }}
-                  >
-                    <span>mijn team</span>
-                    <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
-                  </a>
-                </div>
-
-                <div className="dashboard-section day-winners-section">
-                  <div className="team-card-header">
-                    <div className="day-winners-header">
-                      <h2 className="dashboard-section-title">Dagwinnaars</h2>
-                      <div className="day-winners-route" id="day-winners-route">
-                        {makeRouteText(currentStage)}
-                      </div>
-                    </div>
-
-                    <InfoIconButton
-                      id="day-winners-info-button"
-                      ariaLabel="Informatie over dagwinnaars"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setOpenPopup(openPopup === 'daywinners' ? null : 'daywinners');
-                      }}
-                    />
-                    <InfoPopup id="day-winners-info-popup" isOpen={openPopup === 'daywinners'} title="Dagwinnaars">
-                      Hier zie je de drie teams die de meeste punten hebben gehaald bij deze etappe.
-                    </InfoPopup>
-                  </div>
-
+                <Tile
+                  className="day-winners-section"
+                  title="Dagwinnaars"
+                  subtitle={makeRouteText(currentStage)}
+                  info={{
+                    title: 'Dagwinnaars',
+                    text: 'Hier zie je de drie teams die de meeste punten hebben gehaald bij deze etappe.',
+                  }}
+                  actions={
+                    <a
+                      href={`/daguitslag.html?stage=${encodeURIComponent(currentStage?.stage_number || '')}`}
+                      className="day-winners-button"
+                      aria-label="Bekijk alle teams"
+                    >
+                      <span>bekijk alle teams</span>
+                      <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+                    </a>
+                  }
+                >
                   <div className="day-winners-list" id="day-winners-list">
                     {loadingCards ? (
                       <LoadingBlock />
@@ -348,36 +338,25 @@ export function StagesOverviewPage() {
                       </div>
                     )}
                   </div>
-
-                  <a
-                    href={`/daguitslag.html?stage=${encodeURIComponent(currentStage?.stage_number || '')}`}
-                    className="day-winners-button"
-                    aria-label="Bekijk alle teams"
-                  >
-                    <span>bekijk alle teams</span>
-                    <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
-                  </a>
-                </div>
+                </Tile>
               </div>
 
               <div className="dashboard-column">
-                <div className="dashboard-section etappe-uitslag-section">
-                  <div className="team-card-header">
-                    <h2 className="dashboard-section-title">Etappe uitslag</h2>
-                    <InfoIconButton
-                      id="stage-results-info-button"
-                      ariaLabel="Informatie over etappe uitslag"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setOpenPopup(openPopup === 'results' ? null : 'results');
-                      }}
-                    />
-                    <InfoPopup id="stage-results-info-popup" isOpen={openPopup === 'results'} title="Etappe uitslag">
-                      Hier zie je de top 6 renners van deze etappe met hun eindtijd.
-                    </InfoPopup>
-                  </div>
-
-                  <ol className="results-list list-with-time" id="stage-results-list">
+                <Tile
+                  className="etappe-uitslag-section"
+                  title="Etappe uitslag"
+                  info={{
+                    title: 'Etappe uitslag',
+                    text: 'Hier zie je de top 6 renners van deze etappe met hun eindtijd.',
+                  }}
+                  actions={
+                    <a href="#" className="card-link" onClick={(e) => e.preventDefault()}>
+                      <span>volledige etappe uitslag</span>
+                      <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+                    </a>
+                  }
+                >
+                  <ol className="results-list list-with-time tile-list" id="stage-results-list">
                     {loadingCards ? (
                       <LoadingBlock />
                     ) : (stageResults?.results || []).length === 0 ? (
@@ -392,31 +371,17 @@ export function StagesOverviewPage() {
                       ))
                     )}
                   </ol>
+                </Tile>
 
-                  <a href="#" className="card-link" onClick={(e) => e.preventDefault()}>
-                    <span>volledige etappe uitslag</span>
-                    <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
-                  </a>
-                </div>
-
-                <div className="dashboard-section">
-                  <div className="team-card-header">
-                    <h2 className="team-card-title">Truidragers</h2>
-                    <InfoIconButton
-                      id="jerseys-info-button"
-                      ariaLabel="Informatie over truidragers"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setOpenPopup(openPopup === 'jerseys' ? null : 'jerseys');
-                      }}
-                    />
-                    <InfoPopup id="jerseys-info-popup" isOpen={openPopup === 'jerseys'} title="Truidragers">
-                      Hier zie je welke renners de leidende truien dragen na deze etappe.
-                    </InfoPopup>
-                  </div>
-
+                <Tile
+                  title="Truidragers"
+                  info={{
+                    title: 'Truidragers',
+                    text: 'Hier zie je welke renners de leidende truien dragen na deze etappe.',
+                  }}
+                >
                   <div className="riders-list-container" id="jerseys-list-container">
-                    <div id="jerseys-list">
+                    <div id="jerseys-list" className="tile-list">
                       {loadingCards ? (
                         <LoadingBlock />
                       ) : (jerseys?.jerseys || []).length === 0 ? (
@@ -458,7 +423,7 @@ export function StagesOverviewPage() {
                       )}
                     </div>
                   </div>
-                </div>
+                </Tile>
               </div>
             </div>
           </div>

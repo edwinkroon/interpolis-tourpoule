@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../utils/api';
+import { Tile } from '../components/Tile';
 
 export function StandPage() {
   const navigate = useNavigate();
@@ -39,21 +40,32 @@ export function StandPage() {
         </div>
 
         <div className="col-12 standings-full-section">
-          <h2 className="dashboard-section-title">Stand</h2>
-
-          {loading ? <div className="no-data">Bezig met laden...</div> : null}
-          {error ? <div className="error-message" style={{ display: 'block' }}>{String(error?.message || error)}</div> : null}
-
-          <div className="standings-full-list" id="standings-full-list">
-            {!loading && standings.length === 0 ? <div className="no-data">Nog geen stand beschikbaar</div> : null}
-            {standings.map((team) => (
-              <div key={team.participantId || team.rank} className="standing-item">
-                <div className="standing-rank">{team.rank}</div>
-                <div className="standing-name">{team.teamName}</div>
-                <div className="standing-points">{team.totalPoints}</div>
+          <Tile
+            className="standings-full-section"
+            title="Stand"
+            info={{
+              title: 'Stand',
+              text: 'Dit is de volledige stand: alle teams gerangschikt op totale punten.',
+            }}
+          >
+            {loading ? <div className="no-data">Bezig met laden...</div> : null}
+            {error ? (
+              <div className="error-message" style={{ display: 'block' }}>
+                {String(error?.message || error)}
               </div>
-            ))}
-          </div>
+            ) : null}
+
+            <div className="standings-full-list tile-list" id="standings-full-list">
+              {!loading && standings.length === 0 ? <div className="no-data">Nog geen stand beschikbaar</div> : null}
+              {standings.map((team) => (
+                <div key={team.participantId || team.rank} className="standing-item">
+                  <div className="standing-rank">{team.rank}</div>
+                  <div className="standing-name">{team.teamName}</div>
+                  <div className="standing-points">{team.totalPoints}</div>
+                </div>
+              ))}
+            </div>
+          </Tile>
         </div>
       </div>
     </main>

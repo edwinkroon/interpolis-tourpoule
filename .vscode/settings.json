@@ -1,0 +1,18 @@
+{
+  "search.exclude": {
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/database_csv/**": true,
+    "**/.netlify/**": true
+  },
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/database_csv/**": true,
+    "**/.netlify/**": true
+  },
+  "files.exclude": {
+    "**/dist": true
+  }
+}
+

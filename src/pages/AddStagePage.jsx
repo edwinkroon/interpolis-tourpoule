@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../utils/api';
 import { getUserId } from '../utils/auth0';
 import { LoadingBlock } from '../components/LoadingBlock';
+import { Tile } from '../components/Tile';
 
 function formatStageLabel(stage) {
   const name = stage?.name || '';
@@ -318,12 +319,55 @@ export function AddStagePage() {
                 <span>Etappe toevoegen</span>
                 <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
               </button>
+              {isAdmin ? (
+                <button className="action-button" aria-label="Admin" type="button" onClick={() => navigate('/admin.html')}>
+                  <span>Admin</span>
+                  <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+                </button>
+              ) : null}
             </div>
           </div>
 
           <div className="content-area col-9">
-            <div className="dashboard-section etappe-import-section">
-              <h2 className="dashboard-section-title">Nieuwe Etappe Uitslag Importeren</h2>
+            <Tile
+              className="etappe-import-section"
+              title="Nieuwe Etappe Uitslag Importeren"
+              info={{
+                title: 'Etappe import',
+                text: 'Plak de uitslag (ProCyclingStats), valideer de renners en selecteer daarna de 4 truidragers. Vervolgens exporteer je naar de database.',
+              }}
+              actions={
+                <>
+                  <button
+                    id="validate-button"
+                    className="form-button form-button-primary"
+                    aria-label="Valideren"
+                    type="button"
+                    onClick={onValidate}
+                    disabled={!isAdmin || isValidating}
+                  >
+                    <span>{isValidating ? 'Bezig met valideren...' : 'Valideren'}</span>
+                    <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+                  </button>
+
+                  {validation?.ok ? (
+                    <button
+                      id="export-button"
+                      className="form-button form-button-primary"
+                      aria-label="Export naar database"
+                      type="button"
+                      onClick={onExport}
+                      disabled={!isAdmin || isImporting || !jerseysRequiredSelected}
+                      title={!jerseysRequiredSelected ? 'Selecteer alle 4 truien voordat je kunt exporteren' : ''}
+                      style={!jerseysRequiredSelected ? { opacity: 0.6 } : undefined}
+                    >
+                      <span>{isImporting ? 'Bezig met importeren...' : 'Export naar database'}</span>
+                      <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+                    </button>
+                  ) : null}
+                </>
+              }
+            >
 
               {!loading && !isAdmin ? (
                 <div className="validation-errors" style={{ display: 'block' }}>
@@ -403,19 +447,7 @@ export function AddStagePage() {
                   </small>
                 </div>
 
-                <div className="form-actions">
-                  <button
-                    id="validate-button"
-                    className="form-button form-button-primary"
-                    aria-label="Valideren"
-                    type="button"
-                    onClick={onValidate}
-                    disabled={!isAdmin || isValidating}
-                  >
-                    <span>{isValidating ? 'Bezig met valideren...' : 'Valideren'}</span>
-                    <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
-                  </button>
-                </div>
+                {/* actions moved to tile footer */}
 
                 <div id="validation-results" className="validation-results" style={{ display: validation ? 'block' : 'none' }}>
                   <div id="validation-success" className="validation-success" style={{ display: validation?.ok ? 'block' : 'none' }}>
@@ -492,21 +524,7 @@ export function AddStagePage() {
                       </div>
                     </div>
 
-                    <div className="preview-actions">
-                      <button
-                        id="export-button"
-                        className="form-button form-button-primary"
-                        aria-label="Export naar database"
-                        type="button"
-                        onClick={onExport}
-                        disabled={!isAdmin || isImporting || !jerseysRequiredSelected}
-                        title={!jerseysRequiredSelected ? 'Selecteer alle 4 truien voordat je kunt exporteren' : ''}
-                        style={!jerseysRequiredSelected ? { opacity: 0.6 } : undefined}
-                      >
-                        <span>{isImporting ? 'Bezig met importeren...' : 'Export naar database'}</span>
-                        <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
-                      </button>
-                    </div>
+                    {/* export moved to tile footer */}
                   </div>
 
                   <div
@@ -550,17 +568,9 @@ export function AddStagePage() {
                         onChange={(e) => setUnmatchedText(e.target.value)}
                         disabled={!isAdmin}
                       />
-                      <button
-                        id="retry-validate-button"
-                        className="form-button form-button-primary"
-                        aria-label="Opnieuw valideren"
-                        type="button"
-                        onClick={onRetryValidate}
-                        disabled={!isAdmin || isValidating}
-                      >
-                        <span>Opnieuw valideren</span>
-                        <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
-                      </button>
+                      <div className="form-hint" style={{ marginTop: '0.75rem' }}>
+                        Pas de tekst aan en klik daarna onderaan op <strong>Valideren</strong>.
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -575,7 +585,7 @@ export function AddStagePage() {
 
                 {stageNumber ? <div style={{ display: 'none' }} data-stage-number={stageNumber} /> : null}
               </div>
-            </div>
+            </Tile>
           </div>
         </div>
       </main>

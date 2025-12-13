@@ -1,12 +1,21 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getUserId } from '../utils/auth0';
+import { useAuth } from '../contexts/AuthContext';
 import { api } from '../utils/api';
+import { Tile } from '../components/Tile';
+import { RiderAvatar } from '../components/RiderAvatar';
+
+function initialsFromFullName(name) {
+  if (!name) return '?';
+  const parts = String(name).trim().split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+  return String(name).slice(0, 2).toUpperCase();
+}
 
 export function HomePage() {
   const navigate = useNavigate();
-  const [userId, setUserId] = useState(null);
-  const [participant, setParticipant] = useState(null);
+  const { userId, participant } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
   const [points, setPoints] = useState({ totalPoints: 0, riders: [], route: '' });
   const [standings, setStandings] = useState([]);
   const [prikbord, setPrikbord] = useState([]);
@@ -16,25 +25,22 @@ export function HomePage() {
   const top5 = useMemo(() => standings.slice(0, 5), [standings]);
 
   useEffect(() => {
+    if (!userId) return;
+
     let cancelled = false;
 
     (async () => {
       try {
-        const id = await getUserId();
-        if (!id) return;
-        if (cancelled) return;
-        setUserId(id);
-
-        const [userRes, pointsRes, standingsRes, prikbordRes] = await Promise.all([
-          api.getUser(id),
-          api.getMyPointsRiders(id),
+        const [adminRes, pointsRes, standingsRes, prikbordRes] = await Promise.all([
+          api.checkAdmin(userId),
+          api.getMyPointsRiders(userId),
           api.getStandings(),
           api.getPrikbordMessages(),
         ]);
 
         if (cancelled) return;
 
-        if (userRes?.ok && userRes?.participant) setParticipant(userRes.participant);
+        setIsAdmin(Boolean(adminRes?.ok && adminRes?.isAdmin));
         if (pointsRes?.ok) {
           setPoints({
             totalPoints: pointsRes.totalPoints || 0,
@@ -57,7 +63,7 @@ export function HomePage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [userId]);
 
   if (loading) {
     return <div className="page" style={{ padding: '2rem 1rem' }}>Bezig met laden...</div>;
@@ -115,6 +121,12 @@ export function HomePage() {
               <span>Etappe toevoegen</span>
               <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
             </button>
+            {isAdmin ? (
+              <button className="action-button" type="button" onClick={() => navigate('/admin.html')} aria-label="Admin">
+                <span>Admin</span>
+                <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+              </button>
+            ) : null}
           </div>
 
           <div className="dashboard-content col-9">
@@ -126,22 +138,42 @@ export function HomePage() {
 
             <div className="dashboard-grid">
               <div className="dashboard-column">
-                <div className="dashboard-section points-section">
-                  <div className="team-card-header">
-                    <h2 className="dashboard-section-title">
+                <Tile
+                  className="points-section"
+                  title={
+                    <>
                       Mijn punten <span className="points-value">({points.totalPoints || 0})</span>
-                    </h2>
-                  </div>
-
-                  <div className="points-riders-list">
+                    </>
+                  }
+                  info={{
+                    title: 'Mijn punten',
+                    text: 'Hier zie je welke renners uit jouw team onlangs punten hebben gepakt.',
+                  }}
+                  actions={
+                    <button
+                      className="points-team-button"
+                      type="button"
+                      onClick={() => navigate('/teamoverzicht.html')}
+                      aria-label="Bekijk mijn team"
+                    >
+                      <span>mijn team</span>
+                      <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+                    </button>
+                  }
+                >
+                  <div className="points-riders-list tile-list">
                     {points.riders.length === 0 ? <div className="no-data">Geen punten beschikbaar</div> : null}
                     {points.riders.map((r) => (
                       <div key={r.id || r.name} className="points-rider-item">
-                        {r.photoUrl ? (
-                          <img src={r.photoUrl} alt={r.name} className="points-rider-avatar-img" />
-                        ) : (
-                          <div className="points-rider-avatar" />
-                        )}
+                        <RiderAvatar
+                          photoUrl={r.photoUrl || ''}
+                          alt={r.name}
+                          initials={initialsFromFullName(r.name)}
+                          containerClassName="points-rider-avatar"
+                          imgClassName="points-rider-avatar-img"
+                          placeholderClassName="points-rider-avatar"
+                          placeholderInnerClassName="points-rider-avatar-initials"
+                        />
                         <div className="points-rider-info">
                           <div className="points-rider-name">{r.name}</div>
                           {r.route || points.route ? <div className="points-rider-route">{r.route || points.route}</div> : null}
@@ -150,21 +182,30 @@ export function HomePage() {
                       </div>
                     ))}
                   </div>
-
-                  <button className="points-team-button" type="button" onClick={() => navigate('/teamoverzicht.html')} aria-label="Bekijk mijn team">
-                    <span>mijn team</span>
-                    <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
-                  </button>
-                </div>
+                </Tile>
               </div>
 
               <div className="dashboard-column">
-                <div className="dashboard-section standings-section">
-                  <div className="team-card-header">
-                    <h2 className="dashboard-section-title">Stand</h2>
-                  </div>
-
-                  <div className="standings-list">
+                <Tile
+                  className="standings-section"
+                  title="Stand"
+                  info={{
+                    title: 'Stand',
+                    text: 'Hier zie je de top van het klassement op basis van de totale punten.',
+                  }}
+                  actions={
+                    <button
+                      className="standings-button"
+                      type="button"
+                      onClick={() => navigate('/stand.html')}
+                      aria-label="Bekijk volledige stand"
+                    >
+                      <span>volledige stand</span>
+                      <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+                    </button>
+                  }
+                >
+                  <div className="standings-list tile-list">
                     {top5.length === 0 ? <div className="no-data">Nog geen stand beschikbaar</div> : null}
                     {top5.map((t) => (
                       <div key={t.participantId || t.rank} className="standing-item">
@@ -174,16 +215,41 @@ export function HomePage() {
                       </div>
                     ))}
                   </div>
+                </Tile>
 
-                  <button className="standings-button" type="button" onClick={() => navigate('/stand.html')} aria-label="Bekijk volledige stand">
-                    <span>volledige stand</span>
-                    <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
-                  </button>
-                </div>
-
-                <div className="dashboard-section prikbord-section">
-                  <h2 className="dashboard-section-title">Prikbord</h2>
-                  <div className="prikbord-list">
+                <Tile
+                  className="prikbord-section"
+                  title="Prikbord"
+                  info={{
+                    title: 'Prikbord',
+                    text: 'Hier staan de meest recente berichten. Je kan zelf ook een bericht plaatsen.',
+                  }}
+                  actions={
+                    <button
+                      className="prikbord-button"
+                      type="button"
+                      onClick={async () => {
+                        if (!userId) return;
+                        const message = window.prompt('Plaats een opmerking (max 1000 tekens):');
+                        if (!message) return;
+                        const trimmed = message.trim();
+                        if (!trimmed) return;
+                        try {
+                          await api.postPrikbordMessage({ userId, message: trimmed });
+                          const refreshed = await api.getPrikbordMessages();
+                          if (refreshed?.ok && Array.isArray(refreshed.messages)) setPrikbord(refreshed.messages);
+                        } catch (e) {
+                          alert('Fout bij plaatsen van bericht.');
+                        }
+                      }}
+                      aria-label="Plaats prikbord bericht"
+                    >
+                      <span>prikbord</span>
+                      <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+                    </button>
+                  }
+                >
+                  <div className="prikbord-list tile-list">
                     {prikbord.length === 0 ? <div className="no-data">Geen berichten</div> : null}
                     {prikbord.slice(0, 5).map((m) => (
                       <div key={m.id} className="prikbord-item">
@@ -197,29 +263,7 @@ export function HomePage() {
                       </div>
                     ))}
                   </div>
-                  <button
-                    className="prikbord-button"
-                    type="button"
-                    onClick={async () => {
-                      if (!userId) return;
-                      const message = window.prompt('Plaats een opmerking (max 1000 tekens):');
-                      if (!message) return;
-                      const trimmed = message.trim();
-                      if (!trimmed) return;
-                      try {
-                        await api.postPrikbordMessage({ userId, message: trimmed });
-                        const refreshed = await api.getPrikbordMessages();
-                        if (refreshed?.ok && Array.isArray(refreshed.messages)) setPrikbord(refreshed.messages);
-                      } catch (e) {
-                        alert('Fout bij plaatsen van bericht.');
-                      }
-                    }}
-                    aria-label="Plaats prikbord bericht"
-                  >
-                    <span>prikbord</span>
-                    <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
-                  </button>
-                </div>
+                </Tile>
               </div>
             </div>
           </div>

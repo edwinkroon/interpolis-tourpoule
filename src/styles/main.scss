@@ -11,3 +11,111 @@
 #root {
   min-height: 100vh;
 }
+
+// ---------------------------------------------
+// Tile system (tegels) - stable class contract
+// ---------------------------------------------
+
+// Base tile styling (migrated from .dashboard-section)
+.tile {
+  background: #fff;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 16px rgba(0, 51, 78, 0.16);
+  filter: drop-shadow(0 8px 16px rgba(0, 51, 78, 0.161));
+}
+
+// Base tile header styling (migrated from .team-card-header)
+.tile-header {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.tile-heading {
+  min-width: 0;
+}
+
+// Base tile title styling (migrated from .dashboard-section-title)
+// Most tiles use larger, bold titles, so we default to that.
+.tile-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: #00334e;
+  margin: 0;
+  text-transform: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.tile-title span {
+  display: inline-block;
+}
+
+.tile-subtitle {
+  margin-top: 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.25rem;
+}
+
+.tile-info {
+  // Let the info popup position relative to the tile header (legacy .team-card-header),
+  // so we can size it based on the tile width instead of the icon width.
+  position: static;
+  flex: 0 0 auto;
+}
+
+.tile-content {
+  // spacing is driven by legacy .dashboard-section padding;
+  // this wrapper exists for consistent markup.
+}
+
+// Lists inside a tile: subtle divider with 1rem spacing above/below divider.
+// Use className="tile-list" on the list container (ul/ol/div).
+// Note: .points-rider-item has its own divider system, so exclude it here.
+.tile-content .tile-list > * + *:not(.points-rider-item) {
+  border-top: 1px solid rgba(205, 215, 220, 0.5);
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+
+.tile-actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+// ---------------------------------------------
+// Section-specific tile overrides
+// ---------------------------------------------
+
+// Sections that need 20px title instead of default 19px
+.etappe-uitslag-section .tile-title,
+.dag-uitslag-section .tile-title,
+.achievements-section .tile-title,
+.standings-section .tile-title,
+.standings-full-section .tile-title,
+.prikbord-section .tile-title,
+.stage-section .tile-title,
+.choose-riders-section .tile-title,
+.day-winners-section .tile-title {
+  font-size: 20px;
+}
+
+// Sections that need flex column layout
+.points-section,
+.standings-section,
+.prikbord-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}

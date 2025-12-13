@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 import { Welcome1Page } from './pages/Welcome1Page';
@@ -22,8 +23,9 @@ import { NotFoundPage } from './pages/NotFoundPage';
 
 export function App() {
   return (
-    <BrowserRouter>
-      <Routes>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
         {/* Keep legacy URLs as routes for compatibility */}
         <Route path="/" element={<Navigate to="/index.html" replace />} />
         <Route path="/index.html" element={<Welcome1Page />} />
@@ -125,7 +127,8 @@ export function App() {
         />
 
         <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-    </BrowserRouter>
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }

@@ -1,0 +1,12 @@
+# Heavy build output
+/dist/
+
+# Dependencies
+/node_modules/
+
+# Large local datasets
+/database_csv/
+
+# Netlify local state
+/.netlify/
+

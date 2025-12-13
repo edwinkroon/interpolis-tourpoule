@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getUserId } from '../utils/auth0';
 import { api } from '../utils/api';
+import { RiderAvatar } from '../components/RiderAvatar';
 
 function initialsFromName(teamName) {
   if (!teamName) return 'U';
@@ -121,12 +122,14 @@ export function TeamOverviewPage() {
             {mainRiders.length === 0 ? <div className="no-riders-message" id="no-main-riders-message">Nog geen basisrenners</div> : null}
             {mainRiders.map((r) => (
               <div key={r.id} className="team-rider-item">
-                <div className="rider-avatar">
-                  <img src={r.photo_url || ''} alt={`${r.first_name || ''} ${r.last_name || ''}`.trim()} className="rider-photo" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                  <div className="rider-avatar-placeholder" style={{ display: r.photo_url ? 'none' : 'block' }}>
-                    {`${(r.first_name || 'R')[0]}${(r.last_name || 'R')[0]}`.toUpperCase()}
-                  </div>
-                </div>
+                <RiderAvatar
+                  photoUrl={r.photo_url || ''}
+                  alt={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
+                  initials={`${(r.first_name || 'R')[0]}${(r.last_name || 'R')[0]}`.toUpperCase()}
+                  containerClassName="rider-avatar"
+                  imgClassName="rider-photo"
+                  placeholderClassName="rider-avatar-placeholder"
+                />
                 <div className="rider-info">
                   <div className="rider-name">{`${r.first_name || ''} ${r.last_name || ''}`.trim()}</div>
                   <div className="rider-team">{r.team_name || ''}</div>
@@ -144,12 +147,14 @@ export function TeamOverviewPage() {
             {reserveRiders.length === 0 ? <div className="no-riders-message" id="no-reserve-riders-message">Nog geen reserverenners</div> : null}
             {reserveRiders.map((r) => (
               <div key={r.id} className="team-rider-item">
-                <div className="rider-avatar">
-                  <img src={r.photo_url || ''} alt={`${r.first_name || ''} ${r.last_name || ''}`.trim()} className="rider-photo" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                  <div className="rider-avatar-placeholder" style={{ display: r.photo_url ? 'none' : 'block' }}>
-                    {`${(r.first_name || 'R')[0]}${(r.last_name || 'R')[0]}`.toUpperCase()}
-                  </div>
-                </div>
+                <RiderAvatar
+                  photoUrl={r.photo_url || ''}
+                  alt={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
+                  initials={`${(r.first_name || 'R')[0]}${(r.last_name || 'R')[0]}`.toUpperCase()}
+                  containerClassName="rider-avatar"
+                  imgClassName="rider-photo"
+                  placeholderClassName="rider-avatar-placeholder"
+                />
                 <div className="rider-info">
                   <div className="rider-name">{`${r.first_name || ''} ${r.last_name || ''}`.trim()}</div>
                   <div className="rider-team">{r.team_name || ''}</div>
@@ -169,8 +174,15 @@ export function TeamOverviewPage() {
             {teamJerseys.map((j) => (
               <div key={j.id} className="team-rider-item">
                 <div className="rider-avatar">
-                  {j.assigned?.photo_url ? (
-                    <img src={j.assigned.photo_url} alt="" className="rider-photo" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                  {j.assigned ? (
+                    <RiderAvatar
+                      photoUrl={j.assigned.photo_url || ''}
+                      alt={`${j.assigned.first_name || ''} ${j.assigned.last_name || ''}`.trim()}
+                      initials={`${(j.assigned.first_name || 'R')[0]}${(j.assigned.last_name || 'R')[0]}`.toUpperCase()}
+                      containerClassName="rider-avatar"
+                      imgClassName="rider-photo"
+                      placeholderClassName="rider-avatar-placeholder"
+                    />
                   ) : (
                     <div className="rider-avatar-placeholder" style={{ display: 'block', background: '#f0f3f5', color: '#668494' }}>
                       —

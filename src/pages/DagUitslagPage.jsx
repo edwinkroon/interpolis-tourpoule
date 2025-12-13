@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../utils/api';
 import { LoadingBlock } from '../components/LoadingBlock';
 import { StageNavigationBar } from '../components/StageNavigationBar';
+import { Tile } from '../components/Tile';
 
 function makeStageLabel(stage) {
   if (!stage) return '';
@@ -139,18 +140,21 @@ export function DagUitslagPage() {
       <main className="main-content page">
         <div className="grid">
           <div className="col-12">
-            <div className="dashboard-section standings-full-section">
-              <div className="team-card-header">
-                <h2 className="dashboard-section-title">Alle teams</h2>
-                <div className="standings-route">{makeRouteText(currentStage)}</div>
-              </div>
-
+            <Tile
+              className="standings-full-section"
+              title="Alle teams"
+              subtitle={makeRouteText(currentStage)}
+              info={{
+                title: 'Alle teams',
+                text: 'Dit is de dag-uitslag: alle teams gerangschikt op behaalde punten voor deze etappe.',
+              }}
+            >
               {loading ? (
                 <LoadingBlock />
               ) : teams.length === 0 ? (
                 <div className="no-data">Geen uitslag beschikbaar</div>
               ) : (
-                <ol className="standings-list" id="day-standings-list">
+                <ol className="standings-list tile-list" id="day-standings-list">
                   {teams.map((t) => (
                     <li key={t.participantId || `${t.rank}-${t.teamName}`} className="standing-item">
                       <span className="standing-rank">{t.rank}</span>
@@ -160,7 +164,7 @@ export function DagUitslagPage() {
                   ))}
                 </ol>
               )}
-            </div>
+            </Tile>
           </div>
         </div>
       </main>

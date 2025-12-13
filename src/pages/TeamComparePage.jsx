@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../utils/api';
 import { getUserId } from '../utils/auth0';
 import { LoadingBlock } from '../components/LoadingBlock';
+import { RiderAvatar } from '../components/RiderAvatar';
 
 function initialsFromName(name) {
   if (!name) return '?';
@@ -34,6 +35,7 @@ export function TeamComparePage() {
   const selectRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [myParticipantId, setMyParticipantId] = useState(null);
   const [myTeam, setMyTeam] = useState(null);
   const [standings, setStandings] = useState([]);
@@ -57,13 +59,15 @@ export function TeamComparePage() {
       const userRes = await api.getUser(userId);
       const participantId = userRes?.participant?.id ?? null;
 
-      const [myTeamRes, standingsRes] = await Promise.all([
+      const [adminRes, myTeamRes, standingsRes] = await Promise.all([
+        userId ? api.checkAdmin(userId) : Promise.resolve(null),
         participantId ? api.getTeamComparison(participantId) : Promise.resolve(null),
         api.getStandings(),
       ]);
 
       if (cancelled) return;
 
+      setIsAdmin(Boolean(adminRes?.ok && adminRes?.isAdmin));
       setMyParticipantId(participantId);
       setMyTeam(myTeamRes?.ok ? myTeamRes.team : null);
       setStandings(standingsRes?.ok && Array.isArray(standingsRes.standings) ? standingsRes.standings : []);
@@ -229,6 +233,12 @@ export function TeamComparePage() {
                 <span>Etappe toevoegen</span>
                 <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
               </button>
+              {isAdmin ? (
+                <button className="action-button" type="button" onClick={() => navigate('/admin.html')} aria-label="Admin">
+                  <span>Admin</span>
+                  <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+                </button>
+              ) : null}
             </div>
           </div>
 
@@ -431,23 +441,14 @@ export function TeamComparePage() {
                               data-is-shared="false"
                             >
                               <div className="team-compare-rider-avatar-container">
-                                {r.photoUrl ? (
-                                  <>
-                                    <img
-                                      src={r.photoUrl}
-                                      alt={name}
-                                      className="team-compare-rider-avatar"
-                                      onError={(e) => {
-                                        e.currentTarget.style.display = 'none';
-                                      }}
-                                    />
-                                    <div className="team-compare-rider-avatar-placeholder" style={{ display: 'none' }}>
-                                      {initials}
-                                    </div>
-                                  </>
-                                ) : (
-                                  <div className="team-compare-rider-avatar-placeholder">{initials}</div>
-                                )}
+                                <RiderAvatar
+                                  photoUrl={r.photoUrl || ''}
+                                  alt={name}
+                                  initials={initials}
+                                  containerClassName="team-compare-rider-avatar-container"
+                                  imgClassName="team-compare-rider-avatar"
+                                  placeholderClassName="team-compare-rider-avatar-placeholder"
+                                />
                               </div>
 
                               <div className="team-compare-rider-info">
@@ -556,23 +557,14 @@ export function TeamComparePage() {
                               data-is-shared={String(isShared)}
                             >
                               <div className="team-compare-rider-avatar-container">
-                                {r.photoUrl ? (
-                                  <>
-                                    <img
-                                      src={r.photoUrl}
-                                      alt={name}
-                                      className="team-compare-rider-avatar"
-                                      onError={(e) => {
-                                        e.currentTarget.style.display = 'none';
-                                      }}
-                                    />
-                                    <div className="team-compare-rider-avatar-placeholder" style={{ display: 'none' }}>
-                                      {initials}
-                                    </div>
-                                  </>
-                                ) : (
-                                  <div className="team-compare-rider-avatar-placeholder">{initials}</div>
-                                )}
+                                <RiderAvatar
+                                  photoUrl={r.photoUrl || ''}
+                                  alt={name}
+                                  initials={initials}
+                                  containerClassName="team-compare-rider-avatar-container"
+                                  imgClassName="team-compare-rider-avatar"
+                                  placeholderClassName="team-compare-rider-avatar-placeholder"
+                                />
                               </div>
 
                               <div className="team-compare-rider-info">

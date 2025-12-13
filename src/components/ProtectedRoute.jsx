@@ -1,30 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { getUserId } from '../utils/auth0';
-import { useParticipant } from '../hooks/useParticipant';
+import { useAuth } from '../contexts/AuthContext';
 
 export function ProtectedRoute({ children }) {
-  const [userId, setUserId] = useState(null);
-  const [authLoading, setAuthLoading] = useState(true);
+  const { userId, participantExists, authLoading } = useAuth();
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const id = await getUserId();
-        if (!cancelled) setUserId(id);
-      } finally {
-        if (!cancelled) setAuthLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const participant = useParticipant(userId);
-
-  if (authLoading || participant.loading) {
+  if (authLoading) {
     return <div className="page" style={{ padding: '2rem 1rem' }}>Bezig met laden...</div>;
   }
 
@@ -32,7 +13,7 @@ export function ProtectedRoute({ children }) {
     return <Navigate to="/login.html" replace />;
   }
 
-  if (!participant.exists) {
+  if (!participantExists) {
     // Authenticated but not a participant in DB → send to login (same behavior as legacy requireParticipant)
     return <Navigate to="/login.html" replace />;
   }

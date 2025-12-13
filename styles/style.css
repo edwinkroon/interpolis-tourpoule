@@ -2346,11 +2346,13 @@ button[aria-busy="true"] {
 .info-popup {
   position: absolute;
   top: 100%;
+  /* Right edge aligns with the info icon; left margin makes popup ~4rem smaller than tile */
   right: 0;
+  left: clamp(0.75rem, 2vw, 2rem);
   margin-top: 0.5rem;
   z-index: 100;
-  min-width: 280px;
-  max-width: 400px;
+  max-width: none;
+  box-sizing: border-box;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 51, 78, 0.2);

@@ -4,6 +4,7 @@ import { api } from '../utils/api';
 import { getUserId } from '../utils/auth0';
 import { ensureChartsConfigured, createGradient } from '../utils/charts';
 import { useChart } from '../hooks/useChart';
+import { Tile } from '../components/Tile';
 
 export function StatisticsPage() {
   const navigate = useNavigate();
@@ -12,7 +13,6 @@ export function StatisticsPage() {
   const [topRiders, setTopRiders] = useState(null);
   const [mostSelected, setMostSelected] = useState(null);
   const [stageWinners, setStageWinners] = useState(null);
-  const [openPopup, setOpenPopup] = useState(null);
 
   const topRidersRef = useRef(null);
   const teamPerformanceRef = useRef(null);
@@ -52,16 +52,6 @@ export function StatisticsPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
-
-  // Close popups on outside click
-  useEffect(() => {
-    function onDocClick(e) {
-      const inside = e.target.closest?.('.info-popup') || e.target.closest?.('.info-icon-button');
-      if (!inside) setOpenPopup(null);
-    }
-    document.addEventListener('click', onDocClick);
-    return () => document.removeEventListener('click', onDocClick);
   }, []);
 
   const topRidersChartConfig = useMemo(() => {
@@ -367,110 +357,59 @@ export function StatisticsPage() {
               </div>
 
               <div className="dashboard-column">
-                <div className="dashboard-section chart-tile">
-                  <div className="team-card-header">
-                    <h2 className="dashboard-section-title">Top Renners</h2>
-                    <button
-                      className="info-icon-button"
-                      type="button"
-                      aria-label="Informatie over top renners"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setOpenPopup(openPopup === 'top' ? null : 'top');
-                      }}
-                    >
-                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="1.5" fill="none" />
-                        <text x="10" y="14" textAnchor="middle" fontSize="12" fontWeight="600" fill="currentColor">
-                          i
-                        </text>
-                      </svg>
-                    </button>
-                    <div className="info-popup" style={{ display: openPopup === 'top' ? 'block' : 'none' }}>
-                      <div className="info-popup-content">
-                        <h3>Top Renners</h3>
-                        <p>
-                          Hier zie je de top 10 renners met de meeste punten. De punten worden berekend op basis van etappe
-                          posities en truien.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                <Tile
+                  className="chart-tile"
+                  title="Top Renners"
+                  info={{
+                    title: 'Top Renners',
+                    text: 'Hier zie je de top 10 renners met de meeste punten. De punten worden berekend op basis van etappeposities en truien.',
+                  }}
+                >
                   <div className="chart-container">
                     <canvas ref={topRidersRef} />
                   </div>
-                </div>
+                </Tile>
 
-                <div className="dashboard-section chart-tile">
-                  <div className="team-card-header">
-                    <h2 className="dashboard-section-title">Team Prestaties</h2>
-                    <button
-                      className="info-icon-button"
-                      type="button"
-                      aria-label="Informatie over team prestaties"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setOpenPopup(openPopup === 'team' ? null : 'team');
-                      }}
-                    >
-                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="1.5" fill="none" />
-                        <text x="10" y="14" textAnchor="middle" fontSize="12" fontWeight="600" fill="currentColor">
-                          i
-                        </text>
-                      </svg>
-                    </button>
-                    <div className="info-popup" style={{ display: openPopup === 'team' ? 'block' : 'none' }}>
-                      <div className="info-popup-content">
-                        <h3>Team Prestaties</h3>
-                        <p>Hier zie je de ontwikkeling van je team punten per etappe vergeleken met andere teams.</p>
-                      </div>
-                    </div>
-                  </div>
+                <Tile
+                  className="chart-tile"
+                  title="Team Prestaties"
+                  info={{
+                    title: 'Team Prestaties',
+                    text: 'Hier zie je de ontwikkeling van je teampunten per etappe vergeleken met andere teams.',
+                  }}
+                >
                   <div className="chart-container">
                     <canvas ref={teamPerformanceRef} />
                   </div>
-                </div>
+                </Tile>
               </div>
 
               <div className="dashboard-column">
-                <div className="dashboard-section chart-tile">
-                  <div className="team-card-header">
-                    <h2 className="dashboard-section-title">Meest Geselecteerde Renners</h2>
-                    <button
-                      className="info-icon-button"
-                      type="button"
-                      aria-label="Informatie over meest geselecteerde renners"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setOpenPopup(openPopup === 'most' ? null : 'most');
-                      }}
-                    >
-                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="1.5" fill="none" />
-                        <text x="10" y="14" textAnchor="middle" fontSize="12" fontWeight="600" fill="currentColor">
-                          i
-                        </text>
-                      </svg>
-                    </button>
-                    <div className="info-popup" style={{ display: openPopup === 'most' ? 'block' : 'none' }}>
-                      <div className="info-popup-content">
-                        <h3>Meest Geselecteerde Renners</h3>
-                        <p>Deze grafiek toont welke renners het populairst zijn en in de meeste teams zitten.</p>
-                      </div>
-                    </div>
-                  </div>
+                <Tile
+                  className="chart-tile"
+                  title="Meest Geselecteerde Renners"
+                  info={{
+                    title: 'Meest Geselecteerde Renners',
+                    text: 'Deze grafiek toont welke renners het populairst zijn en in de meeste teams zitten.',
+                  }}
+                >
                   <div className="chart-container">
                     <canvas ref={mostSelectedRef} />
                   </div>
-                </div>
+                </Tile>
 
-                <div className="dashboard-section chart-tile">
-                  <h2 className="dashboard-section-title">Etappe Winnaars</h2>
+                <Tile
+                  className="chart-tile"
+                  title="Etappe Winnaars"
+                  info={{
+                    title: 'Etappe Winnaars',
+                    text: 'Deze grafiek toont per ploeg het aantal etappe-overwinningen.',
+                  }}
+                >
                   <div className="chart-container">
                     <canvas ref={stageWinnersRef} />
                   </div>
-                </div>
+                </Tile>
               </div>
             </div>
           </div>

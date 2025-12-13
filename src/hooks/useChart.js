@@ -8,6 +8,7 @@ export function useChart(canvasRef, config, enabled = true) {
     if (!enabled) return;
     const el = canvasRef.current;
     if (!el) return;
+    if (!config) return;
 
     // Destroy previous instance
     if (chartRef.current) {
@@ -15,8 +16,22 @@ export function useChart(canvasRef, config, enabled = true) {
       chartRef.current = null;
     }
 
-    const ctx = el.getContext('2d');
-    chartRef.current = new Chart(ctx, config);
+    // Use requestAnimationFrame to ensure DOM is ready
+    const initChart = () => {
+      const ctx = el.getContext('2d');
+      if (ctx) {
+        try {
+          chartRef.current = new Chart(ctx, config);
+        } catch (error) {
+          console.error('Chart initialization error:', error);
+        }
+      }
+    };
+
+    // Wait for next frame to ensure container has dimensions
+    requestAnimationFrame(() => {
+      requestAnimationFrame(initChart);
+    });
 
     return () => {
       if (chartRef.current) {

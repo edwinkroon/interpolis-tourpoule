@@ -366,7 +366,7 @@ export function StatisticsPage() {
                   }}
                 >
                   <div className="chart-container">
-                    <canvas ref={topRidersRef} />
+                    <canvas ref={topRidersRef} width="400" height="300" />
                   </div>
                 </Tile>
 
@@ -379,7 +379,7 @@ export function StatisticsPage() {
                   }}
                 >
                   <div className="chart-container">
-                    <canvas ref={teamPerformanceRef} />
+                    <canvas ref={teamPerformanceRef} width="400" height="300" />
                   </div>
                 </Tile>
               </div>
@@ -394,7 +394,7 @@ export function StatisticsPage() {
                   }}
                 >
                   <div className="chart-container">
-                    <canvas ref={mostSelectedRef} />
+                    <canvas ref={mostSelectedRef} width="400" height="300" />
                   </div>
                 </Tile>
 
@@ -407,7 +407,7 @@ export function StatisticsPage() {
                   }}
                 >
                   <div className="chart-container">
-                    <canvas ref={stageWinnersRef} />
+                    <canvas ref={stageWinnersRef} width="400" height="300" />
                   </div>
                 </Tile>
               </div>

@@ -303,6 +303,41 @@ export function RulesPage() {
                   </div>
                 </div>
               </section>
+
+              <section className="rules-section">
+                <h2 className="rules-title">De Stand</h2>
+                <div className="rules-text">
+                  <p>
+                    In de stand zie je alle teams gerangschikt op basis van hun totale punten. Naast elke teamnaam zie je
+                    eventueel een indicator die laat zien hoeveel plaatsen het team is gestegen of gedaald ten opzichte van
+                    de vorige etappe.
+                  </p>
+                  <div className="stand-indicator-explanation">
+                    <h3 className="points-subtitle">Plaatswijziging indicator</h3>
+                    <ul className="rules-list" style={{ listStyleType: 'disc', paddingLeft: '1.5rem' }}>
+                      <li>
+                        <strong style={{ color: '#18AA2E' }}>Groene pijl omhoog (▲)</strong> met een getal: het team is
+                        gestegen. Het getal geeft aan hoeveel plaatsen het team is gestegen ten opzichte van de vorige etappe.
+                      </li>
+                      <li>
+                        <strong style={{ color: '#ff0000' }}>Rode pijl omlaag (▼)</strong> met een getal: het team is
+                        gedaald. Het getal geeft aan hoeveel plaatsen het team is gedaald ten opzichte van de vorige etappe.
+                      </li>
+                      <li>
+                        <strong style={{ color: '#668494' }}>Grijze pijl naar links (◀)</strong> met "0": het team heeft dezelfde
+                        positie behouden als in de vorige etappe.
+                      </li>
+                      <li>
+                        <strong>Geen indicator</strong>: er is nog geen vorige etappe om mee te vergelijken, of het team heeft
+                        nog geen punten behaald.
+                      </li>
+                    </ul>
+                    <p style={{ marginTop: '1rem' }}>
+                      De stand wordt na elke etappe bijgewerkt met de nieuwste punten en plaatswijzigingen.
+                    </p>
+                  </div>
+                </div>
+              </section>
             </div>
           </div>
         </div>

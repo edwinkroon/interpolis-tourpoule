@@ -43,7 +43,10 @@ export const api = {
   },
 
   async getTeamPerformanceStats(participantId) {
-    return await fetchJson(`/.netlify/functions/get-team-performance-stats?participantId=${encodeURIComponent(participantId)}`);
+    const url = participantId 
+      ? `/.netlify/functions/get-team-performance-stats?participantId=${encodeURIComponent(participantId)}`
+      : `/.netlify/functions/get-team-performance-stats`;
+    return await fetchJson(url);
   },
 
   async getStagesWithResults() {

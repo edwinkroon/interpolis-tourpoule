@@ -13,6 +13,7 @@ import { RiderAvatar } from './RiderAvatar';
  * @param {string} props.subtitle - Subtitel (kleinere font, optioneel)
  * @param {string|number} props.value - Getal rechts uitgelijnd
  * @param {React.ReactNode} props.rightIcon - Icoon rechts (in plaats van value, bijv. jersey icon)
+ * @param {number|null} props.positionChange - Aantal plaatsen gestegen/gedaald (positief = gestegen, negatief = gedaald, null = geen wijziging)
  * @param {string} props.className - Optionele extra CSS classes
  * @param {function} props.onClick - Optionele click handler
  */
@@ -25,6 +26,7 @@ export function ListItem({
   subtitle,
   value,
   rightIcon,
+  positionChange,
   className = '',
   onClick,
 }) {
@@ -60,6 +62,30 @@ export function ListItem({
         {title ? <div className="list-item-title">{title}</div> : null}
         {subtitle ? <div className="list-item-subtitle">{subtitle}</div> : null}
       </div>
+      
+      {positionChange !== undefined && positionChange !== null ? (
+        (() => {
+          const changeType = positionChange > 0 ? 'up' : positionChange < 0 ? 'down' : 'neutral';
+          const changeValue = Math.abs(positionChange);
+          return (
+            <div className={`standing-change standing-change-${changeType}`}>
+              <span className="standing-change-value">{changeValue}</span>
+              <img
+                src="/assets/arrow.svg"
+                alt=""
+                className={`standing-change-arrow ${
+                  changeType === 'up' 
+                    ? 'standing-change-arrow-up' 
+                    : changeType === 'down' 
+                    ? 'standing-change-arrow-down' 
+                    : 'standing-change-arrow-neutral'
+                }`}
+                aria-hidden="true"
+              />
+            </div>
+          );
+        })()
+      ) : null}
       
       {showRightIcon ? (
         <div className="list-item-right-icon">{rightIcon}</div>

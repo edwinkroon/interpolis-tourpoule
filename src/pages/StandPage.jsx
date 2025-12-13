@@ -64,6 +64,7 @@ export function StandPage() {
                   leftValue={team.rank}
                   title={team.teamName}
                   value={team.totalPoints}
+                  positionChange={team.positionChange}
                 />
               ))}
             </div>

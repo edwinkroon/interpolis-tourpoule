@@ -1,41 +1,35 @@
 # Hoe SQL Scripts Uitvoeren
 
-## Optie 1: Neon SQL Editor (Aanbevolen - Eenvoudigst)
+## Optie 1: Node.js Script (Aanbevolen voor lokale Docker database)
 
-1. **Ga naar Neon Dashboard:**
-   - Open https://console.neon.tech
-   - Log in met je account
-   - Selecteer je project (bijv. "neondb")
+1. **Zorg dat je database URL is ingesteld:**
+   ```powershell
+   # Voor lokale Docker database
+   $env:DATABASE_URL="postgresql://postgres:password@localhost:5432/dbname"
+   ```
 
-2. **Open SQL Editor:**
-   - Klik op "SQL Editor" in het linkermenu
-   - Of gebruik de directe link naar je database
+2. **Voer het script uit:**
+   ```powershell
+   node imports/run-sql-script.js imports/update-stages-2025.sql
+   ```
 
-3. **Kopieer en plak het script:**
-   - Open het SQL bestand in Cursor (bijv. `imports/import-stages-2025.sql`)
-   - Selecteer alle tekst (Ctrl+A)
-   - Kopieer (Ctrl+C)
-   - Plak in de Neon SQL Editor (Ctrl+V)
-
-4. **Voer het script uit:**
-   - Klik op de "Run" knop
-   - Of druk op `Ctrl+Enter` (Windows) / `Cmd+Enter` (Mac)
-   - Wacht tot het script klaar is
-
-5. **Controleer de resultaten:**
-   - Het script bevat verificatie queries aan het einde
-   - Je ziet het aantal geïmporteerde stages en een overzicht
+3. **Het script:**
+   - Leest automatisch je database configuratie uit environment variables
+   - Voert het SQL script uit
+   - Toont eventuele fouten
+   - Sluit de verbinding netjes af
 
 ## Optie 2: Via psql Command Line (Geavanceerd)
 
 Als je `psql` hebt geïnstalleerd:
 
-```bash
-# Zet de database URL als environment variable
-$env:NEON_DATABASE_URL = "postgresql://neondb_owner:npg_2HT1WlErIqxp@ep-little-unit-aemp2fsn-pooler.c-2.us-east-2.aws.neon.tech/neondb?channel_binding=require&sslmode=require"
+```powershell
+# Voor lokale Docker database
+$env:PGPASSWORD="password"
+psql -h localhost -U postgres -d dbname -f imports/update-stages-2025.sql
 
-# Voer het script uit
-psql $env:NEON_DATABASE_URL -f imports/import-stages-2025.sql
+# Of met connection string
+psql "postgresql://postgres:password@localhost:5432/dbname" -f imports/update-stages-2025.sql
 ```
 
 ## Optie 3: Via Python Script (Alternatief)
@@ -68,7 +62,7 @@ conn.close()
 
 ## Welke Optie Te Gebruiken?
 
-- **Optie 1 (Neon SQL Editor)** is het eenvoudigst en wordt aanbevolen
+- **Optie 1 (Node.js Script)** is het eenvoudigst voor lokale Docker database
 - **Optie 2 (psql)** is handig als je veel scripts moet uitvoeren
 - **Optie 3 (Python)** is handig voor geautomatiseerde imports
 

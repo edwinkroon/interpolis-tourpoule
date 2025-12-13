@@ -12,12 +12,19 @@ import { InfoPopup } from './InfoPopup';
  * - Onderaan: actions blok met 1 of 2 acties.
  *
  * Classnames zijn bewust stabiel gehouden.
+ * 
+ * Voor standings/stand lijsten:
+ * - Gebruik ListItem component met optionele positionChange prop
+ * - positionChange: number|null - aantal plaatsen gestegen/gedaald (positief = gestegen, negatief = gedaald, null = geen wijziging)
+ * - De positionChange wordt automatisch weergegeven met pijl en kleur (groen = gestegen, rood = gedaald, grijs = gelijk)
  */
 export function Tile({
   className = '',
   title,
   subtitle,
   info,
+  headerLeft,
+  headerRight,
   children,
   actions,
   contentClassName = '',
@@ -55,24 +62,32 @@ export function Tile({
   return (
     <section ref={containerRef} className={`tile ${className}`.trim()}>
       <header className="tile-header">
+        {headerLeft ? <div className="tile-header-left">{headerLeft}</div> : null}
+
         <div className="tile-heading">
           <h2 className="tile-title">{title}</h2>
           {subtitle ? <div className="tile-subtitle">{subtitle}</div> : null}
         </div>
 
-        {info ? (
-          <div className="tile-info">
-            <InfoIconButton
-              id={info.buttonId || undefined}
-              ariaLabel={info.ariaLabel || `Informatie over ${title}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                setOpen((v) => !v);
-              }}
-            />
-            <InfoPopup id={popupId} isOpen={open} title={info.title || title}>
-              {info.text}
-            </InfoPopup>
+        {headerRight || info ? (
+          <div className="tile-header-right">
+            {headerRight ? <div className="tile-header-right-content">{headerRight}</div> : null}
+
+            {info ? (
+              <div className="tile-info">
+                <InfoIconButton
+                  id={info.buttonId || undefined}
+                  ariaLabel={info.ariaLabel || `Informatie over ${title}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpen((v) => !v);
+                  }}
+                />
+                <InfoPopup id={popupId} isOpen={open} title={info.title || title}>
+                  {info.text}
+                </InfoPopup>
+              </div>
+            ) : null}
           </div>
         ) : null}
       </header>

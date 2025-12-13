@@ -19,15 +19,46 @@ function initialsFromName(teamName) {
 
 export function TeamOverviewPage() {
   const navigate = useNavigate();
-  const [userId, setUserId] = useState(null);
   const [participant, setParticipant] = useState(null);
   const [teamRiders, setTeamRiders] = useState([]);
   const [teamJerseys, setTeamJerseys] = useState([]);
+  const [teamStanding, setTeamStanding] = useState({ totalPoints: 0, positionChange: null });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [avatarError, setAvatarError] = useState(false);
 
   const mainRiders = useMemo(() => teamRiders.filter((r) => r.slot_type === 'main'), [teamRiders]);
   const reserveRiders = useMemo(() => teamRiders.filter((r) => r.slot_type === 'reserve'), [teamRiders]);
+
+  const sidebar = useMemo(
+    () => (
+      <>
+        <button
+          className="action-button"
+          type="button"
+          onClick={() => navigate('/rules.html')}
+          aria-label="Bekijk spelregels"
+        >
+          <span>Spelregels</span>
+          <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+        </button>
+        <button
+          className="action-button"
+          type="button"
+          onClick={() => navigate('/statistieken.html')}
+          aria-label="Bekijk statistieken"
+        >
+          <span>Statistieken</span>
+          <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+        </button>
+        <button className="action-button" type="button" onClick={() => navigate('/logout.html')} aria-label="Uitloggen">
+          <span>Uitloggen</span>
+          <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+        </button>
+      </>
+    ),
+    [navigate],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -37,17 +68,29 @@ export function TeamOverviewPage() {
         const id = await getUserId();
         if (!id) return;
         if (cancelled) return;
-        setUserId(id);
 
-        const [userRes, ridersRes, jerseysRes] = await Promise.all([
+        const [userRes, ridersRes, jerseysRes, standingsRes] = await Promise.all([
           api.getUser(id),
           api.getTeamRiders(id),
           api.getTeamJerseys(id),
+          api.getStandings(),
         ]);
 
         if (cancelled) return;
 
-        if (userRes?.ok && userRes?.participant) setParticipant(userRes.participant);
+        if (userRes?.ok && userRes?.participant) {
+          setParticipant(userRes.participant);
+
+          const participantId = userRes.participant.id;
+          const standings = standingsRes?.ok && Array.isArray(standingsRes.standings) ? standingsRes.standings : [];
+          const mine = participantId ? standings.find((s) => s.participantId === participantId) : null;
+          setTeamStanding({
+            totalPoints: mine?.totalPoints || 0,
+            positionChange: mine?.positionChange ?? null,
+          });
+        } else {
+          setTeamStanding({ totalPoints: 0, positionChange: null });
+        }
         setTeamRiders(ridersRes?.ok && Array.isArray(ridersRes.riders) ? ridersRes.riders : []);
         setTeamJerseys(jerseysRes?.ok && Array.isArray(jerseysRes.jerseys) ? jerseysRes.jerseys : []);
 
@@ -65,56 +108,87 @@ export function TeamOverviewPage() {
     };
   }, []);
 
+  useEffect(() => {
+    setAvatarError(false);
+  }, [participant?.avatar_url]);
+
   if (loading) {
     return (
-      <PageTemplate title="Team overzicht" backLink="/home.html">
-        <div className="no-data">Bezig met laden...</div>
+      <PageTemplate title="Team overzicht" backLink="/home.html" sidebar={sidebar}>
+        <div className="grid">
+          <div className="col-12">
+            <Tile title="Status">
+              <div className="no-data">Bezig met laden...</div>
+            </Tile>
+          </div>
+        </div>
       </PageTemplate>
     );
   }
 
   if (error) {
     return (
-      <PageTemplate title="Team overzicht" backLink="/home.html">
-        <div className="error-message" style={{ display: 'block' }}>
-          {String(error?.message || error)}
+      <PageTemplate title="Team overzicht" backLink="/home.html" sidebar={sidebar}>
+        <div className="grid">
+          <div className="col-12">
+            <Tile title="Fout">
+              <div className="error-message" style={{ display: 'block' }}>
+                {String(error?.message || error)}
+              </div>
+            </Tile>
+          </div>
         </div>
       </PageTemplate>
     );
   }
 
+  const positionChange = typeof teamStanding?.positionChange === 'number' ? teamStanding.positionChange : 0;
+  const trendType = positionChange > 0 ? 'up' : positionChange < 0 ? 'down' : 'same';
+  const trendValue = Math.abs(positionChange);
+
   return (
     <PageTemplate
       title="Team overzicht"
       backLink="/home.html"
-      sidebar={
-        <>
-          <button
-            className="action-button"
-            type="button"
-            onClick={() => navigate('/rules.html')}
-            aria-label="Bekijk spelregels"
-          >
-            <span>Spelregels</span>
-            <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
-          </button>
-          <button
-            className="action-button"
-            type="button"
-            onClick={() => navigate('/statistieken.html')}
-            aria-label="Bekijk statistieken"
-          >
-            <span>Statistieken</span>
-            <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
-          </button>
-        </>
-      }
+      sidebar={sidebar}
     >
-      <div className="grid">
-
-        {/* Team info */}
-        <div className="col-12">
+      <div className="dashboard-grid">
+        <div className="dashboard-column">
           <Tile
+            className="team-overview-team-tile"
+            headerLeft={
+              <div className="team-tile-avatar">
+                {participant?.avatar_url && !avatarError ? (
+                  <img
+                    src={participant.avatar_url}
+                    alt={participant?.team_name ? `Avatar van ${participant.team_name}` : 'Team avatar'}
+                    className="team-tile-avatar-img"
+                    onError={() => setAvatarError(true)}
+                  />
+                ) : (
+                  <div className="team-tile-avatar-placeholder">{initialsFromName(participant?.team_name)}</div>
+                )}
+              </div>
+            }
+            headerRight={
+              <div className="team-tile-metrics" aria-label="Teampunten en positie verandering">
+                <span className="team-tile-points">{teamStanding?.totalPoints || 0}</span>
+                <span className={`team-tile-trend team-tile-trend--${trendType}`}>
+                  <svg
+                    className={`team-tile-trend-arrow team-tile-trend-arrow--${trendType === 'same' ? 'right' : trendType}`}
+                    viewBox="0 0 12 12"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="M4.2 2.2L9.8 6 4.2 9.8V7.2H2V4.8h2.2V2.2z"
+                    />
+                  </svg>
+                  <span>{trendValue}</span>
+                </span>
+              </div>
+            }
             title={participant?.team_name || 'Team'}
             actions={
               <button className="team-compare-button" type="button" onClick={() => navigate('/teamvergelijken.html')}>
@@ -123,92 +197,30 @@ export function TeamOverviewPage() {
               </button>
             }
           >
-            <div className="team-info-header">
-              <div className="team-avatar-container">
-                {participant?.avatar_url ? (
-                  <img src={participant.avatar_url} alt="Avatar" className="team-avatar-img" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                ) : (
-                  <div className="team-avatar-placeholder">{initialsFromName(participant?.team_name)}</div>
-                )}
-              </div>
-              <div className="team-info-content">
-                <div className="team-info-details">
-                  <div className="team-detail-item">
-                    <div className="team-detail-label">Email</div>
-                    <div className="team-detail-value">{participant?.email || '-'}</div>
-                  </div>
-                  <div className="team-detail-item">
-                    <div className="team-detail-label">Notificaties</div>
-                    <div className="team-detail-value">{participant?.newsletter ? 'Aan' : 'Uit'}</div>
-                  </div>
-                </div>
-              </div>
+            <div className="tile-list">
+              <ListItem title="Email" value={participant?.email || '-'} />
+              <ListItem title="Notificaties" value={participant?.newsletter ? 'Aan' : 'Uit'} />
             </div>
           </Tile>
-        </div>
 
-        {/* Riders */}
-        <div className="col-12">
-          <Tile
-            title={`Basisrenners (${mainRiders.length})`}
-            contentClassName="riders-list-container"
-          >
-            <div className="tile-list" id="main-riders-list-container">
-              {mainRiders.length === 0 ? <div className="no-riders-message" id="no-main-riders-message">Nog geen basisrenners</div> : null}
-              {mainRiders.map((r) => (
-                <ListItem
-                  key={r.id}
-                  avatarPhotoUrl={r.photo_url}
-                  avatarAlt={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
-                  avatarInitials={`${(r.first_name || 'R')[0]}${(r.last_name || 'R')[0]}`.toUpperCase()}
-                  title={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
-                  subtitle={r.team_name || undefined}
-                />
-              ))}
-            </div>
-          </Tile>
-        </div>
-
-        <div className="col-12">
-          <Tile
-            title={`Reserverenners (${reserveRiders.length})`}
-            contentClassName="riders-list-container"
-          >
-            <div className="tile-list" id="reserve-riders-list-container">
-              {reserveRiders.length === 0 ? <div className="no-riders-message" id="no-reserve-riders-message">Nog geen reserverenners</div> : null}
-              {reserveRiders.map((r) => (
-                <ListItem
-                  key={r.id}
-                  avatarPhotoUrl={r.photo_url}
-                  avatarAlt={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
-                  avatarInitials={`${(r.first_name || 'R')[0]}${(r.last_name || 'R')[0]}`.toUpperCase()}
-                  title={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
-                  subtitle={r.team_name || undefined}
-                />
-              ))}
-            </div>
-          </Tile>
-        </div>
-
-        {/* Jerseys */}
-        <div className="col-12">
-          <Tile
-            title="Truien"
-            contentClassName="riders-list-container"
-          >
+          <Tile title="Truien" contentClassName="riders-list-container">
             <div className="tile-list" id="jerseys-list-container">
-              {teamJerseys.length === 0 ? <div className="no-jerseys-message" id="no-jerseys-message"><p>Geen truien gevonden</p></div> : null}
+              {teamJerseys.length === 0 ? (
+                <div className="no-jerseys-message" id="no-jerseys-message">
+                  <p>Geen truien gevonden</p>
+                </div>
+              ) : null}
               {teamJerseys.map((j) => {
                 const jerseyIconSrc =
                   j.type === 'geel'
                     ? '/icons/Truien/geletrui.svg'
                     : j.type === 'groen'
-                    ? '/icons/Truien/groenetrui.svg'
-                    : j.type === 'bolletjes'
-                    ? '/icons/Truien/bolletjestrui.svg'
-                    : j.type === 'wit'
-                    ? '/icons/Truien/wittetrui.svg'
-                    : '/icons/Truien/geletrui.svg';
+                      ? '/icons/Truien/groenetrui.svg'
+                      : j.type === 'bolletjes'
+                        ? '/icons/Truien/bolletjestrui.svg'
+                        : j.type === 'wit'
+                          ? '/icons/Truien/wittetrui.svg'
+                          : '/icons/Truien/geletrui.svg';
 
                 return (
                   <ListItem
@@ -230,8 +242,46 @@ export function TeamOverviewPage() {
           </Tile>
         </div>
 
-        <div className="col-12" style={{ marginTop: '1rem' }}>
-          <a href="/logout.html">Uitloggen</a>
+        <div className="dashboard-column">
+          <Tile title={`Basisrenners (${mainRiders.length})`} contentClassName="riders-list-container">
+            <div className="tile-list" id="main-riders-list-container">
+              {mainRiders.length === 0 ? (
+                <div className="no-riders-message" id="no-main-riders-message">
+                  Nog geen basisrenners
+                </div>
+              ) : null}
+              {mainRiders.map((r) => (
+                <ListItem
+                  key={r.id}
+                  avatarPhotoUrl={r.photo_url}
+                  avatarAlt={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
+                  avatarInitials={`${(r.first_name || 'R')[0]}${(r.last_name || 'R')[0]}`.toUpperCase()}
+                  title={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
+                  subtitle={r.team_name || undefined}
+                />
+              ))}
+            </div>
+          </Tile>
+
+          <Tile title={`Reserverenners (${reserveRiders.length})`} contentClassName="riders-list-container">
+            <div className="tile-list" id="reserve-riders-list-container">
+              {reserveRiders.length === 0 ? (
+                <div className="no-riders-message" id="no-reserve-riders-message">
+                  Nog geen reserverenners
+                </div>
+              ) : null}
+              {reserveRiders.map((r) => (
+                <ListItem
+                  key={r.id}
+                  avatarPhotoUrl={r.photo_url}
+                  avatarAlt={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
+                  avatarInitials={`${(r.first_name || 'R')[0]}${(r.last_name || 'R')[0]}`.toUpperCase()}
+                  title={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
+                  subtitle={r.team_name || undefined}
+                />
+              ))}
+            </div>
+          </Tile>
         </div>
       </div>
     </PageTemplate>

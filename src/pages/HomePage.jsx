@@ -23,6 +23,20 @@ export function HomePage() {
   const [error, setError] = useState(null);
 
   const top5 = useMemo(() => standings.slice(0, 5), [standings]);
+  const myStanding = useMemo(() => {
+    const participantId = participant?.id ?? participant?.participantId ?? participant?.participant_id ?? null;
+    if (!participantId) return null;
+
+    return (
+      standings.find((s) => {
+        const standingParticipantId = s?.participantId ?? s?.id ?? s?.participant_id ?? null;
+        if (!standingParticipantId) return false;
+        return String(standingParticipantId) === String(participantId);
+      }) || null
+    );
+  }, [participant?.id, participant?.participantId, participant?.participant_id, standings]);
+  const myTotalPoints = myStanding?.totalPoints ?? 0;
+  const myLatestStagePoints = points.totalPoints ?? 0;
 
   useEffect(() => {
     if (!userId) return;
@@ -142,7 +156,7 @@ export function HomePage() {
                   className="points-section"
                   title={
                     <>
-                      Mijn punten <span className="points-value">({points.totalPoints || 0})</span>
+                      Mijn punten <span className="points-value">({myLatestStagePoints || 0})</span>
                     </>
                   }
                   info={{
@@ -200,13 +214,37 @@ export function HomePage() {
                 >
                   <div className="standings-list tile-list">
                     {top5.length === 0 ? <div className="no-data">Nog geen stand beschikbaar</div> : null}
-                    {top5.map((t) => (
-                      <div key={t.participantId || t.rank} className="standing-item">
-                        <div className="standing-rank">{t.rank}</div>
-                        <div className="standing-name">{t.teamName}</div>
-                        <div className="standing-points">{t.totalPoints}</div>
-                      </div>
-                    ))}
+                    {top5.map((t) => {
+                      // positionChange kan number, null, of undefined zijn
+                      // null/undefined = geen vorige data, number (inclusief 0) = wel data
+                      const hasPositionChange = t.positionChange !== undefined && t.positionChange !== null;
+                      const positionChange = hasPositionChange ? Number(t.positionChange) : 0;
+                      const changeType = positionChange > 0 ? 'up' : positionChange < 0 ? 'down' : 'neutral';
+                      const changeValue = Math.abs(positionChange);
+                      
+                      return (
+                        <div key={t.participantId || t.rank} className="standing-item">
+                          <div className="standing-rank">{t.rank}</div>
+                          <div className="standing-name">{t.teamName}</div>
+                          <div className="standing-points">{t.totalPoints}</div>
+                          <div className={`standing-change standing-change-${changeType}`} aria-label="Positiewijziging">
+                            <span className="standing-change-value">{hasPositionChange ? changeValue : 0}</span>
+                            <img
+                              src="/assets/arrow.svg"
+                              alt=""
+                              className={`standing-change-arrow ${
+                                changeType === 'up'
+                                  ? 'standing-change-arrow-up'
+                                  : changeType === 'down'
+                                    ? 'standing-change-arrow-down'
+                                    : 'standing-change-arrow-neutral'
+                              }`}
+                              aria-hidden="true"
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </Tile>
 

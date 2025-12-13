@@ -36,7 +36,7 @@ export function StatisticsPage() {
         api.getTopRidersStats(),
         api.getMostSelectedRiders(),
         api.getStageWinnersStats(),
-        participantId ? api.getTeamPerformanceStats(participantId) : Promise.resolve(null),
+        api.getTeamPerformanceStats(), // Get all teams, not just the current user's team
       ]);
 
       if (cancelled) return;

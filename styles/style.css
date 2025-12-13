@@ -141,11 +141,6 @@
   background: #f0f3f5;
   border-radius: 12px;
   border: 2px solid #cdd7dc;
-  transition: border-color 0.2s;
-}
-
-.admin-stage-item:hover {
-  border-color: #00cac6;
 }
 
 .admin-stage-info {
@@ -177,6 +172,7 @@
 .admin-stage-route {
   font-size: 14px;
   color: #668494;
+  margin-top: 0.5rem;
 }
 
 .admin-stage-controls {
@@ -1037,7 +1033,13 @@ button[aria-busy="true"] {
   height: 12px;
   display: block;
 }
-.standing-change-arrow-left {
+.standing-change-arrow-up {
+  transform: rotate(-90deg);
+}
+.standing-change-arrow-down {
+  transform: rotate(90deg);
+}
+.standing-change-arrow-neutral {
   transform: rotate(180deg);
 }
 .standings-button {

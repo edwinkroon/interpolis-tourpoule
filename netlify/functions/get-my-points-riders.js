@@ -151,7 +151,7 @@ exports.handler = async function(event) {
        LEFT JOIN stage_results sr ON sr.rider_id = r.id AND sr.stage_id = $1
        WHERE ft.participant_id = $2
          AND ftr.active = true
-       ORDER BY sr.position NULLS LAST, r.last_name, r.first_name`,
+       ORDER BY r.last_name, r.first_name`,
       [latestStageId, participantId]
     );
 
@@ -183,7 +183,16 @@ exports.handler = async function(event) {
           distance_km: latestStage.distance_km
         };
       })
-      .filter(rider => rider.points > 0);
+      .filter(rider => rider.points > 0)
+      // Sort by points DESC (highest first), then by last_name, first_name
+      .sort((a, b) => {
+        if (b.points !== a.points) {
+          return b.points - a.points;
+        }
+        const aName = `${a.last_name || ''} ${a.first_name || ''}`.trim();
+        const bName = `${b.last_name || ''} ${b.first_name || ''}`.trim();
+        return aName.localeCompare(bName, 'nl-NL');
+      });
 
     let resultRiders = [];
     let routeText = '';
@@ -296,12 +305,17 @@ exports.handler = async function(event) {
         });
       }
 
-      // Sort by stage_number DESC, then by points DESC
+      // Sort by stage_number DESC, then by points DESC (highest first), then by name
       allRidersWithPoints.sort((a, b) => {
         if (b.stage_number !== a.stage_number) {
           return b.stage_number - a.stage_number;
         }
-        return b.points - a.points;
+        if (b.points !== a.points) {
+          return b.points - a.points;
+        }
+        const aName = `${a.last_name || ''} ${a.first_name || ''}`.trim();
+        const bName = `${b.last_name || ''} ${b.first_name || ''}`.trim();
+        return aName.localeCompare(bName, 'nl-NL');
       });
 
       // Always show at least 3 riders, but show more if they're all from the same stage

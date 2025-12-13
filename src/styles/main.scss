@@ -35,8 +35,26 @@
   margin-bottom: 1.5rem;
 }
 
+.tile-header-left {
+  flex: 0 0 auto;
+}
+
 .tile-heading {
   min-width: 0;
+  flex: 1 1 auto;
+}
+
+.tile-header-right {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.tile-header-right-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 // Base tile title styling (migrated from .dashboard-section-title)
@@ -69,6 +87,97 @@
   // so we can size it based on the tile width instead of the icon width.
   position: static;
   flex: 0 0 auto;
+}
+
+// ---------------------------------------------
+// Team Overview - team tile header exception
+// ---------------------------------------------
+
+.team-overview-team-tile .tile-header {
+  align-items: center;
+}
+
+.team-overview-team-tile .tile-title {
+  // Title is now centered between avatar and metrics
+  flex: 1;
+}
+
+.team-tile-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #f0f3f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.team-tile-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.team-tile-avatar-placeholder {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.team-tile-metrics {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  white-space: nowrap;
+}
+
+.team-tile-points {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--brand-navy);
+}
+
+.team-tile-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.team-tile-trend--up {
+  color: #00aa2e;
+}
+
+.team-tile-trend--down {
+  color: #d32f2f;
+}
+
+.team-tile-trend--same {
+  color: var(--text-muted);
+}
+
+.team-tile-trend-arrow {
+  width: 14px;
+  height: 14px;
+  display: block;
+  flex-shrink: 0;
+  transform-origin: 50% 50%;
+}
+
+.team-tile-trend-arrow--up {
+  transform: rotate(-90deg);
+}
+
+.team-tile-trend-arrow--down {
+  transform: rotate(90deg);
+}
+
+.team-tile-trend-arrow--right {
+  transform: rotate(0deg);
 }
 
 .tile-content {
@@ -250,6 +359,57 @@
   flex-shrink: 0;
 }
 
+// Position change indicator (tussen info en value/icon)
+.standing-change {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+  width: 50px;
+  justify-content: flex-end;
+  
+  &-value {
+    font-size: 13px;
+    font-weight: 400;
+  }
+  
+  &-up &-value {
+    color: #18AA2E;
+  }
+  
+  &-down &-value {
+    color: #ff0000;
+  }
+  
+  &-neutral &-value {
+    color: var(--text-muted);
+  }
+  
+  &-neutral &-arrow {
+    filter: brightness(0) saturate(100%) invert(45%) sepia(8%) saturate(800%) hue-rotate(170deg) brightness(95%) contrast(85%);
+  }
+  
+  &-arrow {
+    flex-shrink: 0;
+    width: 9px;
+    height: 12px;
+    display: block;
+    
+    &-up {
+      transform: rotate(-90deg);
+    }
+    
+    &-down {
+      transform: rotate(90deg);
+    }
+    
+    &-neutral {
+      // Arrow points to the right for "no change"
+      transform: rotate(0deg);
+    }
+  }
+}
+
 // Right icon (in plaats van value, bijv. jersey icon)
 .list-item-right-icon {
   flex-shrink: 0;
@@ -265,4 +425,20 @@
     height: 100%;
     object-fit: contain;
   }
+}
+
+// ---------------------------------------------
+// Admin Page - Tiles
+// ---------------------------------------------
+
+.admin-settings-tile,
+.admin-stages-tile {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+// Ensure admin buttons work within tile actions
+.admin-settings-tile .tile-actions .admin-button {
+  align-self: flex-start;
 }

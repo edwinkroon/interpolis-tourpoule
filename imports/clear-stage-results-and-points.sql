@@ -58,3 +58,4 @@ SELECT
   COUNT(*) as row_count
 FROM stage_jersey_wearers
 ORDER BY table_name;
+

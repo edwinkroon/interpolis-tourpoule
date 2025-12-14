@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "concurrently -k \"npm:dev:client\" \"npm:dev:functions\"",
     "dev:client": "vite",
-    "dev:functions": "netlify functions:serve --port 9998",
+    "dev:functions": "netlify functions:serve --port 9999",
     "start": "npm run dev",
     "build": "vite build",
     "preview": "vite preview"

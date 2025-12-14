@@ -166,10 +166,10 @@ export function HomePage() {
                     <button
                       className="button"
                       type="button"
-                      onClick={() => navigate('/stand.html')}
-                      aria-label="Bekijk volledige stand"
+                      onClick={() => navigate('/etappeoverzicht.html')}
+                      aria-label="Bekijk etappeinformatie"
                     >
-                      <span>Volledige stand</span>
+                      <span>Etappeinformatie</span>
                       <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
                     </button>
                   }

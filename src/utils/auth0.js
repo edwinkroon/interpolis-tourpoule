@@ -247,24 +247,33 @@ export async function getUserId() {
     const client = await getAuth0Client();
     console.log('getUserId: Client initialized, checking authentication...');
     
-    const isAuthenticated = await client.isAuthenticated();
-    console.log('getUserId: Is authenticated:', isAuthenticated);
-    
-    if (!isAuthenticated) {
-      console.log('getUserId: Not authenticated, returning null');
-      return null;
+    // Try multiple times with delays - Auth0 client may need time to initialize
+    // and load state from localStorage
+    for (let attempt = 0; attempt < 5; attempt++) {
+      if (attempt > 0) {
+        console.log(`getUserId: Retry attempt ${attempt + 1}, waiting...`);
+        await new Promise(resolve => setTimeout(resolve, 200 * attempt));
+      }
+      
+      const isAuthenticated = await client.isAuthenticated();
+      console.log(`getUserId: Is authenticated (attempt ${attempt + 1}):`, isAuthenticated);
+      
+      if (isAuthenticated) {
+        console.log('getUserId: Getting user...');
+        const user = await client.getUser();
+        console.log('getUserId: User retrieved:', user);
+        
+        const userId = user?.sub || null;
+        if (userId) {
+          sessionStorage.setItem('auth0_user_id', userId);
+          console.log('getUserId: Stored user ID in sessionStorage');
+          return userId;
+        }
+      }
     }
-
-    console.log('getUserId: Getting user...');
-    const user = await client.getUser();
-    console.log('getUserId: User retrieved:', user);
     
-    const userId = user?.sub || null;
-    if (userId) {
-      sessionStorage.setItem('auth0_user_id', userId);
-      console.log('getUserId: Stored user ID in sessionStorage');
-    }
-    return userId;
+    console.log('getUserId: Not authenticated after retries, returning null');
+    return null;
   } catch (error) {
     console.error('getUserId: Error occurred:', error);
     throw error;

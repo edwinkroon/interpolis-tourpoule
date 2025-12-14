@@ -227,17 +227,15 @@ export function StagesOverviewPage() {
                     text: 'Hier zie je welke renners uit jouw team punten hebben behaald bij deze etappe.',
                   }}
                   actions={
-                    <a
-                      href="#"
-                      className="card-link"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        navigate('/teamoverzicht.html');
-                      }}
+                    <button
+                      className="button"
+                      type="button"
+                      onClick={() => navigate('/teamoverzicht.html')}
+                      aria-label="Bekijk mijn team"
                     >
                       <span>mijn team</span>
                       <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
-                    </a>
+                    </button>
                   }
                 >
                   <ul className="riders-list tile-list" id="my-riders-list">
@@ -260,54 +258,115 @@ export function StagesOverviewPage() {
                 </Tile>
 
                 <Tile
-                  className="day-winners-section"
+                  className="daily-winners-section"
                   title="Dagwinnaars"
-                  subtitle={makeRouteText(currentStage)}
                   info={{
                     title: 'Dagwinnaars',
-                    text: 'Hier zie je de drie teams die de meeste punten hebben gehaald bij deze etappe.',
+                    text: 'Hier zie je de top 3 teams van deze etappe met hun dagelijkse punten.',
                   }}
                   actions={
-                    <a
-                      href={`/daguitslag.html?stage=${encodeURIComponent(currentStage?.stage_number || '')}`}
+                    <button
                       className="button"
+                      type="button"
+                      onClick={() => navigate(`/daguitslag.html?stage=${encodeURIComponent(currentStage?.stage_number || '')}`)}
                       aria-label="Bekijk alle teams"
                     >
                       <span>bekijk alle teams</span>
                       <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
-                    </a>
+                    </button>
                   }
                 >
-                  <div className="day-winners-list" id="day-winners-list">
-                    {loadingCards ? (
-                      <LoadingBlock />
-                    ) : top3Teams.length === 0 ? (
-                      <div className="no-data">Geen winnaars beschikbaar</div>
-                    ) : (
-                      <div className="day-winners-podium">
-                        <div className="day-winners-podium-structure">
-                          {[2, 1, 3].map((rank) => {
-                            const t = top3Teams[rank - 1];
-                            if (!t) return null;
-                            const name = t.teamName || t.team_name || 'Team';
-                            return (
-                              <div key={rank} className={`day-winner-podium-block day-winner-podium-${rank}`}>
-                                <div className="day-winner-podium-avatar">
-                                  {t.avatarUrl ? (
-                                    <img src={t.avatarUrl} alt={name} className="day-winner-podium-avatar-img" />
-                                  ) : null}
-                                </div>
-                                <div className="day-winner-podium-name">{name}</div>
+                  {loadingCards ? (
+                    <LoadingBlock />
+                  ) : top3Teams.length === 0 ? (
+                    <div className="no-data">Nog geen dagwinnaars beschikbaar</div>
+                  ) : (
+                    <div className="daily-winners-podium">
+                      <img src="/icons/podium.svg" alt="Podium" className="podium-svg" />
+                      <div className="podium-winners">
+                        {/* 2nd place (left) */}
+                        {top3Teams[1] ? (
+                          <div className="podium-winner podium-winner-2nd">
+                            <div className="podium-avatar-container">
+                              {top3Teams[1].avatarUrl ? (
+                                <img
+                                  src={top3Teams[1].avatarUrl}
+                                  alt={top3Teams[1].teamName || top3Teams[1].team_name}
+                                  className="podium-avatar-img"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                    e.currentTarget.nextElementSibling.style.display = 'flex';
+                                  }}
+                                />
+                              ) : null}
+                              <div
+                                className="podium-avatar-placeholder"
+                                style={{ display: top3Teams[1].avatarUrl ? 'none' : 'flex' }}
+                              >
+                                {(top3Teams[1].teamName || top3Teams[1].team_name) ? (top3Teams[1].teamName || top3Teams[1].team_name).slice(0, 2).toUpperCase() : '?'}
                               </div>
-                            );
-                          })}
-                        </div>
-                        <div className="day-winners-podium-svg">
-                          <img src="/icons/podium.svg" alt="Podium" />
-                        </div>
+                            </div>
+                            <div className="podium-team-name">{top3Teams[1].teamName || top3Teams[1].team_name || '-'}</div>
+                            <div className="podium-points podium-points-2nd">{top3Teams[1].points || 0}</div>
+                          </div>
+                        ) : null}
+                        
+                        {/* 1st place (center) */}
+                        {top3Teams[0] ? (
+                          <div className="podium-winner podium-winner-1st">
+                            <div className="podium-avatar-container">
+                              {top3Teams[0].avatarUrl ? (
+                                <img
+                                  src={top3Teams[0].avatarUrl}
+                                  alt={top3Teams[0].teamName || top3Teams[0].team_name}
+                                  className="podium-avatar-img"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                    e.currentTarget.nextElementSibling.style.display = 'flex';
+                                  }}
+                                />
+                              ) : null}
+                              <div
+                                className="podium-avatar-placeholder"
+                                style={{ display: top3Teams[0].avatarUrl ? 'none' : 'flex' }}
+                              >
+                                {(top3Teams[0].teamName || top3Teams[0].team_name) ? (top3Teams[0].teamName || top3Teams[0].team_name).slice(0, 2).toUpperCase() : '?'}
+                              </div>
+                            </div>
+                            <div className="podium-team-name">{top3Teams[0].teamName || top3Teams[0].team_name || '-'}</div>
+                            <div className="podium-points podium-points-1st">{top3Teams[0].points || 0}</div>
+                          </div>
+                        ) : null}
+                        
+                        {/* 3rd place (right) */}
+                        {top3Teams[2] ? (
+                          <div className="podium-winner podium-winner-3rd">
+                            <div className="podium-avatar-container">
+                              {top3Teams[2].avatarUrl ? (
+                                <img
+                                  src={top3Teams[2].avatarUrl}
+                                  alt={top3Teams[2].teamName || top3Teams[2].team_name}
+                                  className="podium-avatar-img"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                    e.currentTarget.nextElementSibling.style.display = 'flex';
+                                  }}
+                                />
+                              ) : null}
+                              <div
+                                className="podium-avatar-placeholder"
+                                style={{ display: top3Teams[2].avatarUrl ? 'none' : 'flex' }}
+                              >
+                                {(top3Teams[2].teamName || top3Teams[2].team_name) ? (top3Teams[2].teamName || top3Teams[2].team_name).slice(0, 2).toUpperCase() : '?'}
+                              </div>
+                            </div>
+                            <div className="podium-team-name">{top3Teams[2].teamName || top3Teams[2].team_name || '-'}</div>
+                            <div className="podium-points podium-points-3rd">{top3Teams[2].points || 0}</div>
+                          </div>
+                        ) : null}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </Tile>
               </div>
 
@@ -320,10 +379,15 @@ export function StagesOverviewPage() {
                     text: 'Hier zie je de top 6 renners van deze etappe met hun eindtijd.',
                   }}
                   actions={
-                    <a href="#" className="card-link" onClick={(e) => e.preventDefault()}>
+                    <button
+                      className="button"
+                      type="button"
+                      onClick={(e) => e.preventDefault()}
+                      aria-label="Volledige etappe uitslag"
+                    >
                       <span>volledige etappe uitslag</span>
                       <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
-                    </a>
+                    </button>
                   }
                 >
                   <ol className="results-list list-with-time tile-list" id="stage-results-list">

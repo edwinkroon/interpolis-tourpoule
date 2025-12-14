@@ -1,59 +1,16 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { loginWithRedirect, getUserId } from '../utils/auth0';
-import { Navigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { loginWithRedirect } from '../utils/auth0';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 export function LoginPage() {
-  const [checking, setChecking] = useState(true);
-  const [userId, setUserId] = useState(null);
+  const navigate = useNavigate();
+  const { userId, authLoading } = useAuth();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
-  const hasChecked = useRef(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    
-    // Prevent multiple checks
-    if (hasChecked.current) {
-      setChecking(false);
-      return;
-    }
-    hasChecked.current = true;
-    
-    (async () => {
-      try {
-        console.log('LoginPage: Checking for user ID...');
-        
-        // Add timeout to prevent hanging (reduced to 2 seconds)
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Timeout waiting for user ID check')), 2000)
-        );
-        
-        const id = await Promise.race([getUserId(), timeoutPromise]);
-        
-        if (cancelled) {
-          console.log('LoginPage: Component cancelled, aborting');
-          return;
-        }
-        
-        console.log('LoginPage: User ID check completed:', id);
-        setUserId(id);
-        setChecking(false);
-      } catch (e) {
-        if (!cancelled) {
-          console.error('Error getting user ID:', e);
-          // Don't show timeout errors to user, just continue
-          if (!e.message?.includes('Timeout')) {
-            setError(e);
-          }
-          setChecking(false);
-        }
-      }
-    })();
-    
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  // No need for separate checking - use AuthContext which handles this
+  const checking = authLoading;
 
   const handleLogin = async () => {
     setBusy(true);
@@ -68,9 +25,13 @@ export function LoginPage() {
   };
 
   // Redirect if user is already logged in
-  if (!checking && userId) {
-    return <Navigate to="/home.html" replace />;
-  }
+  // Only redirect if we're done loading and have a userId
+  // Use useEffect to prevent infinite loops
+  useEffect(() => {
+    if (!authLoading && userId) {
+      navigate('/home.html', { replace: true });
+    }
+  }, [authLoading, userId, navigate]);
 
   return (
     <>

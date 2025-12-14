@@ -41,3 +41,4 @@ $env:DATABASE_URL="postgresql://postgres:devpassword@localhost:5432/tourpoule"
 node imports/run-sql-script.js imports/add-6-test-teams.sql
 ```
 
+

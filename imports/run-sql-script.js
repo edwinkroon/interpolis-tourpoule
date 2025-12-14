@@ -126,3 +126,4 @@ runSqlScript(scriptPath).catch((error) => {
   process.exit(1);
 });
 
+

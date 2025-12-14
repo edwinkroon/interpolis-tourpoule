@@ -17,117 +17,6 @@ exports.handler = async function(event) {
 
     client = await getDbClient();
 
-    async function buildStandingsUpToStageNumber(stageNumber) {
-      // Only include stages that actually have results
-      const stagesRes = await client.query(
-        `
-          SELECT s.id
-          FROM stages s
-          WHERE s.stage_number <= $1
-            AND EXISTS (SELECT 1 FROM stage_results sr WHERE sr.stage_id = s.id)
-        `,
-        [stageNumber]
-      );
-
-      const stageIds = stagesRes.rows.map((r) => r.id);
-      if (stageIds.length === 0) return [];
-
-      // Scoring rules (same logic as get-my-points-riders)
-      const scoringRules = await client.query(
-        `SELECT rule_type, condition_json, points
-         FROM scoring_rules
-         WHERE rule_type IN ('stage_position', 'jersey')`
-      );
-
-      const positionPointsMap = new Map();
-      const jerseyPointsMap = new Map();
-
-      scoringRules.rows.forEach((rule) => {
-        const condition = rule.condition_json;
-        if (rule.rule_type === 'stage_position' && condition && condition.position) {
-          positionPointsMap.set(condition.position, rule.points);
-        }
-        if (rule.rule_type === 'jersey' && condition && condition.jersey_type) {
-          jerseyPointsMap.set(condition.jersey_type, rule.points);
-        }
-      });
-
-      // Aggregate rider points across all included stages
-      const riderPointsAgg = new Map(); // rider_id -> points
-
-      const stageResultsRes = await client.query(
-        `SELECT rider_id, position
-         FROM stage_results
-         WHERE stage_id = ANY($1::int[])`,
-        [stageIds]
-      );
-      stageResultsRes.rows.forEach((row) => {
-        const points = positionPointsMap.get(row.position) || 0;
-        if (!points) return;
-        riderPointsAgg.set(row.rider_id, (riderPointsAgg.get(row.rider_id) || 0) + points);
-      });
-
-      const jerseyWearersRes = await client.query(
-        `SELECT sjw.rider_id, j.type as jersey_type
-         FROM stage_jersey_wearers sjw
-         JOIN jerseys j ON sjw.jersey_id = j.id
-         WHERE sjw.stage_id = ANY($1::int[])`,
-        [stageIds]
-      );
-      jerseyWearersRes.rows.forEach((row) => {
-        const points = jerseyPointsMap.get(row.jersey_type) || 0;
-        if (!points) return;
-        riderPointsAgg.set(row.rider_id, (riderPointsAgg.get(row.rider_id) || 0) + points);
-      });
-
-      // Get all participants + their active team riders
-      const teamRidersRes = await client.query(
-        `
-          SELECT
-            p.id as participant_id,
-            p.team_name,
-            p.avatar_url,
-            ftr.rider_id
-          FROM participants p
-          LEFT JOIN fantasy_teams ft ON ft.participant_id = p.id
-          LEFT JOIN fantasy_team_riders ftr ON ftr.fantasy_team_id = ft.id AND ftr.active = true
-        `
-      );
-
-      const participantMap = new Map(); // participant_id -> { teamName, avatarUrl, riderIds: [] }
-      teamRidersRes.rows.forEach((row) => {
-        if (!participantMap.has(row.participant_id)) {
-          participantMap.set(row.participant_id, { teamName: row.team_name, avatarUrl: row.avatar_url || null, riderIds: [] });
-        }
-        if (row.rider_id) participantMap.get(row.participant_id).riderIds.push(row.rider_id);
-      });
-
-      const standings = Array.from(participantMap.entries()).map(([participantId, data]) => {
-        const totalPoints = (data.riderIds || []).reduce((sum, riderId) => sum + (riderPointsAgg.get(riderId) || 0), 0);
-        return {
-          participantId,
-          teamName: data.teamName,
-          avatarUrl: data.avatarUrl,
-          totalPoints,
-        };
-      });
-
-      // Rank: points DESC, then team name ASC
-      standings.sort((a, b) => {
-        if (b.totalPoints !== a.totalPoints) return b.totalPoints - a.totalPoints;
-        return String(a.teamName || '').localeCompare(String(b.teamName || ''), 'nl-NL');
-      });
-
-      // Assign rank (ties share rank)
-      let rank = 1;
-      let prevPoints = null;
-      return standings.map((row, index) => {
-        if (prevPoints !== null && row.totalPoints < prevPoints) rank = index + 1;
-        prevPoints = row.totalPoints;
-        return { ...row, rank };
-      });
-    }
-
     // Get the latest stage with results
     const latestStageQuery = `
       SELECT s.id, s.stage_number
@@ -160,8 +49,56 @@ exports.handler = async function(event) {
     const latestStageId = latestStageResult.rows[0].id;
     const latestStageNumber = latestStageResult.rows[0].stage_number;
 
-    // Build standings from the same sources as "Mijn punten"
-    const currentStandings = await buildStandingsUpToStageNumber(latestStageNumber);
+    // Check if cumulative points exist, otherwise calculate from stage points
+    const cumulativePointsCheck = await client.query(`
+      SELECT COUNT(*) as count
+      FROM fantasy_cumulative_points
+      WHERE after_stage_id = $1
+    `, [latestStageId]);
+
+    let currentStandings;
+    
+    if (cumulativePointsCheck.rows[0].count > 0) {
+      // Use cumulative points if available
+      const currentStandingsQuery = `
+        SELECT 
+          p.id as participant_id,
+          p.team_name,
+          fcp.total_points,
+          fcp.rank,
+          fcp.after_stage_id
+        FROM fantasy_cumulative_points fcp
+        JOIN participants p ON p.id = fcp.participant_id
+        WHERE fcp.after_stage_id = $1
+        ORDER BY fcp.rank ASC NULLS LAST, fcp.total_points DESC, p.team_name ASC
+      `;
+      currentStandings = await client.query(currentStandingsQuery, [latestStageId]);
+    } else {
+      // Calculate from stage points if cumulative points don't exist
+      const stagePointsQuery = `
+        SELECT 
+          p.id as participant_id,
+          p.team_name,
+          COALESCE(SUM(fsp.total_points), 0) as total_points
+        FROM participants p
+        LEFT JOIN fantasy_stage_points fsp ON fsp.participant_id = p.id
+        WHERE fsp.stage_id IN (
+          SELECT id FROM stages WHERE stage_number <= $1
+        )
+        GROUP BY p.id, p.team_name
+        ORDER BY total_points DESC, p.team_name ASC
+      `;
+      const stagePointsResult = await client.query(stagePointsQuery, [latestStageNumber]);
+      
+      // Add rank to results
+      currentStandings = {
+        rows: stagePointsResult.rows.map((row, index) => ({
+          ...row,
+          rank: index + 1,
+          after_stage_id: latestStageId
+        }))
+      };
+    }
 
     // Get previous standings (second-to-last stage with results)
     const previousStageQuery = `
@@ -180,32 +117,78 @@ exports.handler = async function(event) {
     let previousRankMap = new Map();
     
     if (previousStageResult.rows.length > 0) {
+      const previousStageId = previousStageResult.rows[0].id;
       const previousStageNumber = previousStageResult.rows[0].stage_number;
-      const previousStandings = await buildStandingsUpToStageNumber(previousStageNumber);
-      previousStandings.forEach((row) => {
-        previousRankMap.set(row.participantId, row.rank);
-      });
+      
+      // Check if cumulative points exist for previous stage
+      const previousCumulativeCheck = await client.query(`
+        SELECT COUNT(*) as count
+        FROM fantasy_cumulative_points
+        WHERE after_stage_id = $1
+      `, [previousStageId]);
+      
+      if (previousCumulativeCheck.rows[0].count > 0) {
+        // Use cumulative points if available
+        const previousStandingsQuery = `
+          SELECT 
+            participant_id,
+            rank
+          FROM fantasy_cumulative_points
+          WHERE after_stage_id = $1
+        `;
+        
+        const previousStandings = await client.query(previousStandingsQuery, [previousStageId]);
+        
+        previousStandings.rows.forEach(row => {
+          previousRankMap.set(row.participant_id, row.rank);
+        });
+      } else {
+        // Calculate previous rankings from stage points if cumulative doesn't exist
+        const previousStagePointsQuery = `
+          SELECT 
+            p.id as participant_id,
+            COALESCE(SUM(fsp.total_points), 0) as total_points
+          FROM participants p
+          LEFT JOIN fantasy_stage_points fsp ON fsp.participant_id = p.id
+          WHERE fsp.stage_id IN (
+            SELECT id FROM stages WHERE stage_number <= $1
+          )
+          GROUP BY p.id
+          ORDER BY total_points DESC, p.team_name ASC
+        `;
+        
+        const previousStagePointsResult = await client.query(previousStagePointsQuery, [previousStageNumber]);
+        
+        // Assign ranks (handle ties)
+        let previousRank = 1;
+        let previousPoints = null;
+        previousStagePointsResult.rows.forEach((row, index) => {
+          if (previousPoints !== null && row.total_points < previousPoints) {
+            previousRank = index + 1;
+          } else if (previousPoints === null || row.total_points > previousPoints) {
+            previousRank = index + 1;
+          }
+          previousRankMap.set(row.participant_id, previousRank);
+          previousPoints = row.total_points;
+        });
+      }
     }
 
     // Build standings with position change
-    const standings = currentStandings.map((row) => {
-      const points = row.totalPoints || 0;
-      const finalRank = row.rank;
-      const previousRank = previousRankMap.get(row.participantId);
+    const standings = currentStandings.rows.map((row, index) => {
+      const currentRank = row.rank || (index + 1);
+      const previousRank = previousRankMap.get(row.participant_id);
       
       let positionChange = null;
       if (previousRank !== undefined && previousRank !== null) {
-        positionChange = previousRank - finalRank; // Positive = moved up, negative = moved down
+        positionChange = previousRank - currentRank; // Positive = moved up, negative = moved down
       }
 
       return {
-        participantId: row.participantId,
-        id: row.participantId, // Also include as 'id' for compatibility
-        teamName: row.teamName,
-        avatar_url: row.avatarUrl || null,
-        avatarUrl: row.avatarUrl || null, // Also include as 'avatarUrl' for compatibility
-        totalPoints: points,
-        rank: finalRank,
+        participantId: row.participant_id,
+        teamName: row.team_name,
+        totalPoints: row.total_points || 0,
+        rank: currentRank,
         positionChange: positionChange
       };
     });

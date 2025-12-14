@@ -130,17 +130,20 @@
 .admin-stages-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0;
 }
 
 .admin-stage-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem;
-  background: #f0f3f5;
-  border-radius: 12px;
-  border: 2px solid #cdd7dc;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(205, 215, 220, 0.5);
+  background: transparent;
+}
+
+.admin-stage-item:last-child {
+  border-bottom: none;
 }
 
 .admin-stage-info {
@@ -233,7 +236,7 @@ h2 {
   overflow: visible;
   position: relative;
   z-index: 100;
-  padding-bottom: 4.5rem; /* Extra space for navigation bar overlay */
+  padding-bottom: 3rem; /* Extra space for navigation bar overlay */
 }
 .header-content {
   position: relative;
@@ -250,7 +253,7 @@ h2 {
   position: relative;
   padding-left: 1rem;
   padding-bottom: 4.5rem; /* Space for navigation bar overlay */
-  min-height: 200px;
+  min-height: 120px;
 }
 .header-user-info {
   display: flex;
@@ -282,9 +285,9 @@ h2 {
 .header-illustration {
   position: absolute;
   right: 0;
-  bottom: -1rem;
-  width: 398px;
-  height: 199px;
+  bottom: -3.5rem;
+  width: 320px;
+  height: 160px;
   max-width: 31%;
   z-index: 101;
   overflow: visible;

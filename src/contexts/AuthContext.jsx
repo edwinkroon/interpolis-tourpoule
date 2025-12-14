@@ -2,7 +2,12 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { getUserId } from '../utils/auth0';
 import { useParticipant } from '../hooks/useParticipant';
 
-const AuthContext = createContext(null);
+const AuthContext = createContext({
+  userId: null,
+  participant: null,
+  participantExists: false,
+  authLoading: true,
+});
 
 export function AuthProvider({ children }) {
   const [userId, setUserId] = useState(null);

@@ -24,7 +24,12 @@ import { NotFoundPage } from './pages/NotFoundPage';
 export function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true,
+        }}
+      >
         <Routes>
         {/* Keep legacy URLs as routes for compatibility */}
         <Route path="/" element={<Navigate to="/index.html" replace />} />

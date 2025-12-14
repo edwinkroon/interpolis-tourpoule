@@ -119,6 +119,13 @@ export const api = {
     });
   },
 
+  async addStage({ userId, stageNumber, name, startLocation, endLocation, distanceKm, date }) {
+    return await fetchJson(`/.netlify/functions/add-stage?userId=${encodeURIComponent(userId)}`, {
+      method: 'POST',
+      body: JSON.stringify({ userId, stageNumber, name, startLocation, endLocation, distanceKm, date }),
+    });
+  },
+
   async getTeamComparison(participantId) {
     return await fetchJson(`/.netlify/functions/get-team-comparison?participantId=${encodeURIComponent(participantId)}`);
   },

@@ -338,63 +338,88 @@ export function AdminPage() {
 
               <div className="col-6">
                 <Tile
-                  className="admin-stages-tile"
-                  title="Etappe beheer"
+                  className="admin-add-stage-tile"
+                  title="Etappe toevoegen"
                   info={{
-                    text: 'Beheer hier de etappes van de Tour de France. Je kunt etappes markeren als geneutraliseerd of vervallen.',
+                    text: 'Voeg een nieuwe etappe toe aan de Tour de France. Gebruik de ProCyclingStats website om de etappegegevens te vinden.',
                   }}
+                  actions={
+                    <button
+                      type="button"
+                      className="admin-button admin-button-primary"
+                      onClick={() => navigate('/etappetoevoegen.html')}
+                    >
+                      <span>Etappe toevoegen</span>
+                    </button>
+                  }
                 >
-                  <div id="stages-list" className="admin-stages-list tile-list">
-                    {sortedStages.length === 0 ? (
-                      <p className="admin-no-data">Geen etappes gevonden</p>
-                    ) : (
-                      sortedStages.map((s) => {
-                        const updating = stageUpdatingIds.has(s.id);
-                        const neutralized = Boolean(s.is_neutralized);
-                        const cancelled = Boolean(s.is_cancelled);
-
-                        return (
-                          <div key={s.id} className="admin-stage-item">
-                            <div className="admin-stage-info">
-                              <h3 className="admin-stage-name">{stageTitle(s)}</h3>
-                              {s.start_location && s.end_location ? (
-                                <div className="admin-stage-route">
-                                  {s.start_location} - {s.end_location}
-                                </div>
-                              ) : null}
-                            </div>
-
-                            <div className="admin-stage-controls" aria-busy={updating ? 'true' : 'false'}>
-                              {updating ? <LoadingBlock /> : null}
-
-                              <label className="admin-checkbox-label">
-                                <input
-                                  type="checkbox"
-                                  className="admin-checkbox"
-                                  checked={neutralized}
-                                  disabled={updating}
-                                  onChange={(e) => onToggleStage(s, 'is_neutralized', e.target.checked)}
-                                />
-                                <span>Geneutraliseerd</span>
-                              </label>
-
-                              <label className="admin-checkbox-label">
-                                <input
-                                  type="checkbox"
-                                  className="admin-checkbox"
-                                  checked={cancelled}
-                                  disabled={updating}
-                                  onChange={(e) => onToggleStage(s, 'is_cancelled', e.target.checked)}
-                                />
-                                <span>Vervallen</span>
-                              </label>
-                            </div>
-                          </div>
-                        );
-                      })
-                    )}
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    <p style={{ fontSize: '14px', color: '#668494', lineHeight: '1.6' }}>
+                      Klik op de knop hierboven om naar de etappe toevoegen pagina te gaan waar je een nieuwe etappe kunt toevoegen en de resultaten kunt uploaden.
+                    </p>
                   </div>
                 </Tile>
+
+                <div style={{ marginTop: '2rem' }}>
+                  <Tile
+                    className="admin-stages-tile"
+                    title="Etappe beheer"
+                    info={{
+                      text: 'Beheer hier de etappes van de Tour de France. Je kunt etappes markeren als geneutraliseerd of vervallen.',
+                    }}
+                  >
+                    <div id="stages-list" className="admin-stages-list tile-list">
+                      {sortedStages.length === 0 ? (
+                        <p className="admin-no-data">Geen etappes gevonden</p>
+                      ) : (
+                        sortedStages.map((s) => {
+                          const updating = stageUpdatingIds.has(s.id);
+                          const neutralized = Boolean(s.is_neutralized);
+                          const cancelled = Boolean(s.is_cancelled);
+
+                          return (
+                            <div key={s.id} className="admin-stage-item">
+                              <div className="admin-stage-info">
+                                <h3 className="admin-stage-name">{stageTitle(s)}</h3>
+                                {s.start_location && s.end_location ? (
+                                  <div className="admin-stage-route">
+                                    {s.start_location} - {s.end_location}
+                                  </div>
+                                ) : null}
+                              </div>
+
+                              <div className="admin-stage-controls" aria-busy={updating ? 'true' : 'false'}>
+                                {updating ? <LoadingBlock /> : null}
+
+                                <label className="admin-checkbox-label">
+                                  <input
+                                    type="checkbox"
+                                    className="admin-checkbox"
+                                    checked={neutralized}
+                                    disabled={updating}
+                                    onChange={(e) => onToggleStage(s, 'is_neutralized', e.target.checked)}
+                                  />
+                                  <span>Geneutraliseerd</span>
+                                </label>
+
+                                <label className="admin-checkbox-label">
+                                  <input
+                                    type="checkbox"
+                                    className="admin-checkbox"
+                                    checked={cancelled}
+                                    disabled={updating}
+                                    onChange={(e) => onToggleStage(s, 'is_cancelled', e.target.checked)}
+                                  />
+                                  <span>Vervallen</span>
+                                </label>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </Tile>
+                </div>
               </div>
             </>
           ) : null}

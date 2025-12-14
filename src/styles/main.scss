@@ -187,8 +187,8 @@
 
 // Lists inside a tile: subtle divider with 1rem spacing above/below divider.
 // Use className="tile-list" on the list container (ul/ol/div).
-// Note: .points-rider-item, .list-item, and .standing-item have their own divider system, so exclude them here.
-.tile-content .tile-list > * + *:not(.points-rider-item):not(.list-item):not(.standing-item) {
+// Note: .points-rider-item, .list-item, .standing-item, and .admin-stage-item have their own divider system, so exclude them here.
+.tile-content .tile-list > * + *:not(.points-rider-item):not(.list-item):not(.standing-item):not(.admin-stage-item) {
   border-top: 1px solid rgba(205, 215, 220, 0.5);
   margin-top: 1rem;
   padding-top: 1rem;

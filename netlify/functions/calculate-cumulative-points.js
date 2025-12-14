@@ -15,15 +15,21 @@ async function calculateCumulativePoints(client, stageId) {
   const stageNumber = stageQuery.rows[0].stage_number;
 
   // Calculate cumulative points for each participant up to this stage
+  // Include all participants, even if they don't have entries for all stages
+  // Calculate total_points directly from components to avoid issues with dbgenerated column
   const cumulativeQuery = `
     SELECT 
       p.id as participant_id,
-      COALESCE(SUM(fsp.total_points), 0) as total_points
+      COALESCE(SUM(
+        COALESCE(fsp.points_stage, 0) + 
+        COALESCE(fsp.points_jerseys, 0) + 
+        COALESCE(fsp.points_bonus, 0)
+      ), 0) as total_points
     FROM participants p
     LEFT JOIN fantasy_stage_points fsp ON fsp.participant_id = p.id
-    WHERE fsp.stage_id IN (
-      SELECT id FROM stages WHERE stage_number <= $1
-    )
+      AND fsp.stage_id IN (
+        SELECT id FROM stages WHERE stage_number <= $1
+      )
     GROUP BY p.id
     ORDER BY total_points DESC, p.team_name ASC
   `;

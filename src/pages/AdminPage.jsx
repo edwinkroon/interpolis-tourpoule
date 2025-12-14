@@ -381,11 +381,15 @@ export function AdminPage() {
                             <div key={s.id} className="admin-stage-item">
                               <div className="admin-stage-info">
                                 <h3 className="admin-stage-name">{stageTitle(s)}</h3>
-                                {s.start_location && s.end_location ? (
-                                  <div className="admin-stage-route">
-                                    {s.start_location} - {s.end_location}
-                                  </div>
-                                ) : null}
+                                <div className="admin-stage-route">
+                                  {!s.start_location && !s.end_location ? (
+                                    'Rustdag'
+                                  ) : s.start_location && s.end_location ? (
+                                    `${s.start_location} - ${s.end_location}`
+                                  ) : s.start_location || s.end_location ? (
+                                    s.start_location || s.end_location
+                                  ) : null}
+                                </div>
                               </div>
 
                               <div className="admin-stage-controls" aria-busy={updating ? 'true' : 'false'}>

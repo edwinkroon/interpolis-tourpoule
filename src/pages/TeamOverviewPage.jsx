@@ -110,20 +110,13 @@ export function TeamOverviewPage() {
         </>
       }
     >
-      <div className="grid">
-
-        {/* Team info */}
-        <div className="col-12">
+      <div className="dashboard-grid">
+        {/* Left column: Team and Jerseys */}
+        <div className="dashboard-column">
+          {/* Team info */}
           <Tile
             title={participant?.team_name || 'Team'}
-            actions={
-              <button className="team-compare-button" type="button" onClick={() => navigate('/teamvergelijken.html')}>
-                <span>Vergelijk teams</span>
-                <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
-              </button>
-            }
-          >
-            <div className="team-info-header">
+            headerLeft={
               <div className="team-avatar-container">
                 {participant?.avatar_url ? (
                   <img src={participant.avatar_url} alt="Avatar" className="team-avatar-img" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
@@ -131,67 +124,27 @@ export function TeamOverviewPage() {
                   <div className="team-avatar-placeholder">{initialsFromName(participant?.team_name)}</div>
                 )}
               </div>
-              <div className="team-info-content">
-                <div className="team-info-details">
-                  <div className="team-detail-item">
-                    <div className="team-detail-label">Email</div>
-                    <div className="team-detail-value">{participant?.email || '-'}</div>
-                  </div>
-                  <div className="team-detail-item">
-                    <div className="team-detail-label">Notificaties</div>
-                    <div className="team-detail-value">{participant?.newsletter ? 'Aan' : 'Uit'}</div>
-                  </div>
-                </div>
+            }
+            actions={
+              <button className="action-button" type="button" onClick={() => navigate('/teamvergelijken.html')}>
+                <span>Vergelijk teams</span>
+                <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+              </button>
+            }
+          >
+            <div className="team-info-details">
+              <div className="team-detail-item">
+                <div className="team-detail-label">Email</div>
+                <div className="team-detail-value">{participant?.email || '-'}</div>
+              </div>
+              <div className="team-detail-item">
+                <div className="team-detail-label">Notificaties</div>
+                <div className="team-detail-value">{participant?.newsletter ? 'Aan' : 'Uit'}</div>
               </div>
             </div>
           </Tile>
-        </div>
 
-        {/* Riders and Jerseys in two columns */}
-        <div className="col-6">
-          <Tile
-            title={`Basisrenners (${mainRiders.length})`}
-            contentClassName="riders-list-container"
-          >
-            <div className="tile-list" id="main-riders-list-container">
-              {mainRiders.length === 0 ? <div className="no-riders-message" id="no-main-riders-message">Nog geen basisrenners</div> : null}
-              {mainRiders.map((r) => (
-                <ListItem
-                  key={r.id}
-                  avatarPhotoUrl={r.photo_url}
-                  avatarAlt={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
-                  avatarInitials={`${(r.first_name || 'R')[0]}${(r.last_name || 'R')[0]}`.toUpperCase()}
-                  title={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
-                  subtitle={r.team_name || undefined}
-                />
-              ))}
-            </div>
-          </Tile>
-        </div>
-
-        <div className="col-6">
-          <Tile
-            title={`Reserverenners (${reserveRiders.length})`}
-            contentClassName="riders-list-container"
-          >
-            <div className="tile-list" id="reserve-riders-list-container">
-              {reserveRiders.length === 0 ? <div className="no-riders-message" id="no-reserve-riders-message">Nog geen reserverenners</div> : null}
-              {reserveRiders.map((r) => (
-                <ListItem
-                  key={r.id}
-                  avatarPhotoUrl={r.photo_url}
-                  avatarAlt={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
-                  avatarInitials={`${(r.first_name || 'R')[0]}${(r.last_name || 'R')[0]}`.toUpperCase()}
-                  title={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
-                  subtitle={r.team_name || undefined}
-                />
-              ))}
-            </div>
-          </Tile>
-        </div>
-
-        {/* Jerseys */}
-        <div className="col-12">
+          {/* Jerseys */}
           <Tile
             title="Truien"
             contentClassName="riders-list-container"
@@ -230,9 +183,50 @@ export function TeamOverviewPage() {
           </Tile>
         </div>
 
-        <div className="col-12" style={{ marginTop: '1rem' }}>
-          <a href="/logout.html">Uitloggen</a>
+        {/* Right column: Main and Reserve Riders */}
+        <div className="dashboard-column">
+          <Tile
+            title={`Basisrenners (${mainRiders.length})`}
+            contentClassName="riders-list-container"
+          >
+            <div className="tile-list" id="main-riders-list-container">
+              {mainRiders.length === 0 ? <div className="no-riders-message" id="no-main-riders-message">Nog geen basisrenners</div> : null}
+              {mainRiders.map((r) => (
+                <ListItem
+                  key={r.id}
+                  avatarPhotoUrl={r.photo_url}
+                  avatarAlt={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
+                  avatarInitials={`${(r.first_name || 'R')[0]}${(r.last_name || 'R')[0]}`.toUpperCase()}
+                  title={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
+                  subtitle={r.team_name || undefined}
+                />
+              ))}
+            </div>
+          </Tile>
+
+          <Tile
+            title={`Reserverenners (${reserveRiders.length})`}
+            contentClassName="riders-list-container"
+          >
+            <div className="tile-list" id="reserve-riders-list-container">
+              {reserveRiders.length === 0 ? <div className="no-riders-message" id="no-reserve-riders-message">Nog geen reserverenners</div> : null}
+              {reserveRiders.map((r) => (
+                <ListItem
+                  key={r.id}
+                  avatarPhotoUrl={r.photo_url}
+                  avatarAlt={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
+                  avatarInitials={`${(r.first_name || 'R')[0]}${(r.last_name || 'R')[0]}`.toUpperCase()}
+                  title={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
+                  subtitle={r.team_name || undefined}
+                />
+              ))}
+            </div>
+          </Tile>
         </div>
+      </div>
+
+      <div style={{ marginTop: '1.5rem' }}>
+        <a href="/logout.html">Uitloggen</a>
       </div>
     </PageTemplate>
   );

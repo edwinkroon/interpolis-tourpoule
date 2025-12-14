@@ -134,10 +134,6 @@ export function HomePage() {
               <span>Statistieken</span>
               <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
             </button>
-            <button className="action-button" type="button" onClick={() => navigate('/etappetoevoegen.html')} aria-label="Etappe toevoegen">
-              <span>Etappe toevoegen</span>
-              <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
-            </button>
             {isAdmin ? (
               <button className="action-button" type="button" onClick={() => navigate('/admin.html')} aria-label="Admin">
                 <span>Admin</span>

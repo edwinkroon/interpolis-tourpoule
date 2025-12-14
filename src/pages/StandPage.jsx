@@ -40,7 +40,7 @@ export function StandPage() {
           </a>
         </div>
 
-        <div className="col-12 standings-full-section">
+        <div className="col-12">
           <Tile
             className="standings-full-section"
             title="Stand"

@@ -156,45 +156,6 @@ export function HomePage() {
             <div className="dashboard-grid">
               <div className="dashboard-column">
                 <Tile
-                  className="points-section"
-                  title={
-                    <>
-                      Mijn punten <span className="points-value">({myLatestStagePoints || 0})</span>
-                    </>
-                  }
-                  info={{
-                    title: 'Mijn punten',
-                    text: 'Hier zie je welke renners uit jouw team onlangs punten hebben gepakt.',
-                  }}
-                  actions={
-                    <button
-                      className="button"
-                      type="button"
-                      onClick={() => navigate('/teamoverzicht.html')}
-                      aria-label="Bekijk mijn team"
-                    >
-                      <span>mijn team</span>
-                      <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
-                    </button>
-                  }
-                >
-                  <div className="points-riders-list tile-list">
-                    {points.riders.length === 0 ? <div className="no-data">Geen punten beschikbaar</div> : null}
-                    {points.riders.map((r) => (
-                      <ListItem
-                        key={r.id || r.name}
-                        avatarPhotoUrl={r.photoUrl}
-                        avatarAlt={r.name}
-                        avatarInitials={initialsFromFullName(r.name)}
-                        title={r.name}
-                        subtitle={r.route || points.route || undefined}
-                        value={r.points || 0}
-                      />
-                    ))}
-                  </div>
-                </Tile>
-
-                <Tile
                   className="daily-winners-section"
                   title="Dagwinnaars"
                   info={{
@@ -302,6 +263,45 @@ export function HomePage() {
                       </div>
                     </div>
                   )}
+                </Tile>
+
+                <Tile
+                  className="points-section"
+                  title={
+                    <>
+                      Mijn punten <span className="points-value">({myLatestStagePoints || 0})</span>
+                    </>
+                  }
+                  info={{
+                    title: 'Mijn punten',
+                    text: 'Hier zie je welke renners uit jouw team onlangs punten hebben gepakt.',
+                  }}
+                  actions={
+                    <button
+                      className="button"
+                      type="button"
+                      onClick={() => navigate('/teamoverzicht.html')}
+                      aria-label="Bekijk mijn team"
+                    >
+                      <span>mijn team</span>
+                      <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+                    </button>
+                  }
+                >
+                  <div className="points-riders-list tile-list">
+                    {points.riders.length === 0 ? <div className="no-data">Geen punten beschikbaar</div> : null}
+                    {points.riders.map((r) => (
+                      <ListItem
+                        key={r.id || r.name}
+                        avatarPhotoUrl={r.photoUrl}
+                        avatarAlt={r.name}
+                        avatarInitials={initialsFromFullName(r.name)}
+                        title={r.name}
+                        subtitle={r.route || points.route || undefined}
+                        value={r.points || 0}
+                      />
+                    ))}
+                  </div>
                 </Tile>
               </div>
 

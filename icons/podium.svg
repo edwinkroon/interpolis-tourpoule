@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 309.5 162.8">
+  <!-- Generator: Adobe Illustrator 30.1.0, SVG Export Plug-In . SVG Version: 2.1.1 Build 136)  -->
+  <defs>
+    <style>
+      .st0, .st1 {
+        fill: none;
+      }
+
+      .st1 {
+        stroke: #00334e;
+        stroke-linecap: round;
+        stroke-miterlimit: 10;
+        stroke-width: 2px;
+      }
+
+      .st2 {
+        clip-path: url(#clippath);
+      }
+    </style>
+    <clipPath id="clippath">
+      <rect class="st0" width="309.5" height="162.8"/>
+    </clipPath>
+  </defs>
+  <g class="st2">
+    <g id="Group_114">
+      <g id="podium">
+        <path id="Path_823" class="st1" d="M1,151.4v-72.5c0-3.2,2.6-5.8,5.8-5.8h90.9c3.2,0,5.8,2.6,5.8,5.8v16"/>
+        <path id="Path_824" class="st1" d="M103.2,73.1v-35.2c0-3.2,2.6-5.8,5.8-5.8h90.9c3.2,0,5.8,2.6,5.8,5.8v67.9"/>
+        <path id="Path_825" class="st1" d="M206,131.4v-18.5c0-3.2,2.6-5.8,5.8-5.8h90.9c3.2,0,5.8,2.6,5.8,5.8v38.5"/>
+      </g>
+    </g>
+  </g>
+</svg>

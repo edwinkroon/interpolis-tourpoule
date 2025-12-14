@@ -126,7 +126,7 @@ export function TeamOverviewPage() {
               </div>
             }
             actions={
-              <button className="action-button" type="button" onClick={() => navigate('/teamvergelijken.html')}>
+              <button className="button" type="button" onClick={() => navigate('/teamvergelijken.html')}>
                 <span>Vergelijk teams</span>
                 <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
               </button>

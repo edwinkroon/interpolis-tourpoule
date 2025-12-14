@@ -175,4 +175,23 @@ export const api = {
       body: JSON.stringify({ userId, teamName, email, avatarUrl, newsletter }),
     });
   },
+
+  async getDailyWinners() {
+    // Get latest stage first, then get top 3 teams for that stage
+    const latestStageRes = await fetchJson('/.netlify/functions/get-latest-stage');
+    if (!latestStageRes?.ok || !latestStageRes?.stage) {
+      return { ok: true, winners: [] };
+    }
+    const stageNumber = latestStageRes.stage.stage_number;
+    const teamPointsRes = await fetchJson(`/.netlify/functions/get-stage-team-points?stage_number=${encodeURIComponent(stageNumber)}`);
+    if (!teamPointsRes?.ok || !Array.isArray(teamPointsRes.teams)) {
+      return { ok: true, winners: [] };
+    }
+    // Return top 3 teams
+    return {
+      ok: true,
+      winners: teamPointsRes.teams.slice(0, 3),
+      stageNumber: stageNumber
+    };
+  },
 };

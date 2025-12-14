@@ -61,17 +61,18 @@ exports.handler = async function(event) {
 
     // Get team points for this stage, ordered by total_points descending
     // Only include participants that have a fantasy team
+    // Calculate total points explicitly as sum of points_stage + points_jerseys + points_bonus
     const query = `
       SELECT 
         p.id as participant_id,
         p.team_name,
         p.avatar_url,
         p.email,
-        COALESCE(fsp.total_points, 0) as points
+        COALESCE(fsp.points_stage, 0) + COALESCE(fsp.points_jerseys, 0) + COALESCE(fsp.points_bonus, 0) as points
       FROM participants p
       INNER JOIN fantasy_teams ft ON ft.participant_id = p.id
       LEFT JOIN fantasy_stage_points fsp ON fsp.participant_id = p.id AND fsp.stage_id = $1
-      ORDER BY COALESCE(fsp.total_points, 0) DESC, p.team_name ASC
+      ORDER BY (COALESCE(fsp.points_stage, 0) + COALESCE(fsp.points_jerseys, 0) + COALESCE(fsp.points_bonus, 0)) DESC, p.team_name ASC
     `;
     
     const { rows } = await client.query(query, [stageId]);

@@ -270,7 +270,7 @@ export function StagesOverviewPage() {
                   actions={
                     <a
                       href={`/daguitslag.html?stage=${encodeURIComponent(currentStage?.stage_number || '')}`}
-                      className="day-winners-button"
+                      className="button"
                       aria-label="Bekijk alle teams"
                     >
                       <span>bekijk alle teams</span>

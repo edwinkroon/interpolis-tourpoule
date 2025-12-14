@@ -7,6 +7,40 @@
   --text-muted: #668494;
 }
 
+// ---------------------------------------------
+// Universal Button Style
+// ---------------------------------------------
+
+.button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  color: #00334e;
+  font-size: 16px;
+  font-family: 'Open Sans', system-ui, sans-serif;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  margin-top: auto;
+  transition: color 0.2s, gap 0.2s, text-decoration 0.2s;
+  text-transform: lowercase;
+  
+  &:hover {
+    text-decoration: underline;
+    gap: 0.75rem;
+  }
+  
+  .action-arrow {
+    width: 9px;
+    height: 12px;
+    display: block;
+    flex-shrink: 0;
+    transform: rotate(0deg);
+  }
+}
+
 // Small global tweaks for React app shell
 #root {
   min-height: 100vh;
@@ -440,4 +474,163 @@
 // Ensure admin buttons work within tile actions
 .admin-settings-tile .tile-actions .admin-button {
   align-self: flex-start;
+}
+
+// ---------------------------------------------
+// Daily Winners Podium
+// ---------------------------------------------
+
+.daily-winners-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.daily-winners-podium {
+  position: relative;
+  width: 100%;
+  margin: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 200px; // Ensure enough space for absolute positioning
+}
+
+.podium-svg {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  display: block;
+  margin-top: 3rem;
+}
+
+.podium-winners {
+  position: absolute;
+  /* top: 0; */
+  left: 0;
+  right: 0;
+  bottom: 5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+  /* max-width: 400px; */
+  margin: 0 2rem;
+  width: 100%;
+}
+
+.podium-winner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: absolute;
+  bottom: 0;
+}
+
+// 2nd place (left) - medium height
+// Podium SVG: left step starts at ~1px, center at ~103px, right at ~206px
+// Heights: left ~78px, center ~95px, right ~50px from bottom
+.podium-winner-2nd {
+  left: -12px;
+  bottom: 40px;
+}
+
+// 1st place (center) - tallest
+.podium-winner-1st {
+  left: 43%;
+  transform: translateX(-50%);
+  bottom: 91px;
+}
+
+// 3rd place (right) - shortest
+.podium-winner-3rd {
+  right: 11%;
+  bottom: 0;
+}
+
+.podium-avatar-container {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #f0f3f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  margin-bottom: 0.5rem;
+  border: 2px solid #cdd7dc;
+}
+
+.podium-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.podium-avatar-placeholder {
+  font-size: 20px;
+  font-weight: 700;
+  color: #668494;
+  text-align: center;
+  display: none;
+}
+
+.podium-team-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #00334e;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Position avatars and names above the steps
+.podium-winner-2nd .podium-avatar-container,
+.podium-winner-2nd .podium-team-name {
+  margin-bottom: 0.75rem;
+}
+
+.podium-winner-1st .podium-avatar-container,
+.podium-winner-1st .podium-team-name {
+  margin-bottom: 1rem;
+}
+
+.podium-winner-3rd .podium-avatar-container,
+.podium-winner-3rd .podium-team-name {
+  margin-bottom: 0.5rem;
+}
+
+.podium-points {
+  font-size: 24px;
+  font-weight: 700;
+  color: #00334e;
+  text-align: center;
+  line-height: 1;
+  position: absolute;
+  z-index: 10;
+  width: 100%;
+}
+
+// Position points on the podium steps (on top of the steps)
+// Based on SVG: left step top at ~79px, center at ~38px, right at ~113px from top (viewBox height 162.8)
+.podium-points-2nd {
+  bottom: -50%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.podium-points-1st {
+  bottom: -40%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.podium-points-3rd {
+  bottom: -50%;
+  left: 50%;
+  transform: translateX(-50%);
 }

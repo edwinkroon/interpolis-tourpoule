@@ -19,6 +19,7 @@ export function HomePage() {
   const [points, setPoints] = useState({ totalPoints: 0, riders: [], route: '' });
   const [standings, setStandings] = useState([]);
   const [prikbord, setPrikbord] = useState([]);
+  const [dailyWinners, setDailyWinners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -45,11 +46,12 @@ export function HomePage() {
 
     (async () => {
       try {
-        const [adminRes, pointsRes, standingsRes, prikbordRes] = await Promise.all([
+        const [adminRes, pointsRes, standingsRes, prikbordRes, dailyWinnersRes] = await Promise.all([
           api.checkAdmin(userId),
           api.getMyPointsRiders(userId),
           api.getStandings(),
           api.getPrikbordMessages(),
+          api.getDailyWinners(),
         ]);
 
         if (cancelled) return;
@@ -64,6 +66,7 @@ export function HomePage() {
         }
         if (standingsRes?.ok && Array.isArray(standingsRes.standings)) setStandings(standingsRes.standings);
         if (prikbordRes?.ok && Array.isArray(prikbordRes.messages)) setPrikbord(prikbordRes.messages);
+        if (dailyWinnersRes?.ok && Array.isArray(dailyWinnersRes.winners)) setDailyWinners(dailyWinnersRes.winners);
 
         setLoading(false);
       } catch (e) {
@@ -165,7 +168,7 @@ export function HomePage() {
                   }}
                   actions={
                     <button
-                      className="points-team-button"
+                      className="button"
                       type="button"
                       onClick={() => navigate('/teamoverzicht.html')}
                       aria-label="Bekijk mijn team"
@@ -190,6 +193,116 @@ export function HomePage() {
                     ))}
                   </div>
                 </Tile>
+
+                <Tile
+                  className="daily-winners-section"
+                  title="Dagwinnaars"
+                  info={{
+                    title: 'Dagwinnaars',
+                    text: 'Hier zie je de top 3 teams van de laatste etappe met hun dagelijkse punten.',
+                  }}
+                  actions={
+                    <button
+                      className="button"
+                      type="button"
+                      onClick={() => navigate('/stand.html')}
+                      aria-label="Bekijk volledige stand"
+                    >
+                      <span>Volledige stand</span>
+                      <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+                    </button>
+                  }
+                >
+                  {dailyWinners.length === 0 ? (
+                    <div className="no-data">Nog geen dagwinnaars beschikbaar</div>
+                  ) : (
+                    <div className="daily-winners-podium">
+                      <img src="/icons/podium.svg" alt="Podium" className="podium-svg" />
+                      <div className="podium-winners">
+                        {/* 2nd place (left) */}
+                        {dailyWinners[1] ? (
+                          <div className="podium-winner podium-winner-2nd">
+                            <div className="podium-avatar-container">
+                              {dailyWinners[1].avatarUrl ? (
+                                <img
+                                  src={dailyWinners[1].avatarUrl}
+                                  alt={dailyWinners[1].teamName}
+                                  className="podium-avatar-img"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                    e.currentTarget.nextElementSibling.style.display = 'flex';
+                                  }}
+                                />
+                              ) : null}
+                              <div
+                                className="podium-avatar-placeholder"
+                                style={{ display: dailyWinners[1].avatarUrl ? 'none' : 'flex' }}
+                              >
+                                {dailyWinners[1].teamName ? dailyWinners[1].teamName.slice(0, 2).toUpperCase() : '?'}
+                              </div>
+                            </div>
+                            <div className="podium-team-name">{dailyWinners[1].teamName || '-'}</div>
+                            <div className="podium-points podium-points-2nd">{dailyWinners[1].points || 0}</div>
+                          </div>
+                        ) : null}
+                        
+                        {/* 1st place (center) */}
+                        {dailyWinners[0] ? (
+                          <div className="podium-winner podium-winner-1st">
+                            <div className="podium-avatar-container">
+                              {dailyWinners[0].avatarUrl ? (
+                                <img
+                                  src={dailyWinners[0].avatarUrl}
+                                  alt={dailyWinners[0].teamName}
+                                  className="podium-avatar-img"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                    e.currentTarget.nextElementSibling.style.display = 'flex';
+                                  }}
+                                />
+                              ) : null}
+                              <div
+                                className="podium-avatar-placeholder"
+                                style={{ display: dailyWinners[0].avatarUrl ? 'none' : 'flex' }}
+                              >
+                                {dailyWinners[0].teamName ? dailyWinners[0].teamName.slice(0, 2).toUpperCase() : '?'}
+                              </div>
+                            </div>
+                            <div className="podium-team-name">{dailyWinners[0].teamName || '-'}</div>
+                            <div className="podium-points podium-points-1st">{dailyWinners[0].points || 0}</div>
+                          </div>
+                        ) : null}
+                        
+                        {/* 3rd place (right) */}
+                        {dailyWinners[2] ? (
+                          <div className="podium-winner podium-winner-3rd">
+                            <div className="podium-avatar-container">
+                              {dailyWinners[2].avatarUrl ? (
+                                <img
+                                  src={dailyWinners[2].avatarUrl}
+                                  alt={dailyWinners[2].teamName}
+                                  className="podium-avatar-img"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                    e.currentTarget.nextElementSibling.style.display = 'flex';
+                                  }}
+                                />
+                              ) : null}
+                              <div
+                                className="podium-avatar-placeholder"
+                                style={{ display: dailyWinners[2].avatarUrl ? 'none' : 'flex' }}
+                              >
+                                {dailyWinners[2].teamName ? dailyWinners[2].teamName.slice(0, 2).toUpperCase() : '?'}
+                              </div>
+                            </div>
+                            <div className="podium-team-name">{dailyWinners[2].teamName || '-'}</div>
+                            <div className="podium-points podium-points-3rd">{dailyWinners[2].points || 0}</div>
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
+                  )}
+                </Tile>
               </div>
 
               <div className="dashboard-column">
@@ -202,7 +315,7 @@ export function HomePage() {
                   }}
                   actions={
                     <button
-                      className="standings-button"
+                      className="button"
                       type="button"
                       onClick={() => navigate('/stand.html')}
                       aria-label="Bekijk volledige stand"
@@ -260,7 +373,7 @@ export function HomePage() {
                   }}
                   actions={
                     <button
-                      className="prikbord-button"
+                      className="button"
                       type="button"
                       onClick={async () => {
                         if (!userId) return;

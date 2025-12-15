@@ -15,6 +15,9 @@ exports.handler = async function(event) {
   const stageNumberParam = event.queryStringParameters?.stage_number
     ? parseInt(event.queryStringParameters.stage_number, 10)
     : null;
+  const participantIdParam = event.queryStringParameters?.participant_id
+    ? parseInt(event.queryStringParameters.participant_id, 10)
+    : null;
 
   let client;
   try {
@@ -35,11 +38,21 @@ exports.handler = async function(event) {
     }
 
     const params = [];
-    let whereClause = '';
+    const whereConditions = [];
+    
     if (stageFilter?.id) {
-      whereClause = 'WHERE a.stage_id = $1';
+      whereConditions.push(`a.stage_id = $${params.length + 1}`);
       params.push(stageFilter.id);
     }
+    
+    if (participantIdParam && !Number.isNaN(participantIdParam)) {
+      whereConditions.push(`ap.participant_id = $${params.length + 1}`);
+      params.push(participantIdParam);
+    }
+    
+    const whereClause = whereConditions.length > 0 
+      ? `WHERE ${whereConditions.join(' AND ')}`
+      : '';
 
     // Default: latest 3 awards across all stages
     const applyLimit = !stageFilter && limitParam && !Number.isNaN(limitParam);

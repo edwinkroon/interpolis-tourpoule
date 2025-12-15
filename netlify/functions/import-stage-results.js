@@ -942,6 +942,9 @@ async function activateReservesForDroppedRiders(client, stageId) {
     teamMainRidersMap.get(rider.fantasy_team_id).push(rider);
   });
   
+  // Track total reserves activated across all teams
+  let totalReservesActivated = 0;
+  
   // For each fantasy team, check for DNF main riders and activate reserves
   for (const [fantasyTeamId, mainRiders] of teamMainRidersMap) {
     // STEP 1: Find and deactivate main riders that are DNF/DNS in this stage
@@ -1061,6 +1064,7 @@ async function activateReservesForDroppedRiders(client, stageId) {
           }
           
           console.log(`Activated reserve rider ${reserveToActivate.rider_id} to slot ${targetSlot} for team ${fantasyTeamId} (filling up to 10 main riders)`);
+          totalReservesActivated++;
         } catch (updateError) {
           // If we get a unique constraint violation, log it and continue
           if (updateError.code === '23505') { // PostgreSQL unique violation
@@ -1098,6 +1102,8 @@ async function activateReservesForDroppedRiders(client, stageId) {
       console.log(`Team ${fantasyTeamId} already has 10 active main riders`);
     }
   }
+  
+  return { reservesActivated: totalReservesActivated };
 }
 
 // Helper function to check if a stage is the final stage
@@ -1353,12 +1359,16 @@ exports.handler = async function(event) {
       // After importing stage results, check which main riders are no longer in results
       // and automatically activate the first reserve rider to take their place
       // This is done AFTER commit to avoid transaction abort issues
+      let reservesActivated = 0;
+      let reserveError = null;
       try {
-        await activateReservesForDroppedRiders(client, stageId);
-      } catch (reserveError) {
-        console.error('Error activating reserves (non-fatal):', reserveError);
-        console.error('Error code:', reserveError.code);
-        console.error('Error message:', reserveError.message);
+        const reserveResult = await activateReservesForDroppedRiders(client, stageId);
+        reservesActivated = reserveResult?.reservesActivated || 0;
+      } catch (err) {
+        reserveError = err;
+        console.error('Error activating reserves (non-fatal):', err);
+        console.error('Error code:', err.code);
+        console.error('Error message:', err.message);
         // Reserve activation failure doesn't fail the import
         // The stage results are already imported successfully
       }
@@ -1368,6 +1378,10 @@ exports.handler = async function(event) {
       let pointsCalculated = false;
       let pointsError = null;
       let participantsCalculated = 0;
+      let awardsCalculated = false;
+      let awardsError = null;
+      let cumulativeCalculated = false;
+      let cumulativeError = null;
       
       try {
         const pointsResult = await calculateStagePoints(client, stageId);
@@ -1388,16 +1402,20 @@ exports.handler = async function(event) {
         // Calculate awards after stage points are calculated
         try {
           await calculateAwards(client, stageId);
-        } catch (awardsErr) {
-          console.error('Error calculating awards:', awardsErr);
+          awardsCalculated = true;
+        } catch (err) {
+          awardsError = err;
+          console.error('Error calculating awards:', err);
           // Don't fail the import if awards calculation fails
         }
         
         // Calculate cumulative points and rankings after stage points are calculated
         try {
           await calculateCumulativePoints(client, stageId);
-        } catch (cumulativeErr) {
-          console.error('Error calculating cumulative points:', cumulativeErr);
+          cumulativeCalculated = true;
+        } catch (err) {
+          cumulativeError = err;
+          console.error('Error calculating cumulative points:', err);
           // Don't fail the import if cumulative points calculation fails
         }
         
@@ -1428,6 +1446,56 @@ exports.handler = async function(event) {
         console.error('Full error object:', JSON.stringify(err, Object.getOwnPropertyNames(err)));
       }
       
+      // Fase 6: Logging - Samenvatting van import
+      const summary = {
+        stageId: stageId,
+        resultsImported: results.length,
+        jerseysImported: jerseys.length,
+        replacedExisting: hasExistingResults,
+        existingCount: existingCount,
+        reservesActivated: reservesActivated,
+        reserveError: reserveError ? reserveError.message : null,
+        pointsCalculated: pointsCalculated,
+        participantsCalculated: participantsCalculated,
+        pointsError: pointsError ? pointsError.message : null,
+        awardsCalculated: awardsCalculated,
+        awardsError: awardsError ? awardsError.message : null,
+        cumulativeCalculated: cumulativeCalculated,
+        cumulativeError: cumulativeError ? cumulativeError.message : null
+      };
+
+      // Log samenvatting
+      console.log('\n' + '═'.repeat(80));
+      console.log('📊 ETAPPE IMPORT SAMENVATTING');
+      console.log('═'.repeat(80));
+      console.log(`Etappe ID: ${summary.stageId}`);
+      console.log(`Resultaten geïmporteerd: ${summary.resultsImported}`);
+      console.log(`Truien geïmporteerd: ${summary.jerseysImported}`);
+      if (summary.replacedExisting) {
+        console.log(`⚠️  Bestaande resultaten vervangen (${summary.existingCount} records)`);
+      }
+      if (summary.reservesActivated > 0) {
+        console.log(`✅ ${summary.reservesActivated} reserve(s) geactiveerd`);
+      } else if (summary.reserveError) {
+        console.log(`⚠️  Reserve activatie gefaald: ${summary.reserveError}`);
+      }
+      if (summary.pointsCalculated) {
+        console.log(`✅ Punten berekend voor ${summary.participantsCalculated} participants`);
+      } else {
+        console.log(`❌ Punten berekening gefaald: ${summary.pointsError || 'Onbekende fout'}`);
+      }
+      if (summary.awardsCalculated) {
+        console.log(`✅ Awards berekend`);
+      } else if (summary.awardsError) {
+        console.log(`⚠️  Awards berekening gefaald: ${summary.awardsError}`);
+      }
+      if (summary.cumulativeCalculated) {
+        console.log(`✅ Cumulatieve punten en rankings bijgewerkt`);
+      } else if (summary.cumulativeError) {
+        console.log(`⚠️  Cumulatieve punten berekening gefaald: ${summary.cumulativeError}`);
+      }
+      console.log('═'.repeat(80) + '\n');
+
       await client.end();
 
       return {
@@ -1439,12 +1507,7 @@ exports.handler = async function(event) {
         body: JSON.stringify({
           ok: true,
           message: 'Stage results imported successfully',
-          count: results.length,
-          replacedExisting: hasExistingResults,
-          existingCount: existingCount,
-          pointsCalculated: pointsCalculated,
-          participantsCalculated: participantsCalculated,
-          pointsError: pointsError ? pointsError.message : null
+          ...summary
         })
       };
     } catch (err) {

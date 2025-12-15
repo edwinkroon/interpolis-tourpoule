@@ -71,7 +71,8 @@ export function HomePage() {
         if (prikbordRes?.ok && Array.isArray(prikbordRes.messages)) setPrikbord(prikbordRes.messages);
         if (dailyWinnersRes?.ok && Array.isArray(dailyWinnersRes.winners)) setDailyWinners(dailyWinnersRes.winners);
         try {
-          const awardsRes = await api.getAwardsLatest(3);
+          const participantId = participant?.id ?? participant?.participantId ?? participant?.participant_id ?? null;
+          const awardsRes = await api.getAwardsLatest(3, participantId);
           if (awardsRes?.ok && Array.isArray(awardsRes.awards)) {
             setAwards(awardsRes.awards);
           } else {

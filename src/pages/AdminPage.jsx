@@ -53,6 +53,8 @@ export function AdminPage() {
 
   const [stages, setStages] = useState([]);
   const [stageUpdatingIds, setStageUpdatingIds] = useState(() => new Set());
+  const [resetting, setResetting] = useState(false);
+  const [resetMessage, setResetMessage] = useState({ type: null, text: '' });
 
   // init (kept without escaped \n)
   React.useEffect(() => {
@@ -184,6 +186,39 @@ export function AdminPage() {
         next.delete(id);
         return next;
       });
+    }
+  }
+
+  async function onResetAllStageData() {
+    if (!userId) return;
+
+    // Confirmation dialog
+    // eslint-disable-next-line no-alert
+    const confirmed = window.confirm(
+      'Weet je zeker dat je alle etapperesultaten wilt resetten?\n\n' +
+      'Dit zal verwijderen:\n' +
+      '- Alle etapperesultaten\n' +
+      '- Alle berekende punten\n' +
+      '- Alle awards\n' +
+      '- Alle truidragers\n\n' +
+      'Deze actie kan niet ongedaan worden gemaakt!'
+    );
+
+    if (!confirmed) return;
+
+    setResetting(true);
+    setResetMessage({ type: null, text: '' });
+
+    try {
+      const res = await api.resetAllStageData(userId);
+      if (!res?.ok) throw new Error(res?.error || 'Fout bij resetten');
+
+      setResetMessage({ type: 'success', text: 'Alle etapperesultaten zijn succesvol gereset!' });
+      await reloadAdminData();
+    } catch (e) {
+      setResetMessage({ type: 'error', text: `Fout: ${e?.message || e}` });
+    } finally {
+      setResetting(false);
     }
   }
 
@@ -422,6 +457,52 @@ export function AdminPage() {
                         })
                       )}
                     </div>
+                  </Tile>
+                </div>
+
+                <div style={{ marginTop: '2rem' }}>
+                  <Tile
+                    className="admin-reset-tile"
+                    title="Reset etapperesultaten"
+                    info={{
+                      text: 'Reset alle etapperesultaten, berekende punten, awards en truidragers. Dit is een destructieve actie die niet ongedaan kan worden gemaakt. Gebruik dit alleen als je opnieuw wilt beginnen vanaf de eerste etappe.',
+                    }}
+                  >
+                    <div style={{ marginBottom: '1.5rem' }}>
+                      <p style={{ fontSize: '14px', color: '#668494', lineHeight: '1.6', marginBottom: '1rem' }}>
+                        Deze actie zal alle volgende data verwijderen:
+                      </p>
+                      <ul style={{ fontSize: '14px', color: '#668494', lineHeight: '1.8', paddingLeft: '1.5rem' }}>
+                        <li>Alle etapperesultaten</li>
+                        <li>Alle berekende punten (etappe- en cumulatieve punten)</li>
+                        <li>Alle toegekende awards</li>
+                        <li>Alle truidragers per etappe</li>
+                      </ul>
+                    </div>
+
+                    <div
+                      className={
+                        resetMessage.type === 'success'
+                          ? 'admin-message admin-message-success'
+                          : resetMessage.type === 'error'
+                          ? 'admin-message admin-message-error'
+                          : 'admin-message'
+                      }
+                      style={{ display: resetMessage.text ? 'block' : 'none' }}
+                    >
+                      {resetMessage.text}
+                    </div>
+
+                    <footer className="tile-actions">
+                      <button
+                        className="admin-button admin-button-danger"
+                        type="button"
+                        onClick={onResetAllStageData}
+                        disabled={resetting}
+                      >
+                        <span>{resetting ? 'Bezig met resetten...' : 'Reset alle etapperesultaten'}</span>
+                      </button>
+                    </footer>
                   </Tile>
                 </div>
               </div>

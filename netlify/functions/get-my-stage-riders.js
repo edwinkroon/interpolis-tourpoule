@@ -1,5 +1,33 @@
 const { getDbClient, handleDbError, missingDbConfigResponse } = require('./_shared/db');
 
+// Helper function to check if a stage is the final stage
+async function isFinalStage(client, stageId) {
+  // Get the stage number of the current stage
+  const currentStageQuery = await client.query(
+    'SELECT stage_number FROM stages WHERE id = $1',
+    [stageId]
+  );
+  
+  if (currentStageQuery.rows.length === 0) {
+    return false;
+  }
+  
+  const currentStageNumber = currentStageQuery.rows[0].stage_number;
+  
+  // Get the highest stage number in the database
+  const maxStageQuery = await client.query(
+    'SELECT MAX(stage_number) as max_stage FROM stages'
+  );
+  
+  if (maxStageQuery.rows.length === 0 || !maxStageQuery.rows[0].max_stage) {
+    return false;
+  }
+  
+  const maxStageNumber = maxStageQuery.rows[0].max_stage;
+  
+  return currentStageNumber === maxStageNumber;
+}
+
 exports.handler = async function(event) {
   let client;
   try {
@@ -55,9 +83,9 @@ exports.handler = async function(event) {
 
     const participantId = participantResult.rows[0].id;
 
-    // Get stage ID
+    // Get stage ID and status
     const stageResult = await client.query(
-      'SELECT id FROM stages WHERE stage_number = $1',
+      'SELECT id, is_neutralized, is_cancelled FROM stages WHERE stage_number = $1',
       [stageNumber]
     );
 
@@ -74,6 +102,29 @@ exports.handler = async function(event) {
     }
 
     const stageId = stageResult.rows[0].id;
+    const isNeutralized = stageResult.rows[0].is_neutralized || false;
+    const isCancelled = stageResult.rows[0].is_cancelled || false;
+
+    // BUSINESS RULE: If stage is cancelled, return empty results (no points awarded)
+    if (isCancelled) {
+      await client.end();
+      return {
+        statusCode: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        },
+        body: JSON.stringify({
+          ok: true,
+          riders: [],
+          totalPoints: 0
+        })
+      };
+    }
+
+    // BUSINESS RULE 9: Check if this is the final stage
+    // If it is, no jersey points should be awarded for this stage
+    const isFinal = await isFinalStage(client, stageId);
 
     // Get scoring rules
     const scoringRules = await client.query(
@@ -123,6 +174,7 @@ exports.handler = async function(event) {
     });
 
     // Get user's fantasy team riders
+    // BUSINESS RULE: Only main riders (slot_type = 'main') can earn points
     const teamRidersResult = await client.query(
       `SELECT 
          r.id as rider_id,
@@ -138,11 +190,14 @@ exports.handler = async function(event) {
        LEFT JOIN stage_results sr ON sr.rider_id = r.id AND sr.stage_id = $1
        WHERE ft.participant_id = $2
          AND ftr.active = true
+         AND ftr.slot_type = 'main'
        ORDER BY sr.position NULLS LAST, r.last_name, r.first_name`,
       [stageId, participantId]
     );
 
     // Calculate points for each rider
+    // BUSINESS RULE 11: If stage is neutralized, no stage position points are awarded
+    // BUSINESS RULE: If stage is cancelled, no points are awarded (handled by returning empty results)
     const ridersWithPoints = teamRidersResult.rows.map(rider => {
       let points = 0;
       let pointsBreakdown = {
@@ -150,16 +205,19 @@ exports.handler = async function(event) {
         jersey: 0
       };
 
-      // Points from position
-      if (rider.position) {
+      // Points from position (only if stage is not neutralized)
+      if (!isNeutralized && rider.position) {
         pointsBreakdown.position = positionPointsMap.get(rider.position) || 0;
         points += pointsBreakdown.position;
       }
 
-      // Points from jersey
-      const jerseyPoints = riderJerseyPointsMap.get(rider.rider_id) || 0;
-      pointsBreakdown.jersey = jerseyPoints;
-      points += jerseyPoints;
+      // Points from jersey (still awarded even if neutralized, but not if cancelled or final stage)
+      // BUSINESS RULE 9: No jersey points on final stage
+      if (!isCancelled && !isFinal) {
+        const jerseyPoints = riderJerseyPointsMap.get(rider.rider_id) || 0;
+        pointsBreakdown.jersey = jerseyPoints;
+        points += jerseyPoints;
+      }
 
       return {
         id: rider.rider_id,

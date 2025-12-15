@@ -195,8 +195,11 @@ export const api = {
     };
   },
 
-  async getAwardsLatest(limit = 3) {
-    const url = `/.netlify/functions/get-awards?limit=${encodeURIComponent(limit)}`;
+  async getAwardsLatest(limit = 3, participantId = null) {
+    let url = `/.netlify/functions/get-awards?limit=${encodeURIComponent(limit)}`;
+    if (participantId) {
+      url += `&participant_id=${encodeURIComponent(participantId)}`;
+    }
     return await fetchJson(url);
   },
 
@@ -206,5 +209,11 @@ export const api = {
     }
     const url = `/.netlify/functions/get-awards?stage_number=${encodeURIComponent(stageNumber)}`;
     return await fetchJson(url);
+  },
+
+  async resetAllStageData(userId) {
+    return await fetchJson(`/.netlify/functions/reset-all-stage-data?userId=${encodeURIComponent(userId)}`, {
+      method: 'POST',
+    });
   },
 };

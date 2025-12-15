@@ -103,6 +103,15 @@
   background: #00b3af;
 }
 
+.admin-button-danger {
+  background: #dc3545;
+  color: #fff;
+}
+
+.admin-button-danger:hover:not(:disabled) {
+  background: #c82333;
+}
+
 .admin-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;

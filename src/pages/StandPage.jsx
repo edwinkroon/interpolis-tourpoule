@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { api } from '../utils/api';
+import { PageTemplate } from '../layouts/PageTemplate';
 import { Tile } from '../components/Tile';
 import { ListItem } from '../components/ListItem';
 
 export function StandPage() {
-  const navigate = useNavigate();
   const [standings, setStandings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -31,46 +30,51 @@ export function StandPage() {
   }, []);
 
   return (
-    <main className="main-content page">
-      <div className="grid">
-        <div className="col-12">
-          <a className="back-link" href="#" onClick={(e) => { e.preventDefault(); navigate('/home.html'); }}>
-            <img src="/assets/arrow.svg" alt="" className="back-arrow" aria-hidden="true" />
-            terug
-          </a>
-        </div>
+    <PageTemplate
+      title="Stand"
+      backLink="/home.html"
+    >
+      <div className="col-12">
+        <Tile
+          className="standings-full-section"
+          title="Stand"
+          info={{
+            title: 'Stand',
+            text: 'Dit is de volledige stand: alle teams gerangschikt op totale punten.',
+          }}
+        >
+          {loading ? <div className="no-data">Bezig met laden...</div> : null}
+          {error ? (
+            <div className="error-message" style={{ display: 'block' }}>
+              {String(error?.message || error)}
+            </div>
+          ) : null}
 
-        <div className="col-12">
-          <Tile
-            className="standings-full-section"
-            title="Stand"
-            info={{
-              title: 'Stand',
-              text: 'Dit is de volledige stand: alle teams gerangschikt op totale punten.',
-            }}
-          >
-            {loading ? <div className="no-data">Bezig met laden...</div> : null}
-            {error ? (
-              <div className="error-message" style={{ display: 'block' }}>
-                {String(error?.message || error)}
-              </div>
-            ) : null}
-
-            <div className="standings-full-list tile-list" id="standings-full-list">
-              {!loading && standings.length === 0 ? <div className="no-data">Nog geen stand beschikbaar</div> : null}
-              {standings.map((team) => (
+          <div className="standings-full-list tile-list" id="standings-full-list">
+            {!loading && standings.length === 0 ? <div className="no-data">Nog geen stand beschikbaar</div> : null}
+            {standings.map((team) => {
+              // positionChange kan number, null, of undefined zijn
+              // null/undefined = geen vorige data, number (inclusief 0) = wel data
+              // ListItem toont alleen positionChange als het niet null/undefined is
+              // Voor 0 (geen wijziging) moeten we null doorgeven zodat het niet wordt getoond
+              const hasPositionChange = team.positionChange !== undefined && team.positionChange !== null;
+              const positionChange = hasPositionChange ? Number(team.positionChange) : null;
+              // Als positionChange 0 is, geef null door zodat het niet wordt getoond
+              const positionChangeForListItem = positionChange !== null && positionChange !== 0 ? positionChange : null;
+              
+              return (
                 <ListItem
                   key={team.participantId || team.rank}
                   leftValue={team.rank}
                   title={team.teamName}
                   value={team.totalPoints}
-                  positionChange={team.positionChange}
+                  positionChange={positionChangeForListItem}
                 />
-              ))}
-            </div>
-          </Tile>
-        </div>
+              );
+            })}
+          </div>
+        </Tile>
       </div>
-    </main>
+    </PageTemplate>
   );
 }

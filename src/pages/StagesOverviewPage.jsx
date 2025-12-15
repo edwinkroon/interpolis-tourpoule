@@ -183,9 +183,8 @@ export function StagesOverviewPage() {
       });
   }, [myStage]);
 
-  const subtitle = currentStage
-    ? `${makeStageLabel(currentStage)}${makeRouteText(currentStage) ? ` – ${makeRouteText(currentStage)}` : ''}`
-    : undefined;
+  // Subtitle should only show the route, not the stage name (which is already in StageNavigationBar)
+  const subtitle = currentStage ? makeRouteText(currentStage) || undefined : undefined;
 
   return (
     <>

@@ -1,33 +1,5 @@
 const { getDbClient, handleDbError, missingDbConfigResponse } = require('./_shared/db');
 
-// Helper function to check if a stage is the final stage
-async function isFinalStage(client, stageId) {
-  // Get the stage number of the current stage
-  const currentStageQuery = await client.query(
-    'SELECT stage_number FROM stages WHERE id = $1',
-    [stageId]
-  );
-  
-  if (currentStageQuery.rows.length === 0) {
-    return false;
-  }
-  
-  const currentStageNumber = currentStageQuery.rows[0].stage_number;
-  
-  // Get the highest stage number in the database
-  const maxStageQuery = await client.query(
-    'SELECT MAX(stage_number) as max_stage FROM stages'
-  );
-  
-  if (maxStageQuery.rows.length === 0 || !maxStageQuery.rows[0].max_stage) {
-    return false;
-  }
-  
-  const maxStageNumber = maxStageQuery.rows[0].max_stage;
-  
-  return currentStageNumber === maxStageNumber;
-}
-
 exports.handler = async function(event) {
   let client;
   try {
@@ -83,9 +55,16 @@ exports.handler = async function(event) {
 
     const participantId = participantResult.rows[0].id;
 
-    // Get stage ID and status
+    // Get stage ID, status, and check if it's the final stage (all in one query for performance)
     const stageResult = await client.query(
-      'SELECT id, is_neutralized, is_cancelled FROM stages WHERE stage_number = $1',
+      `SELECT 
+         s.id,
+         s.stage_number,
+         s.is_neutralized,
+         s.is_cancelled,
+         (SELECT MAX(stage_number) FROM stages) as max_stage_number
+       FROM stages s
+       WHERE s.stage_number = $1`,
       [stageNumber]
     );
 
@@ -101,9 +80,15 @@ exports.handler = async function(event) {
       };
     }
 
-    const stageId = stageResult.rows[0].id;
-    const isNeutralized = stageResult.rows[0].is_neutralized || false;
-    const isCancelled = stageResult.rows[0].is_cancelled || false;
+    const stageRow = stageResult.rows[0];
+    const stageId = stageRow.id;
+    const isNeutralized = stageRow.is_neutralized || false;
+    const isCancelled = stageRow.is_cancelled || false;
+    
+    // BUSINESS RULE 9: Check if this is the final stage
+    // If it is, no jersey points should be awarded for this stage
+    const isFinal = stageRow.max_stage_number && 
+                    stageRow.stage_number === stageRow.max_stage_number;
 
     // BUSINESS RULE: If stage is cancelled, return empty results (no points awarded)
     if (isCancelled) {
@@ -121,10 +106,6 @@ exports.handler = async function(event) {
         })
       };
     }
-
-    // BUSINESS RULE 9: Check if this is the final stage
-    // If it is, no jersey points should be awarded for this stage
-    const isFinal = await isFinalStage(client, stageId);
 
     // Get scoring rules
     const scoringRules = await client.query(

@@ -315,10 +315,6 @@ export function AddStagePage() {
                 <span>Statistieken</span>
                 <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
               </button>
-              <button className="action-button" aria-label="Etappe toevoegen" type="button" onClick={() => navigate('/etappetoevoegen.html')}>
-                <span>Etappe toevoegen</span>
-                <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
-              </button>
               {isAdmin ? (
                 <button className="action-button" aria-label="Admin" type="button" onClick={() => navigate('/admin.html')}>
                   <span>Admin</span>

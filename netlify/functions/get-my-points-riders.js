@@ -311,7 +311,7 @@ exports.handler = async function(event) {
           return b.stage_number - a.stage_number;
         }
         if (b.points !== a.points) {
-          return b.points - a.points;
+        return b.points - a.points;
         }
         const aName = `${a.last_name || ''} ${a.first_name || ''}`.trim();
         const bName = `${b.last_name || ''} ${b.first_name || ''}`.trim();

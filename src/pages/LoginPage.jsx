@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const { userId, authLoading } = useAuth();
+  const { userId, participantExists, authLoading } = useAuth();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
 
@@ -24,14 +24,13 @@ export function LoginPage() {
     }
   };
 
-  // Redirect if user is already logged in
-  // Only redirect if we're done loading and have a userId
-  // Use useEffect to prevent infinite loops
+  // Redirect only when authenticated AND participant exists
+  // Prevents redirect loop when user is authenticated but not (yet) in DB
   useEffect(() => {
-    if (!authLoading && userId) {
+    if (!authLoading && userId && participantExists) {
       navigate('/home.html', { replace: true });
     }
-  }, [authLoading, userId, navigate]);
+  }, [authLoading, userId, participantExists, navigate]);
 
   return (
     <>

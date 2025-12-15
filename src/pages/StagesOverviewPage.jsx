@@ -47,6 +47,9 @@ export function StagesOverviewPage() {
   const [stageResults, setStageResults] = useState(null);
   const [dayTeams, setDayTeams] = useState(null);
   const [jerseys, setJerseys] = useState(null);
+  const [stageAwards, setStageAwards] = useState([]);
+  const [stageAwardsLoading, setStageAwardsLoading] = useState(false);
+  const [stageAwardsError, setStageAwardsError] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -131,6 +134,39 @@ export function StagesOverviewPage() {
     };
   }, [currentStage, setSearchParams]);
 
+  // Load awards for the selected stage
+  useEffect(() => {
+    let cancelled = false;
+    const loadAwards = async () => {
+      if (!currentStage?.stage_number) {
+        setStageAwards([]);
+        return;
+      }
+      setStageAwardsLoading(true);
+      setStageAwardsError(null);
+      try {
+        const res = await api.getAwardsByStage(currentStage.stage_number);
+        if (cancelled) return;
+        if (res?.ok && Array.isArray(res.awards)) {
+          setStageAwards(res.awards);
+        } else {
+          setStageAwards([]);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setStageAwardsError(err);
+          setStageAwards([]);
+        }
+      } finally {
+        if (!cancelled) setStageAwardsLoading(false);
+      }
+    };
+    loadAwards();
+    return () => {
+      cancelled = true;
+    };
+  }, [currentStage]);
+
   const top3Teams = useMemo(() => {
     const teams = dayTeams?.teams || [];
     return teams.slice(0, 3);
@@ -193,15 +229,6 @@ export function StagesOverviewPage() {
               aria-label="Bekijk statistieken"
             >
               <span>Statistieken</span>
-              <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
-            </button>
-            <button
-              className="action-button"
-              type="button"
-              onClick={() => navigate('/etappetoevoegen.html')}
-              aria-label="Etappe toevoegen"
-            >
-              <span>Etappe toevoegen</span>
               <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
             </button>
             {isAdmin ? (
@@ -367,6 +394,43 @@ export function StagesOverviewPage() {
                       </div>
                     </div>
                   )}
+                </Tile>
+
+                <Tile
+                  className="trophy-cabinet-section"
+                  title="Prijzenschema"
+                  info={{
+                    title: 'Prijzenschema',
+                    text: 'Alle awards die bij deze etappe zijn uitgereikt.',
+                  }}
+                >
+                  <div className="tile-list">
+                    {stageAwardsLoading ? (
+                      <div className="no-data">Bezig met laden...</div>
+                    ) : stageAwardsError ? (
+                      <div className="no-data">Kon awards niet laden</div>
+                    ) : stageAwards.length === 0 ? (
+                      <div className="no-data">Nog geen awards voor deze etappe</div>
+                    ) : (
+                      stageAwards.map((award) => {
+                        const stageLabel = award.stageNumber
+                          ? `Etappe ${award.stageNumber}${award.stageName ? ` – ${award.stageName}` : ''}`
+                          : 'Algemeen';
+                        const iconSrc = award.icon ? `/${String(award.icon).replace(/^\//, '')}` : undefined;
+                        return (
+                          <ListItem
+                            key={award.awardAssignmentId || `${award.awardCode}-${award.participantId}-${stageLabel}`}
+                            avatarPhotoUrl={iconSrc}
+                            avatarAlt={award.awardTitle}
+                            avatarInitials={!iconSrc ? (award.awardTitle || '?').slice(0, 2).toUpperCase() : undefined}
+                            title={award.awardTitle || 'Award'}
+                            subtitle={award.awardDescription || stageLabel}
+                            value={award.teamName || ''}
+                          />
+                        );
+                      })
+                    )}
+                  </div>
                 </Tile>
               </div>
 

@@ -194,4 +194,17 @@ export const api = {
       stageNumber: stageNumber
     };
   },
+
+  async getAwardsLatest(limit = 3) {
+    const url = `/.netlify/functions/get-awards?limit=${encodeURIComponent(limit)}`;
+    return await fetchJson(url);
+  },
+
+  async getAwardsByStage(stageNumber) {
+    if (!stageNumber && stageNumber !== 0) {
+      return { ok: true, awards: [] };
+    }
+    const url = `/.netlify/functions/get-awards?stage_number=${encodeURIComponent(stageNumber)}`;
+    return await fetchJson(url);
+  },
 };

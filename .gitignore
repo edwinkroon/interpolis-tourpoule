@@ -1,7 +1,7 @@
 node_modules/
 dist/
-.env
-.env.local
+# .env files are needed for local tooling; keep them tracked/visible
+# (be mindful not to commit secrets)
 
 
 # Local Netlify folder

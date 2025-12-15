@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="39.25" height="39.25" viewBox="0 0 39.25 39.25">
+  <defs>
+    <clipPath id="clip-path">
+      <rect id="Rectangle_2427" data-name="Rectangle 2427" width="39.25" height="39.25" fill="none"/>
+    </clipPath>
+  </defs>
+  <g id="streamline-icon-award-trophy_48x48" data-name="streamline-icon-award-trophy@48x48" transform="translate(-3.467 -3)">
+    <g id="Group_15500" data-name="Group 15500" transform="translate(3.467 3)" clip-path="url(#clip-path)">
+      <circle id="Ellipse_45" data-name="Ellipse 45" cx="13.933" cy="13.933" r="13.933" transform="translate(5.692 10.759)" fill="none" stroke="#00334e" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/>
+      <path id="Path_15781" data-name="Path 15781" d="M20.525,16.74l2.108,4.152h3.591a.982.982,0,0,1,.708,1.688l-3.3,3.246,1.827,4.2a1,1,0,0,1-1.416,1.249l-4.417-2.49-4.417,2.484a.994.994,0,0,1-1.417-1.244l1.827-4.2-3.3-3.246a.983.983,0,0,1,.707-1.689h3.592l2.11-4.152a1.013,1.013,0,0,1,1.791.007Z" fill="#cfd7db"/>
+      <path id="Path_15782" data-name="Path 15782" d="M20.525,16.74l2.108,4.152h3.591a.982.982,0,0,1,.708,1.688l-3.3,3.246,1.827,4.2a1,1,0,0,1-1.416,1.249l-4.417-2.49-4.417,2.484a.994.994,0,0,1-1.417-1.244l1.827-4.2-3.3-3.246a.983.983,0,0,1,.707-1.689h3.592l2.11-4.152a1.013,1.013,0,0,1,1.791.007Z" fill="none" stroke="#00334e" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/>
+      <line id="Line_368" data-name="Line 368" x2="2.861" y2="10.569" transform="translate(13.292 0.625)"/>
+      <line id="Line_369" data-name="Line 369" x2="2.861" y2="10.569" transform="translate(13.292 0.625)" fill="none" stroke="#00334e" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/>
+      <line id="Line_370" data-name="Line 370" x1="6.852" y1="17.24" transform="translate(0.625 0.625)"/>
+      <line id="Line_371" data-name="Line 371" x1="6.852" y1="17.24" transform="translate(0.625 0.625)" fill="none" stroke="#00334e" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/>
+      <line id="Line_372" data-name="Line 372" x1="2.861" y2="10.569" transform="translate(23.098 0.625)"/>
+      <line id="Line_373" data-name="Line 373" x1="2.861" y2="10.569" transform="translate(23.098 0.625)" fill="none" stroke="#00334e" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/>
+      <line id="Line_374" data-name="Line 374" y1="17.24" x2="6.852" transform="translate(31.773 0.625)"/>
+      <line id="Line_375" data-name="Line 375" y1="17.24" x2="6.852" transform="translate(31.773 0.625)" fill="none" stroke="#00334e" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25"/>
+    </g>
+  </g>
+</svg>

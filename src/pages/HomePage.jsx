@@ -22,6 +22,9 @@ export function HomePage() {
   const [dailyWinners, setDailyWinners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [awards, setAwards] = useState([]);
+  const [awardsLoading, setAwardsLoading] = useState(true);
+  const [awardsError, setAwardsError] = useState(null);
 
   const top5 = useMemo(() => standings.slice(0, 5), [standings]);
   const myStanding = useMemo(() => {
@@ -67,11 +70,25 @@ export function HomePage() {
         if (standingsRes?.ok && Array.isArray(standingsRes.standings)) setStandings(standingsRes.standings);
         if (prikbordRes?.ok && Array.isArray(prikbordRes.messages)) setPrikbord(prikbordRes.messages);
         if (dailyWinnersRes?.ok && Array.isArray(dailyWinnersRes.winners)) setDailyWinners(dailyWinnersRes.winners);
+        try {
+          const awardsRes = await api.getAwardsLatest(3);
+          if (awardsRes?.ok && Array.isArray(awardsRes.awards)) {
+            setAwards(awardsRes.awards);
+          } else {
+            setAwards([]);
+          }
+          setAwardsLoading(false);
+        } catch (awardsErr) {
+          setAwardsError(awardsErr);
+          setAwards([]);
+          setAwardsLoading(false);
+        }
 
         setLoading(false);
       } catch (e) {
         if (!cancelled) {
           setError(e);
+          setAwardsLoading(false);
           setLoading(false);
         }
       }
@@ -259,6 +276,43 @@ export function HomePage() {
                       </div>
                     </div>
                   )}
+                </Tile>
+
+                <Tile
+                  title="Mijn prijzenkast"
+                  info={{
+                    title: 'Mijn prijzenkast',
+                    text: 'Laatste behaalde awards.',
+                  }}
+                  className="trophy-cabinet-section"
+                >
+                  <div className="tile-list">
+                    {awardsLoading ? (
+                      <div className="no-data">Bezig met laden...</div>
+                    ) : awardsError ? (
+                      <div className="no-data">Kon awards niet laden</div>
+                    ) : awards.length === 0 ? (
+                      <div className="no-data">Geen awards beschikbaar</div>
+                    ) : (
+                      awards.map((award) => {
+                        const stageLabel = award.stageNumber
+                          ? `Etappe ${award.stageNumber}${award.stageName ? ` – ${award.stageName}` : ''}`
+                          : 'Algemeen';
+                        const iconSrc = award.icon ? `/${String(award.icon).replace(/^\//, '')}` : undefined;
+                        return (
+                          <ListItem
+                            key={award.awardAssignmentId || `${award.awardCode}-${award.participantId}-${stageLabel}`}
+                            avatarPhotoUrl={iconSrc}
+                            avatarAlt={award.awardTitle}
+                            avatarInitials={!iconSrc ? (award.awardTitle || '?').slice(0, 2).toUpperCase() : undefined}
+                            title={award.awardTitle || 'Award'}
+                            subtitle={award.awardDescription || stageLabel}
+                            value={award.teamName || ''}
+                          />
+                        );
+                      })
+                    )}
+                  </div>
                 </Tile>
 
                 <Tile

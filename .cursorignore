@@ -10,3 +10,8 @@
 # Netlify local state
 /.netlify/
 
+# Allow .env files (don't ignore them)
+!.env
+!.env.local
+!.env.*
+

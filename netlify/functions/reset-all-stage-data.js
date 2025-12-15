@@ -84,3 +84,4 @@ exports.handler = async function(event) {
     return handleDbError(error, client);
   }
 };
+

@@ -6,3 +6,11 @@ dist/
 
 # Local Netlify folder
 .netlify
+
+# Test coverage
+coverage/
+.nyc_output/
+*.lcov
+
+# Jest
+.jest-cache/

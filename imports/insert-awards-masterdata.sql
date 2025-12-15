@@ -211,3 +211,4 @@ BEGIN
     UPDATE awards SET title = 'Derde plaats', description = '3e plaats in een etappe (derde etappepunten).', icon = NULL WHERE code = 'PODIUM_3';
   END IF;
 END $$;
+

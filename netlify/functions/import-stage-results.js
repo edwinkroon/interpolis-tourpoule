@@ -135,16 +135,18 @@ async function importJerseys(client, stageId, jerseys) {
  * @param {number} stageId - Stage ID
  * @param {Array} results - Array of {position, riderId, timeSeconds}
  */
-async function importStageResults(client, stageId, results) {
-  // Delete existing results for this stage
-  await client.query('DELETE FROM stage_results WHERE stage_id = $1', [stageId]);
-
-  // Calculate same_time_group based on time_seconds
-  // Group results by time_seconds and assign group numbers
+/**
+ * Calculate same_time_group numbers for stage results
+ * Groups riders by their finish time (time_seconds), similar to DENSE_RANK.
+ * All riders with the same time_seconds get the same group number.
+ * Riders with null time_seconds (DNF/DNS) all get the same group (highest number).
+ * @param {Array<{position: number, timeSeconds: number|null}>} results - Array of stage results
+ * @returns {Map<number, number>} Map of result index -> same_time_group number
+ */
+function calculateSameTimeGroups(results) {
   const timeGroupMap = new Map(); // Maps time_seconds value to group number
   let currentGroupNumber = 1;
   
-  // First pass: assign group numbers by time_seconds
   // Sort by time_seconds (nulls last) and position for consistent grouping
   const sortedResults = [...results].sort((a, b) => {
     if (a.timeSeconds === null && b.timeSeconds === null) {
@@ -176,11 +178,35 @@ async function importStageResults(client, stageId, results) {
     }
   });
 
-  // Insert results with same_time_group
-  for (const result of results) {
+  // Create map of original result -> group number
+  const resultGroupMap = new Map();
+  results.forEach((result, index) => {
     const sameTimeGroup = result.timeSeconds === null 
       ? nullTimeGroup
       : timeGroupMap.get(result.timeSeconds);
+    resultGroupMap.set(index, sameTimeGroup);
+  });
+
+  return resultGroupMap;
+}
+
+/**
+ * Import stage results into the database
+ * @param {Object} client - PostgreSQL client
+ * @param {number} stageId - Stage ID
+ * @param {Array<{position: number, riderId: number, timeSeconds: number|null}>} results - Array of stage results
+ */
+async function importStageResults(client, stageId, results) {
+  // Delete existing results for this stage
+  await client.query('DELETE FROM stage_results WHERE stage_id = $1', [stageId]);
+
+  // Calculate same_time_group for all results
+  const sameTimeGroupMap = calculateSameTimeGroups(results);
+
+  // Insert results with same_time_group
+  for (let i = 0; i < results.length; i++) {
+    const result = results[i];
+    const sameTimeGroup = sameTimeGroupMap.get(i);
 
     await client.query(
       `INSERT INTO stage_results (stage_id, rider_id, position, time_seconds, same_time_group)
@@ -582,6 +608,54 @@ async function calculateStijgerVanDeDag(client, stageId) {
 }
 
 /**
+ * Helper function to save awards for winners
+ * Handles award ID lookup, deletion of existing awards, and insertion of new awards
+ * @param {Object} client - PostgreSQL client
+ * @param {string} awardCode - Award code (e.g., 'COMEBACK', 'LUCKY_LOSER', 'TEAMWORK')
+ * @param {number} stageId - Stage ID
+ * @param {Array<{participant_id: number}>} winners - Array of winner objects with participant_id
+ * @param {string} logMessage - Custom log message to append
+ * @returns {Promise<void>}
+ */
+async function saveAwardsForWinners(client, awardCode, stageId, winners, logMessage = '') {
+  if (!winners || winners.length === 0) {
+    return;
+  }
+
+  // Get award ID
+  const awardQuery = await client.query('SELECT id FROM awards WHERE code = $1', [awardCode]);
+  if (awardQuery.rows.length === 0) {
+    console.warn(`${awardCode} award not found in database, skipping`);
+    return;
+  }
+
+  const awardId = awardQuery.rows[0].id;
+
+  // Delete existing awards for this stage
+  await client.query(
+    'DELETE FROM awards_per_participant WHERE stage_id = $1 AND award_id = $2',
+    [stageId, awardId]
+  );
+
+  // Insert awards for all winners
+  for (const winner of winners) {
+    try {
+      await client.query(
+        `INSERT INTO awards_per_participant (award_id, participant_id, stage_id)
+         VALUES ($1, $2, $3)
+         ON CONFLICT (award_id, participant_id, stage_id) DO NOTHING`,
+        [awardId, winner.participant_id, stageId]
+      );
+    } catch (err) {
+      console.error(`Error inserting ${awardCode} for participant ${winner.participant_id}:`, err.message);
+    }
+  }
+
+  const logSuffix = logMessage ? ` (${logMessage})` : '';
+  console.log(`Awarded ${awardCode} to ${winners.length} participant(s) for stage ${stageId}${logSuffix}`);
+}
+
+/**
  * Calculate cumulative awards (COMEBACK, LUCKY_LOSER, TEAMWORK)
  * These awards are evaluated after each stage but may span multiple stages
  * @param {Object} client - PostgreSQL client
@@ -687,35 +761,14 @@ async function calculateComeback(client, stageId) {
   // Find all participants with maximum improvement (handle ties)
   const winners = rankChanges.filter(r => r.change === maxChange);
   
-  // Get award ID
-  const awardQuery = await client.query("SELECT id FROM awards WHERE code = 'COMEBACK'");
-  if (awardQuery.rows.length === 0) {
-    console.warn('COMEBACK award not found in database, skipping');
-    return;
-  }
-  
-  const awardId = awardQuery.rows[0].id;
-  
-  // Delete existing COMEBACK awards for this stage
-  await client.query(`
-    DELETE FROM awards_per_participant
-    WHERE stage_id = $1 AND award_id = $2
-  `, [stageId, awardId]);
-  
-  // Insert awards for all winners
-  for (const winner of winners) {
-    try {
-      await client.query(`
-        INSERT INTO awards_per_participant (award_id, participant_id, stage_id)
-        VALUES ($1, $2, $3)
-        ON CONFLICT (award_id, participant_id, stage_id) DO NOTHING
-      `, [awardId, winner.participant_id, stageId]);
-    } catch (err) {
-      console.error(`Error inserting COMEBACK for participant ${winner.participant_id}:`, err.message);
-    }
-  }
-  
-  console.log(`Awarded COMEBACK to ${winners.length} participant(s) for stage ${stageId} (improvement: ${maxChange} positions)`);
+  // Save awards using helper function
+  await saveAwardsForWinners(
+    client,
+    'COMEBACK',
+    stageId,
+    winners,
+    `improvement: ${maxChange} positions`
+  );
 }
 
 /**
@@ -763,35 +816,14 @@ async function calculateLuckyLoser(client, stageId) {
     r => parseInt(r.total_points, 10) === maxPoints
   );
   
-  // Get award ID
-  const awardQuery = await client.query("SELECT id FROM awards WHERE code = 'LUCKY_LOSER'");
-  if (awardQuery.rows.length === 0) {
-    console.warn('LUCKY_LOSER award not found in database, skipping');
-    return;
-  }
-  
-  const awardId = awardQuery.rows[0].id;
-  
-  // Delete existing LUCKY_LOSER awards for this stage
-  await client.query(`
-    DELETE FROM awards_per_participant
-    WHERE stage_id = $1 AND award_id = $2
-  `, [stageId, awardId]);
-  
-  // Insert awards for all winners
-  for (const winner of winners) {
-    try {
-      await client.query(`
-        INSERT INTO awards_per_participant (award_id, participant_id, stage_id)
-        VALUES ($1, $2, $3)
-        ON CONFLICT (award_id, participant_id, stage_id) DO NOTHING
-      `, [awardId, winner.participant_id, stageId]);
-    } catch (err) {
-      console.error(`Error inserting LUCKY_LOSER for participant ${winner.participant_id}:`, err.message);
-    }
-  }
-  
-  console.log(`Awarded LUCKY_LOSER to ${winners.length} participant(s) for stage ${stageId} (${minActiveRiders} active riders, ${maxPoints} points)`);
+  // Save awards using helper function
+  await saveAwardsForWinners(
+    client,
+    'LUCKY_LOSER',
+    stageId,
+    winners,
+    `${minActiveRiders} active riders, ${maxPoints} points`
+  );
 }
 
 /**
@@ -867,40 +899,206 @@ async function calculateTeamwork(client, stageId) {
     r => parseInt(r.stages_with_teamwork, 10) === maxStages
   );
   
-  // Get award ID
-  const awardQuery = await client.query("SELECT id FROM awards WHERE code = 'TEAMWORK'");
-  if (awardQuery.rows.length === 0) {
-    console.warn('TEAMWORK award not found in database, skipping');
-    return;
+  // Save awards using helper function
+  await saveAwardsForWinners(
+    client,
+    'TEAMWORK',
+    stageId,
+    winners,
+    `${maxStages} stages with ≥5 riders finishing`
+  );
+}
+
+/**
+ * Deactivate main riders that are DNF/DNS in the current stage
+ * @param {Object} client - PostgreSQL client
+ * @param {number} fantasyTeamId - Fantasy team ID
+ * @param {Array} mainRiders - Array of main riders for this team
+ * @param {Set<number>} dnfRiderIds - Set of rider IDs that are DNF (time_seconds IS NULL)
+ * @param {Set<number>} finishedRiderIds - Set of rider IDs that finished the stage
+ * @returns {Promise<number>} Number of riders deactivated
+ */
+async function deactivateDnfMainRiders(client, fantasyTeamId, mainRiders, dnfRiderIds, finishedRiderIds) {
+  const activeMainRiders = mainRiders.filter(r => r.active);
+  const dnfOrMissingMainRiders = activeMainRiders.filter(rider => {
+    const isDnf = dnfRiderIds.has(rider.rider_id);
+    const isMissing = !finishedRiderIds.has(rider.rider_id); // DNS / no result line
+    return isDnf || isMissing;
+  });
+  
+  // Deactivate DNF/DNS main riders
+  for (const dnfMain of dnfOrMissingMainRiders) {
+    await client.query(
+      'UPDATE fantasy_team_riders SET active = false WHERE id = $1',
+      [dnfMain.id]
+    );
+    console.log(`Deactivated DNF/DNS main rider ${dnfMain.rider_id} in slot ${dnfMain.slot_number} for team ${fantasyTeamId}`);
   }
   
-  const awardId = awardQuery.rows[0].id;
+  return dnfOrMissingMainRiders.length;
+}
+
+/**
+ * Free up slots from inactive main riders by moving them to high slot numbers
+ * This allows reserves to take their place in slots 1-10
+ * @param {Object} client - PostgreSQL client
+ * @param {number} fantasyTeamId - Fantasy team ID
+ * @param {Array} mainRiders - Array of main riders for this team
+ * @returns {Promise<void>}
+ */
+async function freeUpInactiveMainSlots(client, fantasyTeamId, mainRiders) {
+  const inactiveMainRiders = mainRiders.filter(r => !r.active);
+  for (const inactiveMain of inactiveMainRiders) {
+    // Only move if slot is in range 1-10 (reserves might already be in higher slots)
+    if (inactiveMain.slot_number >= 1 && inactiveMain.slot_number <= 10) {
+      await client.query(
+        'UPDATE fantasy_team_riders SET slot_number = 900 + $1 WHERE id = $2',
+        [inactiveMain.slot_number, inactiveMain.id]
+      );
+      console.log(`Freed slot ${inactiveMain.slot_number} from inactive main rider ${inactiveMain.rider_id} for team ${fantasyTeamId}`);
+    }
+  }
+}
+
+/**
+ * Get available main slots (1-10) that are not currently occupied by active main riders
+ * @param {Object} client - PostgreSQL client
+ * @param {number} fantasyTeamId - Fantasy team ID
+ * @returns {Promise<Array<number>>} Array of available slot numbers
+ */
+async function getAvailableMainSlots(client, fantasyTeamId) {
+  const occupiedSlotsQuery = await client.query(
+    `SELECT slot_number
+     FROM fantasy_team_riders
+     WHERE fantasy_team_id = $1
+       AND slot_type = 'main'
+       AND active = true
+       AND slot_number BETWEEN 1 AND 10`,
+    [fantasyTeamId]
+  );
   
-  // Delete existing TEAMWORK awards for this stage (it's recalculated each time)
-  await client.query(`
-    DELETE FROM awards_per_participant
-    WHERE stage_id = $1 AND award_id = $2
-  `, [stageId, awardId]);
-  
-  // Insert awards for all winners
-  for (const winner of winners) {
-    try {
-      await client.query(`
-        INSERT INTO awards_per_participant (award_id, participant_id, stage_id)
-        VALUES ($1, $2, $3)
-        ON CONFLICT (award_id, participant_id, stage_id) DO NOTHING
-      `, [awardId, winner.participant_id, stageId]);
-    } catch (err) {
-      console.error(`Error inserting TEAMWORK for participant ${winner.participant_id}:`, err.message);
+  const occupiedSlots = new Set(occupiedSlotsQuery.rows.map(r => r.slot_number));
+  const availableMainSlots = [];
+  for (let i = 1; i <= 10; i++) {
+    if (!occupiedSlots.has(i)) {
+      availableMainSlots.push(i);
     }
   }
   
-  console.log(`Awarded TEAMWORK to ${winners.length} participant(s) for stage ${stageId} (${maxStages} stages with ≥5 riders finishing)`);
+  return availableMainSlots;
 }
 
-// BUSINESS RULE: Activate reserve riders when main riders drop out (DNF)
-// This function checks which main riders have DNF (time_seconds IS NULL in stage_results)
-// and automatically activates reserve riders to maintain 10 active main riders per team
+/**
+ * Activate reserves for a specific team to fill up to 10 active main riders
+ * @param {Object} client - PostgreSQL client
+ * @param {number} fantasyTeamId - Fantasy team ID
+ * @param {number} neededReserves - Number of reserves needed
+ * @param {number} activeMainCount - Current number of active main riders
+ * @returns {Promise<number>} Number of reserves activated
+ */
+async function activateReservesForTeam(client, fantasyTeamId, neededReserves, activeMainCount) {
+  if (neededReserves <= 0) {
+    return 0;
+  }
+
+  // Get available reserve riders for this team, ordered by slot_number
+  const reserveRidersQuery = await client.query(
+    `SELECT id, rider_id, slot_number
+     FROM fantasy_team_riders
+     WHERE fantasy_team_id = $1
+       AND slot_type = 'reserve'
+       AND active = true
+     ORDER BY slot_number ASC`,
+    [fantasyTeamId]
+  );
+  
+  const availableReserves = reserveRidersQuery.rows;
+  const reservesToActivate = Math.min(neededReserves, availableReserves.length);
+  
+  if (reservesToActivate === 0) {
+    console.log(`Team ${fantasyTeamId} needs ${neededReserves} reserves but none are available`);
+    return 0;
+  }
+
+  // Get available main slots
+  const availableMainSlots = await getAvailableMainSlots(client, fantasyTeamId);
+  
+  let activatedCount = 0;
+  
+  // Activate reserves to fill up to 10 main riders
+  for (let i = 0; i < reservesToActivate && i < availableMainSlots.length; i++) {
+    const reserveToActivate = availableReserves[i];
+    const targetSlot = availableMainSlots[i];
+    
+    try {
+      // Temporarily set the reserve's slot_number to a high value to avoid unique constraint conflicts
+      await client.query(
+        'UPDATE fantasy_team_riders SET slot_number = 999 WHERE id = $1',
+        [reserveToActivate.id]
+      );
+      
+      // Now update to the correct slot
+      const updateResult = await client.query(
+        `UPDATE fantasy_team_riders
+         SET slot_type = 'main', slot_number = $1, active = true
+         WHERE id = $2`,
+        [targetSlot, reserveToActivate.id]
+      );
+      
+      if (updateResult.rowCount === 0) {
+        console.warn(`Failed to update reserve rider ${reserveToActivate.id} - no rows affected`);
+        // Revert slot_number change
+        await client.query(
+          'UPDATE fantasy_team_riders SET slot_number = $1 WHERE id = $2',
+          [reserveToActivate.slot_number, reserveToActivate.id]
+        );
+        continue;
+      }
+      
+      console.log(`Activated reserve rider ${reserveToActivate.rider_id} to slot ${targetSlot} for team ${fantasyTeamId} (filling up to 10 main riders)`);
+      activatedCount++;
+    } catch (updateError) {
+      // If we get a unique constraint violation, log it and continue
+      if (updateError.code === '23505') { // PostgreSQL unique violation
+        console.error(`Unique constraint violation when activating reserve ${reserveToActivate.id} to slot ${targetSlot} for team ${fantasyTeamId}:`, updateError.message);
+        // Try to revert the slot_number change
+        try {
+          await client.query(
+            'UPDATE fantasy_team_riders SET slot_number = $1 WHERE id = $2',
+            [reserveToActivate.slot_number, reserveToActivate.id]
+          );
+        } catch (revertError) {
+          console.error(`Failed to revert slot_number for reserve ${reserveToActivate.id}:`, revertError.message);
+          throw new Error(`Failed to activate reserve and revert failed: ${revertError.message}`);
+        }
+        continue;
+      }
+      // Check if transaction is aborted
+      if (updateError.code === '25P02') {
+        throw updateError;
+      }
+      // For other errors, rethrow
+      throw updateError;
+    }
+  }
+  
+  if (activatedCount < neededReserves) {
+    console.log(`Team ${fantasyTeamId} has ${activeMainCount + activatedCount} active main riders (target: 10, but no more reserves available)`);
+  } else {
+    console.log(`Team ${fantasyTeamId} now has ${activeMainCount + activatedCount} active main riders (target: 10)`);
+  }
+  
+  return activatedCount;
+}
+
+/**
+ * BUSINESS RULE: Activate reserve riders when main riders drop out (DNF)
+ * This function checks which main riders have DNF (time_seconds IS NULL in stage_results)
+ * and automatically activates reserve riders to maintain 10 active main riders per team
+ * @param {Object} client - PostgreSQL client
+ * @param {number} stageId - Stage ID
+ * @returns {Promise<{reservesActivated: number}>} Number of reserves activated
+ */
 async function activateReservesForDroppedRiders(client, stageId) {
   // Get all main riders from all fantasy teams (both active and inactive)
   const mainRidersQuery = await client.query(`
@@ -947,157 +1145,28 @@ async function activateReservesForDroppedRiders(client, stageId) {
   
   // For each fantasy team, check for DNF main riders and activate reserves
   for (const [fantasyTeamId, mainRiders] of teamMainRidersMap) {
-    // STEP 1: Find and deactivate main riders that are DNF/DNS in this stage
-    // Only check active riders (inactive riders are already deactivated)
-    const activeMainRiders = mainRiders.filter(r => r.active);
-    const dnfOrMissingMainRiders = activeMainRiders.filter(rider => {
-      const isDnf = dnfRiderIds.has(rider.rider_id);
-      const isMissing = !finishedRiderIds.has(rider.rider_id); // DNS / no result line
-      return isDnf || isMissing;
-    });
+    // STEP 1: Deactivate main riders that are DNF/DNS in this stage
+    await deactivateDnfMainRiders(client, fantasyTeamId, mainRiders, dnfRiderIds, finishedRiderIds);
     
-    // Deactivate DNF/DNS main riders
-    for (const dnfMain of dnfOrMissingMainRiders) {
-      await client.query(`
-        UPDATE fantasy_team_riders
-        SET active = false
-        WHERE id = $1
-      `, [dnfMain.id]);
-      console.log(`Deactivated DNF/DNS main rider ${dnfMain.rider_id} in slot ${dnfMain.slot_number} for team ${fantasyTeamId}`);
-    }
-    
-    // STEP 2: Free up slots from inactive main riders (move them to high slot numbers)
-    // This allows reserves to take their place
-    const inactiveMainRiders = mainRiders.filter(r => !r.active);
-    for (const inactiveMain of inactiveMainRiders) {
-      // Only move if slot is in range 1-10 (reserves might already be in higher slots)
-      if (inactiveMain.slot_number >= 1 && inactiveMain.slot_number <= 10) {
-        await client.query(`
-          UPDATE fantasy_team_riders
-          SET slot_number = 900 + $1
-          WHERE id = $2
-        `, [inactiveMain.slot_number, inactiveMain.id]);
-        console.log(`Freed slot ${inactiveMain.slot_number} from inactive main rider ${inactiveMain.rider_id} for team ${fantasyTeamId}`);
-      }
-    }
+    // STEP 2: Free up slots from inactive main riders
+    await freeUpInactiveMainSlots(client, fantasyTeamId, mainRiders);
     
     // STEP 3: Count how many active main riders remain (after deactivating DNF riders)
-    const activeMainCountQuery = await client.query(`
-      SELECT COUNT(*) as count
-      FROM fantasy_team_riders
-      WHERE fantasy_team_id = $1
-        AND slot_type = 'main'
-        AND active = true
-    `, [fantasyTeamId]);
+    const activeMainCountQuery = await client.query(
+      `SELECT COUNT(*) as count
+       FROM fantasy_team_riders
+       WHERE fantasy_team_id = $1 AND slot_type = 'main' AND active = true`,
+      [fantasyTeamId]
+    );
     
     const activeMainCount = parseInt(activeMainCountQuery.rows[0].count, 10);
     const targetMainCount = 10;
     const neededReserves = Math.max(0, targetMainCount - activeMainCount);
     
-    // STEP 4: Always check if we need to activate reserves (even if no new DNF riders)
+    // STEP 4: Activate reserves if needed
     if (neededReserves > 0) {
-      // Get available reserve riders for this team, ordered by slot_number
-      const reserveRidersQuery = await client.query(`
-        SELECT 
-          id,
-          rider_id,
-          slot_number
-        FROM fantasy_team_riders
-        WHERE fantasy_team_id = $1
-          AND slot_type = 'reserve'
-          AND active = true
-        ORDER BY slot_number ASC
-      `, [fantasyTeamId]);
-      
-      const availableReserves = reserveRidersQuery.rows;
-      const reservesToActivate = Math.min(neededReserves, availableReserves.length);
-      
-      // Find available main slots (1-10) that are not currently occupied by active main riders
-      const occupiedSlotsQuery = await client.query(`
-        SELECT slot_number
-        FROM fantasy_team_riders
-        WHERE fantasy_team_id = $1
-          AND slot_type = 'main'
-          AND active = true
-          AND slot_number BETWEEN 1 AND 10
-      `, [fantasyTeamId]);
-      
-      const occupiedSlots = new Set(occupiedSlotsQuery.rows.map(r => r.slot_number));
-      const availableMainSlots = [];
-      for (let i = 1; i <= 10; i++) {
-        if (!occupiedSlots.has(i)) {
-          availableMainSlots.push(i);
-        }
-      }
-      
-      // STEP 4: Activate reserves to fill up to 10 main riders
-      for (let i = 0; i < reservesToActivate && i < availableMainSlots.length; i++) {
-        const reserveToActivate = availableReserves[i];
-        const targetSlot = availableMainSlots[i];
-        
-        try {
-          // Temporarily set the reserve's slot_number to a high value to avoid unique constraint conflicts
-          await client.query(`
-            UPDATE fantasy_team_riders
-            SET slot_number = 999
-            WHERE id = $1
-          `, [reserveToActivate.id]);
-          
-          // Now update to the correct slot
-          const updateResult = await client.query(`
-            UPDATE fantasy_team_riders
-            SET slot_type = 'main',
-                slot_number = $1,
-                active = true
-            WHERE id = $2
-          `, [targetSlot, reserveToActivate.id]);
-          
-          if (updateResult.rowCount === 0) {
-            console.warn(`Failed to update reserve rider ${reserveToActivate.id} - no rows affected`);
-            // Revert slot_number change
-            await client.query(`
-              UPDATE fantasy_team_riders
-              SET slot_number = $1
-              WHERE id = $2
-            `, [reserveToActivate.slot_number, reserveToActivate.id]);
-            continue;
-          }
-          
-          console.log(`Activated reserve rider ${reserveToActivate.rider_id} to slot ${targetSlot} for team ${fantasyTeamId} (filling up to 10 main riders)`);
-          totalReservesActivated++;
-        } catch (updateError) {
-          // If we get a unique constraint violation, log it and continue
-          if (updateError.code === '23505') { // PostgreSQL unique violation
-            console.error(`Unique constraint violation when activating reserve ${reserveToActivate.id} to slot ${targetSlot} for team ${fantasyTeamId}:`, updateError.message);
-            // Try to revert the slot_number change
-            try {
-              await client.query(`
-                UPDATE fantasy_team_riders
-                SET slot_number = $1
-                WHERE id = $2
-              `, [reserveToActivate.slot_number, reserveToActivate.id]);
-            } catch (revertError) {
-              console.error(`Failed to revert slot_number for reserve ${reserveToActivate.id}:`, revertError.message);
-              // If revert fails, we need to rollback the transaction
-              throw new Error(`Failed to activate reserve and revert failed: ${revertError.message}`);
-            }
-            continue;
-          }
-          // Check if transaction is aborted
-          if (updateError.code === '25P02') {
-            // Transaction is aborted, we can't continue
-            throw updateError;
-          }
-          // For other errors, rethrow
-          throw updateError;
-        }
-      }
-      
-      if (reservesToActivate < neededReserves) {
-        console.log(`Team ${fantasyTeamId} has ${activeMainCount + reservesToActivate} active main riders (target: 10, but no more reserves available)`);
-      } else {
-        console.log(`Team ${fantasyTeamId} now has ${activeMainCount + reservesToActivate} active main riders (target: 10)`);
-      }
+      const activated = await activateReservesForTeam(client, fantasyTeamId, neededReserves, activeMainCount);
+      totalReservesActivated += activated;
     } else if (activeMainCount === 10) {
       console.log(`Team ${fantasyTeamId} already has 10 active main riders`);
     }
@@ -1106,7 +1175,12 @@ async function activateReservesForDroppedRiders(client, stageId) {
   return { reservesActivated: totalReservesActivated };
 }
 
-// Helper function to check if a stage is the final stage
+/**
+ * Check if a stage is the final stage (highest stage number)
+ * @param {Object} client - PostgreSQL client
+ * @param {number} stageId - Stage ID to check
+ * @returns {Promise<boolean>} True if this is the final stage
+ */
 async function isFinalStage(client, stageId) {
   // Get the stage number of the current stage
   const currentStageQuery = await client.query(

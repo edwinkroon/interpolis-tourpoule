@@ -78,7 +78,8 @@ exports.handler = async function(event) {
       const ridersQuery = `
         SELECT slot_type, COUNT(*) as count
         FROM fantasy_team_riders
-        WHERE fantasy_team_id = $1 AND active = true
+        WHERE fantasy_team_id = $1 
+          AND (active = true OR slot_type = 'reserve')
         GROUP BY slot_type
       `;
       const ridersResult = await client.query(ridersQuery, [fantasyTeamId]);

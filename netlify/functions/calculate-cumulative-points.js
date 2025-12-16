@@ -17,24 +17,53 @@ async function calculateCumulativePoints(client, stageId) {
   // Calculate cumulative points for each participant up to this stage
   // Include all participants, even if they don't have entries for all stages
   // Calculate total_points directly from components to avoid issues with dbgenerated column
+  // Use a subquery to ensure we always get a value, even if there are no matches
   const cumulativeQuery = `
     SELECT 
       p.id as participant_id,
-      COALESCE(SUM(
-        COALESCE(fsp.points_stage, 0) + 
-        COALESCE(fsp.points_jerseys, 0) + 
-        COALESCE(fsp.points_bonus, 0)
-      ), 0) as total_points
+      COALESCE(
+        (
+          SELECT SUM(
+            COALESCE(fsp2.points_stage, 0) + 
+            COALESCE(fsp2.points_jerseys, 0) + 
+            COALESCE(fsp2.points_bonus, 0)
+          )
+          FROM fantasy_stage_points fsp2
+          WHERE fsp2.participant_id = p.id
+            AND fsp2.stage_id IN (
+              SELECT id FROM stages WHERE stage_number <= $1
+            )
+        ),
+        0
+      ) as total_points
     FROM participants p
-    LEFT JOIN fantasy_stage_points fsp ON fsp.participant_id = p.id
-      AND fsp.stage_id IN (
-      SELECT id FROM stages WHERE stage_number <= $1
-    )
-    GROUP BY p.id
-    ORDER BY total_points DESC, p.team_name ASC
+    ORDER BY 
+      COALESCE(
+        (
+          SELECT SUM(
+            COALESCE(fsp2.points_stage, 0) + 
+            COALESCE(fsp2.points_jerseys, 0) + 
+            COALESCE(fsp2.points_bonus, 0)
+          )
+          FROM fantasy_stage_points fsp2
+          WHERE fsp2.participant_id = p.id
+            AND fsp2.stage_id IN (
+              SELECT id FROM stages WHERE stage_number <= $1
+            )
+        ),
+        0
+      ) DESC, 
+      p.team_name ASC
   `;
 
   const cumulativeResult = await client.query(cumulativeQuery, [stageNumber]);
+
+  // Debug: Log the results to see what we're getting
+  console.log(`Calculating cumulative points for stage ${stageNumber} (stageId: ${stageId})`);
+  console.log(`Found ${cumulativeResult.rows.length} participants`);
+  if (cumulativeResult.rows.length > 0) {
+    console.log(`Sample participant: participant_id=${cumulativeResult.rows[0].participant_id}, total_points=${cumulativeResult.rows[0].total_points} (type: ${typeof cumulativeResult.rows[0].total_points})`);
+  }
 
   // Assign ranks (handle ties - same points = same rank)
   let currentRank = 1;
@@ -42,10 +71,13 @@ async function calculateCumulativePoints(client, stageId) {
   const rankedParticipants = [];
 
   cumulativeResult.rows.forEach((row, index) => {
-    if (previousPoints !== null && row.total_points < previousPoints) {
+    // Ensure total_points is a number
+    const totalPoints = parseInt(row.total_points, 10) || 0;
+    
+    if (previousPoints !== null && totalPoints < previousPoints) {
       // Points decreased, increment rank
       currentRank = index + 1;
-    } else if (previousPoints !== null && row.total_points === previousPoints) {
+    } else if (previousPoints !== null && totalPoints === previousPoints) {
       // Same points, keep same rank
       // currentRank stays the same
     } else {
@@ -55,11 +87,11 @@ async function calculateCumulativePoints(client, stageId) {
 
     rankedParticipants.push({
       participant_id: row.participant_id,
-      total_points: row.total_points,
+      total_points: totalPoints,
       rank: currentRank
     });
 
-    previousPoints = row.total_points;
+    previousPoints = totalPoints;
   });
 
   // Insert or update cumulative points

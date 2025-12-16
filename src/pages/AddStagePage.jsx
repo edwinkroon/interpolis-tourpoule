@@ -227,11 +227,38 @@ export function AddStagePage() {
       });
 
       if (res?.ok) {
-        setImportMessage(
-          res.replacedExisting
-            ? `Uitslag succesvol geïmporteerd! ${res.existingCount} bestaande resultaten zijn overschreven.`
-            : 'De etappe uitslag is succesvol geïmporteerd naar de database.'
-        );
+        // Log detailed information to console for debugging
+        console.log('=== Import Stage Results Response ===');
+        console.log('Points calculated:', res.pointsCalculated);
+        console.log('Participants calculated:', res.participantsCalculated);
+        console.log('Awards calculated:', res.awardsCalculated);
+        console.log('Cumulative calculated:', res.cumulativeCalculated);
+        if (res.pointsError) {
+          console.error('Points calculation error:', res.pointsError);
+        }
+        if (res.awardsError) {
+          console.error('Awards calculation error:', res.awardsError);
+        }
+        if (res.cumulativeError) {
+          console.error('Cumulative calculation error:', res.cumulativeError);
+        }
+        console.log('Full response:', res);
+        
+        let message = res.replacedExisting
+          ? `Uitslag succesvol geïmporteerd! ${res.existingCount} bestaande resultaten zijn overschreven.`
+          : 'De etappe uitslag is succesvol geïmporteerd naar de database.';
+        
+        // Add warnings if points calculation failed
+        if (!res.pointsCalculated) {
+          message += '\n\n⚠️ Waarschuwing: Puntenberekening is mislukt. Controleer de logs.';
+          if (res.pointsError) {
+            message += `\nFout: ${res.pointsError}`;
+          }
+        } else if (res.participantsCalculated === 0) {
+          message += '\n\n⚠️ Waarschuwing: Geen punten berekend voor participants. Controleer of er scoring rules zijn ingesteld en of teams riders hebben.';
+        }
+        
+        setImportMessage(message);
         setImportSuccess(true);
 
         setResultsText('');

@@ -242,12 +242,18 @@ async function calculatePositionPoints(client, stageId, stageResults, isNeutrali
      WHERE rule_type = 'stage_position'`
   );
 
+  console.log(`  Found ${scoringRules.rows.length} scoring rules for stage positions`);
+  if (scoringRules.rows.length === 0) {
+    console.warn('  WARNING: No scoring rules found for stage positions! Points will be 0.');
+  }
+
   // Create a map of position -> points
   const positionPointsMap = new Map();
   scoringRules.rows.forEach(rule => {
     const condition = rule.condition_json;
     if (condition && condition.position) {
       positionPointsMap.set(condition.position, rule.points);
+      console.log(`  Position ${condition.position} = ${rule.points} points`);
     }
   });
 
@@ -1231,13 +1237,14 @@ async function calculateStagePoints(client, stageId) {
     for (const participant of allParticipants.rows) {
       await client.query(
         `INSERT INTO fantasy_stage_points 
-         (stage_id, participant_id, points_stage, points_jerseys, points_bonus)
-         VALUES ($1, $2, 0, 0, 0)
+         (stage_id, participant_id, points_stage, points_jerseys, points_bonus, total_points)
+         VALUES ($1, $2, 0, 0, 0, 0)
          ON CONFLICT (stage_id, participant_id)
          DO UPDATE SET
            points_stage = 0,
            points_jerseys = 0,
-           points_bonus = 0`,
+           points_bonus = 0,
+           total_points = 0`,
         [stageId, participant.id]
       );
     }
@@ -1276,9 +1283,20 @@ async function calculateStagePoints(client, stageId) {
 
   // Step 3: Calculate points per rider type
   const isNeutralized = stageCheck.rows.length > 0 && stageCheck.rows[0].is_neutralized;
+  console.log(`  Stage ${stageId}: isNeutralized=${isNeutralized}, isFinal=${isFinal}`);
+  console.log(`  Found ${stageResults.length} stage results`);
+  console.log(`  Found ${fantasyTeams.length} fantasy team riders`);
+  
   const riderPositionPoints = await calculatePositionPoints(client, stageId, stageResults, isNeutralized);
   const riderJerseyPoints = await calculateJerseyPoints(client, stageId, isFinal);
   const riderBonusPoints = await calculateBonusPoints(client, stageId);
+  
+  console.log(`  Position points map size: ${riderPositionPoints.size}`);
+  console.log(`  Jersey points map size: ${riderJerseyPoints.size}`);
+  if (riderPositionPoints.size > 0) {
+    const samplePos = Array.from(riderPositionPoints.entries())[0];
+    console.log(`  Sample position points: rider_id=${samplePos[0]}, points=${samplePos[1]}`);
+  }
 
   // Step 4: Aggregate points per participant
   const participantPoints = aggregatePointsPerParticipant(
@@ -1287,22 +1305,30 @@ async function calculateStagePoints(client, stageId) {
     riderJerseyPoints,
     riderBonusPoints
   );
+  
+  console.log(`  Calculated points for ${participantPoints.size} participants`);
+  if (participantPoints.size > 0) {
+    const samplePart = Array.from(participantPoints.entries())[0];
+    console.log(`  Sample participant: participant_id=${samplePart[0]}, points_stage=${samplePart[1].points_stage}, points_jerseys=${samplePart[1].points_jerseys}, points_bonus=${samplePart[1].points_bonus}`);
+  }
 
   // Step 6: Insert or update fantasy_stage_points
-  
+  // Calculate total_points explicitly to ensure it's set correctly
   let insertedCount = 0;
   for (const [participantId, points] of participantPoints) {
     try {
+      const totalPoints = points.points_stage + points.points_jerseys + points.points_bonus;
       const result = await client.query(
         `INSERT INTO fantasy_stage_points 
-         (stage_id, participant_id, points_stage, points_jerseys, points_bonus)
-         VALUES ($1, $2, $3, $4, $5)
+         (stage_id, participant_id, points_stage, points_jerseys, points_bonus, total_points)
+         VALUES ($1, $2, $3, $4, $5, $6)
          ON CONFLICT (stage_id, participant_id)
          DO UPDATE SET
            points_stage = EXCLUDED.points_stage,
            points_jerseys = EXCLUDED.points_jerseys,
-           points_bonus = EXCLUDED.points_bonus`,
-        [stageId, participantId, points.points_stage, points.points_jerseys, points.points_bonus]
+           points_bonus = EXCLUDED.points_bonus,
+           total_points = EXCLUDED.points_stage + EXCLUDED.points_jerseys + EXCLUDED.points_bonus`,
+        [stageId, participantId, points.points_stage, points.points_jerseys, points.points_bonus, totalPoints]
       );
       insertedCount++;
     } catch (insertError) {
@@ -1321,13 +1347,14 @@ async function calculateStagePoints(client, stageId) {
       try {
         await client.query(
           `INSERT INTO fantasy_stage_points 
-           (stage_id, participant_id, points_stage, points_jerseys, points_bonus)
-           VALUES ($1, $2, 0, 0, 0)
+           (stage_id, participant_id, points_stage, points_jerseys, points_bonus, total_points)
+           VALUES ($1, $2, 0, 0, 0, 0)
            ON CONFLICT (stage_id, participant_id)
            DO UPDATE SET
              points_stage = 0,
              points_jerseys = 0,
-             points_bonus = 0`,
+             points_bonus = 0,
+             total_points = 0`,
           [stageId, participant.id]
         );
       } catch (insertError) {
@@ -1339,6 +1366,125 @@ async function calculateStagePoints(client, stageId) {
   
 
   return { participantsCalculated: participantPoints.size };
+}
+
+/**
+ * Calculate and update total_points for each rider in fantasy_team_riders
+ * This sums up all points earned by each rider across all stages
+ * @param {Object} client - PostgreSQL client
+ * @param {number} stageId - Stage ID (optional, if provided only updates after this stage)
+ */
+async function updateRiderTotalPoints(client, stageId = null) {
+  try {
+    // First, ensure the total_points column exists
+    await client.query(`
+      ALTER TABLE fantasy_team_riders 
+      ADD COLUMN IF NOT EXISTS total_points INT DEFAULT 0
+    `);
+    
+    // Get max stage number to determine final stage
+    const maxStageResult = await client.query(`
+      SELECT MAX(stage_number) as max_stage FROM stages
+    `);
+    const maxStageNumber = maxStageResult.rows[0]?.max_stage || 0;
+    
+    // Reset all total_points to 0 first
+    await client.query(`
+      UPDATE fantasy_team_riders SET total_points = 0
+    `);
+    
+    // Get all unique riders
+    const allRiders = await client.query(`
+      SELECT DISTINCT rider_id FROM fantasy_team_riders
+    `);
+    
+    // Calculate total points for each rider
+    for (const riderRow of allRiders.rows) {
+      const riderId = riderRow.rider_id;
+      let totalPoints = 0;
+      
+      // Get all stage results for this rider
+      const stageResults = await client.query(`
+        SELECT sr.stage_id, sr.position, s.is_neutralized, s.stage_number
+        FROM stage_results sr
+        JOIN stages s ON sr.stage_id = s.id
+        WHERE sr.rider_id = $1
+        ORDER BY s.stage_number
+      `, [riderId]);
+      
+      for (const stageResult of stageResults.rows) {
+        const stageId = stageResult.stage_id;
+        const position = stageResult.position;
+        const isNeutralized = stageResult.is_neutralized;
+        const stageNumber = stageResult.stage_number;
+        
+        // Add position points (if not neutralized)
+        if (!isNeutralized && position) {
+          const positionRule = await client.query(`
+            SELECT points 
+            FROM scoring_rules 
+            WHERE rule_type = 'stage_position' 
+              AND (condition_json->>'position')::int = $1
+            LIMIT 1
+          `, [position]);
+          if (positionRule.rows.length > 0) {
+            totalPoints += parseInt(positionRule.rows[0].points, 10) || 0;
+          }
+        }
+        
+        // Add jersey points (if not final stage)
+        if (stageNumber < maxStageNumber) {
+          const jerseyWearers = await client.query(`
+            SELECT j.type as jersey_type
+            FROM stage_jersey_wearers sjw
+            JOIN jerseys j ON sjw.jersey_id = j.id
+            WHERE sjw.stage_id = $1 AND sjw.rider_id = $2
+          `, [stageId, riderId]);
+          
+          for (const jersey of jerseyWearers.rows) {
+            const jerseyRule = await client.query(`
+              SELECT points 
+              FROM scoring_rules 
+              WHERE rule_type = 'jersey' 
+                AND condition_json->>'jersey_type' = $1
+              LIMIT 1
+            `, [jersey.jersey_type]);
+            if (jerseyRule.rows.length > 0) {
+              totalPoints += parseInt(jerseyRule.rows[0].points, 10) || 0;
+            }
+          }
+        }
+        
+        // Add final classification points (if this is the final stage)
+        if (stageNumber === maxStageNumber && position) {
+          const finalRule = await client.query(`
+            SELECT points 
+            FROM scoring_rules 
+            WHERE rule_type = 'final_classification' 
+              AND (condition_json->>'position')::int = $1
+            LIMIT 1
+          `, [position]);
+          if (finalRule.rows.length > 0) {
+            totalPoints += parseInt(finalRule.rows[0].points, 10) || 0;
+          }
+        }
+      }
+      
+      // Update total_points for this rider in all fantasy teams
+      await client.query(`
+        UPDATE fantasy_team_riders
+        SET total_points = $1
+        WHERE rider_id = $2
+      `, [totalPoints, riderId]);
+    }
+    
+    console.log(`Updated total_points for ${allRiders.rows.length} riders`);
+  } catch (err) {
+    // If column doesn't exist or update fails, log but don't throw
+    console.error('Error updating rider total_points:', err.message);
+    console.error('Error stack:', err.stack);
+    // Don't throw - this is not critical for the import process
+  }
 }
 
 // Export functions for testing/manual use
@@ -1460,9 +1606,11 @@ exports.handler = async function(event) {
       let cumulativeError = null;
       
       try {
+        console.log(`=== Starting points calculation for stage ${stageId} ===`);
         const pointsResult = await calculateStagePoints(client, stageId);
         pointsCalculated = true;
         participantsCalculated = pointsResult.participantsCalculated;
+        console.log(`=== Points calculation completed: ${participantsCalculated} participants ===`);
         
         // Verify that points were actually inserted
         const verifyQuery = await client.query(
@@ -1471,8 +1619,34 @@ exports.handler = async function(event) {
         );
         const actualCount = parseInt(verifyQuery.rows[0].count, 10);
         
+        // Check if there are any non-zero points
+        const pointsCheckQuery = await client.query(
+          `SELECT 
+            COUNT(*) as total_count,
+            COUNT(CASE WHEN points_stage > 0 OR points_jerseys > 0 OR points_bonus > 0 THEN 1 END) as non_zero_count,
+            SUM(points_stage) as total_stage_points,
+            SUM(points_jerseys) as total_jersey_points,
+            SUM(points_bonus) as total_bonus_points
+           FROM fantasy_stage_points WHERE stage_id = $1`,
+          [stageId]
+        );
+        const pointsCheck = pointsCheckQuery.rows[0];
+        
+        console.log(`  Verification: ${actualCount} entries created`);
+        console.log(`  Non-zero entries: ${pointsCheck.non_zero_count}`);
+        console.log(`  Total stage points: ${pointsCheck.total_stage_points || 0}`);
+        console.log(`  Total jersey points: ${pointsCheck.total_jersey_points || 0}`);
+        console.log(`  Total bonus points: ${pointsCheck.total_bonus_points || 0}`);
+        
         if (actualCount === 0) {
           console.warn('WARNING: Points calculation reported success but no entries were created!');
+        } else if (pointsCheck.non_zero_count === 0) {
+          console.warn('WARNING: Points calculation created entries but all points are 0!');
+          console.warn('  This could mean:');
+          console.warn('  1. No scoring rules are configured');
+          console.warn('  2. No fantasy teams have riders with results');
+          console.warn('  3. Stage is neutralized');
+          console.warn('  4. No jerseys were assigned');
         }
         
         // Calculate awards after stage points are calculated
@@ -1493,6 +1667,14 @@ exports.handler = async function(event) {
           cumulativeError = err;
           console.error('Error calculating cumulative points:', err);
           // Don't fail the import if cumulative points calculation fails
+        }
+        
+        // Update total_points per rider in fantasy_team_riders
+        try {
+          await updateRiderTotalPoints(client, stageId);
+        } catch (err) {
+          console.error('Error updating rider total_points:', err);
+          // Don't fail the import if rider points update fails
         }
         
         // BUSINESS RULE: Calculate final classification and final jersey points if this is the final stage
@@ -1520,6 +1702,7 @@ exports.handler = async function(event) {
         console.error('Error detail:', err.detail);
         console.error('Error hint:', err.hint);
         console.error('Full error object:', JSON.stringify(err, Object.getOwnPropertyNames(err)));
+        // Don't re-throw - we want to continue with the import even if points calculation fails
       }
       
       // Fase 6: Logging - Samenvatting van import

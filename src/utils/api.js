@@ -270,4 +270,8 @@ export const api = {
       body: JSON.stringify({ userId, riderIds }),
     });
   },
+
+  async checkTeamChangesAllowed() {
+    return await fetchJson('/.netlify/functions/check-team-changes-allowed');
+  },
 };

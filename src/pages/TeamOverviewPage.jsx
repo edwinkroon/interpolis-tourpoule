@@ -34,6 +34,7 @@ export function TeamOverviewPage() {
   const [allRiders, setAllRiders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [changesAllowed, setChangesAllowed] = useState(true);
 
   // Modal states
   const [addRidersModalOpen, setAddRidersModalOpen] = useState(false);
@@ -66,11 +67,12 @@ export function TeamOverviewPage() {
         if (cancelled) return;
         setUserId(id);
 
-        const [userRes, ridersRes, jerseysRes, allRidersRes] = await Promise.all([
+        const [userRes, ridersRes, jerseysRes, allRidersRes, changesAllowedRes] = await Promise.all([
           api.getUser(id),
           api.getTeamRiders(id),
           api.getTeamJerseys(id),
           api.getAllRiders(),
+          api.checkTeamChangesAllowed(),
         ]);
 
         if (cancelled) return;
@@ -79,6 +81,7 @@ export function TeamOverviewPage() {
         setTeamRiders(ridersRes?.ok && Array.isArray(ridersRes.riders) ? ridersRes.riders : []);
         setTeamJerseys(jerseysRes?.ok && Array.isArray(jerseysRes.jerseys) ? jerseysRes.jerseys : []);
         setAllRiders(allRidersRes?.ok && Array.isArray(allRidersRes.riders) ? allRidersRes.riders : []);
+        setChangesAllowed(changesAllowedRes?.ok && changesAllowedRes?.changesAllowed === true);
 
         // Pre-fill jersey assignments
         if (jerseysRes?.ok && Array.isArray(jerseysRes.jerseys)) {
@@ -379,15 +382,17 @@ export function TeamOverviewPage() {
             title="Truien"
             contentClassName="riders-list-container"
             actions={
-              <button
-                className="button"
-                type="button"
-                onClick={handleOpenAssignJerseys}
-                aria-label="Wijs truien toe"
-              >
-                <span>Truien toewijzen</span>
-                <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
-              </button>
+              changesAllowed && (
+                <button
+                  className="button"
+                  type="button"
+                  onClick={handleOpenAssignJerseys}
+                  aria-label="Wijs truien toe"
+                >
+                  <span>toewijzen</span>
+                  <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+                </button>
+              )
             }
           >
             <div className="tile-list" id="jerseys-list-container">
@@ -430,28 +435,30 @@ export function TeamOverviewPage() {
             title={`Basisrenners (${mainRiders.length})`}
             contentClassName="riders-list-container"
             actions={
-              <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'row' }}>
-                <button
-                  className="button"
-                  type="button"
-                  onClick={() => handleOpenAddRiders('main')}
-                  aria-label="Voeg basisrenners toe"
-                >
-                  <span>Renners toevoegen</span>
-                  <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
-                </button>
-                {mainRiders.length > 0 && (
+              changesAllowed && (
+                <div style={{ display: 'flex', gap: '1.5rem', flexDirection: 'row' }}>
                   <button
                     className="button"
                     type="button"
-                    onClick={() => handleOpenRemoveRiders('main')}
-                    aria-label="Verwijder basisrenners"
+                    onClick={() => handleOpenAddRiders('main')}
+                    aria-label="Voeg basisrenners toe"
                   >
-                    <span>Renners verwijderen</span>
-                    <img src="/assets/arrow.svg" alt="" className="action-arrow" style={{ filter: 'brightness(0) saturate(100%) invert(20%) sepia(95%) saturate(7471%) hue-rotate(352deg) brightness(95%) contrast(118%)' }} aria-hidden="true" />
+                    <span>toevoegen</span>
+                    <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
                   </button>
-                )}
-              </div>
+                  {mainRiders.length > 0 && (
+                    <button
+                      className="button"
+                      type="button"
+                      onClick={() => handleOpenRemoveRiders('main')}
+                      aria-label="Verwijder basisrenners"
+                    >
+                      <span>verwijderen</span>
+                      <img src="/assets/arrow.svg" alt="" className="action-arrow" style={{ filter: 'brightness(0) saturate(100%) invert(20%) sepia(95%) saturate(7471%) hue-rotate(352deg) brightness(95%) contrast(118%)' }} aria-hidden="true" />
+                    </button>
+                  )}
+                </div>
+              )
             }
           >
             <div className="tile-list" id="main-riders-list-container">
@@ -473,28 +480,30 @@ export function TeamOverviewPage() {
             title={`Reserverenners (${reserveRiders.length})`}
             contentClassName="riders-list-container"
             actions={
-              <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'row' }}>
-                <button
-                  className="button"
-                  type="button"
-                  onClick={() => handleOpenAddRiders('reserve')}
-                  aria-label="Voeg reserverenners toe"
-                >
-                  <span>Renners toevoegen</span>
-                  <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
-                </button>
-                {reserveRiders.length > 0 && (
+              changesAllowed && (
+                <div style={{ display: 'flex', gap: '1.5rem', flexDirection: 'row' }}>
                   <button
                     className="button"
                     type="button"
-                    onClick={() => handleOpenRemoveRiders('reserve')}
-                    aria-label="Verwijder reserverenners"
+                    onClick={() => handleOpenAddRiders('reserve')}
+                    aria-label="Voeg reserverenners toe"
                   >
-                    <span>Renners verwijderen</span>
-                    <img src="/assets/arrow.svg" alt="" className="action-arrow" style={{ filter: 'brightness(0) saturate(100%) invert(20%) sepia(95%) saturate(7471%) hue-rotate(352deg) brightness(95%) contrast(118%)' }} aria-hidden="true" />
+                    <span>toevoegen</span>
+                    <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
                   </button>
-                )}
-              </div>
+                  {reserveRiders.length > 0 && (
+                    <button
+                      className="button"
+                      type="button"
+                      onClick={() => handleOpenRemoveRiders('reserve')}
+                      aria-label="Verwijder reserverenners"
+                    >
+                      <span>verwijderen</span>
+                      <img src="/assets/arrow.svg" alt="" className="action-arrow" style={{ filter: 'brightness(0) saturate(100%) invert(20%) sepia(95%) saturate(7471%) hue-rotate(352deg) brightness(95%) contrast(118%)' }} aria-hidden="true" />
+                    </button>
+                  )}
+                </div>
+              )
             }
           >
             <div className="tile-list" id="reserve-riders-list-container">

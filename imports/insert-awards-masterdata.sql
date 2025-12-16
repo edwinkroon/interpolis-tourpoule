@@ -118,9 +118,9 @@ BEGIN
   -- PUNTENVRETER
   IF NOT EXISTS (SELECT 1 FROM awards WHERE code = 'PUNTENVRETER') THEN
     INSERT INTO awards (stage_id, code, title, description, icon)
-    VALUES (NULL, 'PUNTENVRETER', 'De Puntenvreter', 'Hoogste totaalpunten over alle etappes.', NULL);
+    VALUES (NULL, 'PUNTENVRETER', 'De Puntenvreter', 'Hoogste totaalpunten over alle etappes.', 'icons/Iconpng/puntenvreter.png');
   ELSE
-    UPDATE awards SET title = 'De Puntenvreter', description = 'Hoogste totaalpunten over alle etappes.', icon = NULL WHERE code = 'PUNTENVRETER';
+    UPDATE awards SET title = 'De Puntenvreter', description = 'Hoogste totaalpunten over alle etappes.', icon = 'icons/Iconpng/puntenvreter.png' WHERE code = 'PUNTENVRETER';
   END IF;
 
   -- DAGWINNERVRETER
@@ -134,49 +134,49 @@ BEGIN
   -- TRUIEN
   IF NOT EXISTS (SELECT 1 FROM awards WHERE code = 'TRUIEN') THEN
     INSERT INTO awards (stage_id, code, title, description, icon)
-    VALUES (NULL, 'TRUIEN', 'Truienverzamelaar', 'Meeste punten uit truien (geel/groen/bolletjes/wit).', NULL);
+    VALUES (NULL, 'TRUIEN', 'Truienverzamelaar', 'Meeste punten uit truien (geel/groen/bolletjes/wit).', 'icons/Iconpng/Truien.png');
   ELSE
-    UPDATE awards SET title = 'Truienverzamelaar', description = 'Meeste punten uit truien (geel/groen/bolletjes/wit).', icon = NULL WHERE code = 'TRUIEN';
+    UPDATE awards SET title = 'Truienverzamelaar', description = 'Meeste punten uit truien (geel/groen/bolletjes/wit).', icon = 'icons/Iconpng/Truien.png' WHERE code = 'TRUIEN';
   END IF;
 
   -- TEAMWORK
   IF NOT EXISTS (SELECT 1 FROM awards WHERE code = 'TEAMWORK') THEN
     INSERT INTO awards (stage_id, code, title, description, icon)
-    VALUES (NULL, 'TEAMWORK', 'Teamwork Makes the Dream Work', 'Meeste etappes waarin ≥5 renners punten scoren.', NULL);
+    VALUES (NULL, 'TEAMWORK', 'Teamwork Makes the Dream Work', 'Meeste etappes waarin ≥5 renners punten scoren.', 'icons/Iconpng/TeamWork.png');
   ELSE
-    UPDATE awards SET title = 'Teamwork Makes the Dream Work', description = 'Meeste etappes waarin ≥5 renners punten scoren.', icon = NULL WHERE code = 'TEAMWORK';
+    UPDATE awards SET title = 'Teamwork Makes the Dream Work', description = 'Meeste etappes waarin ≥5 renners punten scoren.', icon = 'icons/Iconpng/TeamWork.png' WHERE code = 'TEAMWORK';
   END IF;
 
   -- KOP_OVER_KOP
   IF NOT EXISTS (SELECT 1 FROM awards WHERE code = 'KOP_OVER_KOP') THEN
     INSERT INTO awards (stage_id, code, title, description, icon)
-    VALUES (NULL, 'KOP_OVER_KOP', 'Kop-over-Kop', 'Vaakst de nummer 1-positie in het klassement overgenomen.', NULL);
+    VALUES (NULL, 'KOP_OVER_KOP', 'Kop-over-Kop', 'Vaakst de nummer 1-positie in het klassement overgenomen.', 'icons/Iconpng/KopOverKop.png');
   ELSE
-    UPDATE awards SET title = 'Kop-over-Kop', description = 'Vaakst de nummer 1-positie in het klassement overgenomen.', icon = NULL WHERE code = 'KOP_OVER_KOP';
+    UPDATE awards SET title = 'Kop-over-Kop', description = 'Vaakst de nummer 1-positie in het klassement overgenomen.', icon = 'icons/Iconpng/KopOverKop.png' WHERE code = 'KOP_OVER_KOP';
   END IF;
 
   -- MID_RANGE
   IF NOT EXISTS (SELECT 1 FROM awards WHERE code = 'MID_RANGE') THEN
     INSERT INTO awards (stage_id, code, title, description, icon)
-    VALUES (NULL, 'MID_RANGE', 'Mister/Miss Negentig', 'Beste gemiddelde score in ritten van 90-120 km.', NULL);
+    VALUES (NULL, 'MID_RANGE', 'Mister/Miss Negentig', 'Beste gemiddelde score in ritten van 90-120 km.', 'icons/Iconpng/MidRange.png');
   ELSE
-    UPDATE awards SET title = 'Mister/Miss Negentig', description = 'Beste gemiddelde score in ritten van 90-120 km.', icon = NULL WHERE code = 'MID_RANGE';
+    UPDATE awards SET title = 'Mister/Miss Negentig', description = 'Beste gemiddelde score in ritten van 90-120 km.', icon = 'icons/Iconpng/MidRange.png' WHERE code = 'MID_RANGE';
   END IF;
 
   -- STILLE_WATEREN
   IF NOT EXISTS (SELECT 1 FROM awards WHERE code = 'STILLE_WATEREN') THEN
     INSERT INTO awards (stage_id, code, title, description, icon)
-    VALUES (NULL, 'STILLE_WATEREN', 'Stille Wateren', 'Top-5 eindklassering met de minste prikbordberichten.', NULL);
+    VALUES (NULL, 'STILLE_WATEREN', 'Stille Wateren', 'Top-5 eindklassering met de minste prikbordberichten.', 'icons/Iconpng/STILLE_WATEREN.png');
   ELSE
-    UPDATE awards SET title = 'Stille Wateren', description = 'Top-5 eindklassering met de minste prikbordberichten.', icon = NULL WHERE code = 'STILLE_WATEREN';
+    UPDATE awards SET title = 'Stille Wateren', description = 'Top-5 eindklassering met de minste prikbordberichten.', icon = 'icons/Iconpng/STILLE_WATEREN.png' WHERE code = 'STILLE_WATEREN';
   END IF;
 
   -- PLOEGLEIDER
   IF NOT EXISTS (SELECT 1 FROM awards WHERE code = 'PLOEGLEIDER') THEN
     INSERT INTO awards (stage_id, code, title, description, icon)
-    VALUES (NULL, 'PLOEGLEIDER', 'Ploegleider van het Jaar', 'Hoogste eindsaldo na alle etappes (incl. trui/bonus).', NULL);
+    VALUES (NULL, 'PLOEGLEIDER', 'Ploegleider van het Jaar', 'Hoogste eindsaldo na alle etappes (incl. trui/bonus).', 'icons/Iconpng/Ploegleider.png');
   ELSE
-    UPDATE awards SET title = 'Ploegleider van het Jaar', description = 'Hoogste eindsaldo na alle etappes (incl. trui/bonus).', icon = NULL WHERE code = 'PLOEGLEIDER';
+    UPDATE awards SET title = 'Ploegleider van het Jaar', description = 'Hoogste eindsaldo na alle etappes (incl. trui/bonus).', icon = 'icons/Iconpng/Ploegleider.png' WHERE code = 'PLOEGLEIDER';
   END IF;
 
   -- STIJGER_VD_DAG (heeft icon)

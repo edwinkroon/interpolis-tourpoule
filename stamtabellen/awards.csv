@@ -11,14 +11,14 @@ id,stage_id,code,title,description,icon
 10,,LUCKY_LOSER,Lucky Loser,Beste etappescore met het kleinste aantal actieve renners.,
 11,,STOFFEERDER,De Stoffeerder,Hoogste score met de laagst geprijsde selectie.,
 12,,UNDERDOG,Underdog Whisperer,Meeste punten van renners met lage populariteit.,
-13,,PUNTENVRETER,De Puntenvreter,Hoogste totaalpunten over alle etappes.,
+13,,PUNTENVRETER,De Puntenvreter,Hoogste totaalpunten over alle etappes.,icons/Iconpng/puntenvreter.png
 14,,DAGWINNERVRETER,Dagwinnervreter,Meeste etappe-overwinningen (dagwinst).,
-15,,TRUIEN,Truienverzamelaar,Meeste punten uit truien (geel/groen/bolletjes/wit).,
-16,,TEAMWORK,Teamwork Makes the Dream Work,Meeste etappes waarin ≥5 renners punten scoren.,
-17,,KOP_OVER_KOP,Kop-over-Kop,Vaakst de nummer 1-positie in het klassement overgenomen.,
-18,,MID_RANGE,Mister/Miss Negentig,Beste gemiddelde score in ritten van 90-120 km.,
-19,,STILLE_WATEREN,Stille Wateren,Top-5 eindklassering met de minste prikbordberichten.,
-20,,PLOEGLEIDER,Ploegleider van het Jaar,Hoogste eindsaldo na alle etappes (incl. trui/bonus).,
+15,,TRUIEN,Truienverzamelaar,Meeste punten uit truien (geel/groen/bolletjes/wit).,icons/Iconpng/Truien.png
+16,,TEAMWORK,Teamwork Makes the Dream Work,Meeste etappes waarin ≥5 renners punten scoren.,icons/Iconpng/TeamWork.png
+17,,KOP_OVER_KOP,Kop-over-Kop,Vaakst de nummer 1-positie in het klassement overgenomen.,icons/Iconpng/KopOverKop.png
+18,,MID_RANGE,Mister/Miss Negentig,Beste gemiddelde score in ritten van 90-120 km.,icons/Iconpng/MidRange.png
+19,,STILLE_WATEREN,Stille Wateren,Top-5 eindklassering met de minste prikbordberichten.,icons/Iconpng/STILLE_WATEREN.png
+20,,PLOEGLEIDER,Ploegleider van het Jaar,Hoogste eindsaldo na alle etappes (incl. trui/bonus).,icons/Iconpng/Ploegleider.png
 21,,STIJGER_VD_DAG,Stijger van de dag,Grootste klassementssprong in de meest recente etappe.,icons/icoonstijgervandedag.svg
 22,,PODIUM_1,Dagwinnaar,1e plaats in een etappe (meeste etappepunten).,icons/IcoonEerstePlaats.svg
 23,,PODIUM_2,Tweede plaats,2e plaats in een etappe (tweede etappepunten).,icons/icoontweedeplaats.svg

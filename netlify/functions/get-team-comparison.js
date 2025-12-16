@@ -70,7 +70,7 @@ exports.handler = async function(event) {
     const fantasyTeamResult = await client.query(fantasyTeamQuery, [participantId]);
     const fantasyTeamId = fantasyTeamResult.rows.length > 0 ? fantasyTeamResult.rows[0].id : null;
 
-    // Get team riders (both main and reserve)
+    // Get team riders (both main and reserve, active and inactive)
     const ridersQuery = `
       SELECT 
         r.id,
@@ -79,13 +79,13 @@ exports.handler = async function(event) {
         r.photo_url,
         tp.name as team_name,
         ftr.slot_type,
-        ftr.slot_number
+        ftr.slot_number,
+        ftr.active
       FROM fantasy_team_riders ftr
       INNER JOIN fantasy_teams ft ON ftr.fantasy_team_id = ft.id
       INNER JOIN riders r ON ftr.rider_id = r.id
       LEFT JOIN teams_pro tp ON r.team_pro_id = tp.id
       WHERE ft.participant_id = $1
-        AND ftr.active = true
       ORDER BY ftr.slot_type ASC, ftr.slot_number ASC
     `;
     
@@ -223,7 +223,7 @@ exports.handler = async function(event) {
       slotNumber: row.slot_number,
       jerseys: currentJerseyWearersMap.get(row.id) || [], // Only current jersey wearers
       totalPoints: riderPointsMap.get(row.id) || 0,
-      isActive: activeRiderIds.has(row.id) // Whether rider is still active
+      isActive: activeRiderIds.has(row.id) && row.active === true // Whether rider is still active AND marked as active in team
     }));
 
     // Get latest standings to find rank and total points (reuse latestStageId from above)

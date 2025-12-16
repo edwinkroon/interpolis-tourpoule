@@ -16,7 +16,7 @@ export function HomePage() {
   const navigate = useNavigate();
   const { userId, participant } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
-  const [points, setPoints] = useState({ totalPoints: 0, riders: [], route: '' });
+  const [points, setPoints] = useState({ totalPoints: 0, totalCumulativePoints: 0, riders: [], route: '' });
   const [standings, setStandings] = useState([]);
   const [prikbord, setPrikbord] = useState([]);
   const [dailyWinners, setDailyWinners] = useState([]);
@@ -66,6 +66,7 @@ export function HomePage() {
         if (pointsRes?.ok) {
           setPoints({
             totalPoints: pointsRes.totalPoints || 0,
+            totalCumulativePoints: pointsRes.totalCumulativePoints || 0,
             riders: pointsRes.riders || [],
             route: pointsRes.route || '',
           });
@@ -73,6 +74,7 @@ export function HomePage() {
           console.error('Error loading points:', pointsRes.error);
           setPoints({
             totalPoints: 0,
+            totalCumulativePoints: 0,
             riders: [],
             route: '',
           });

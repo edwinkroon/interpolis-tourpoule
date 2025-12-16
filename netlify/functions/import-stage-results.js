@@ -932,13 +932,13 @@ async function deactivateDnfMainRiders(client, fantasyTeamId, mainRiders, dnfRid
     return isDnf || isMissing;
   });
   
-  // Deactivate DNF/DNS main riders
+  // Deactivate DNF/DNS main riders and mark them as out_of_race
   for (const dnfMain of dnfOrMissingMainRiders) {
     await client.query(
-      'UPDATE fantasy_team_riders SET active = false WHERE id = $1',
+      'UPDATE fantasy_team_riders SET active = false, out_of_race = true WHERE id = $1',
       [dnfMain.id]
     );
-    console.log(`Deactivated DNF/DNS main rider ${dnfMain.rider_id} in slot ${dnfMain.slot_number} for team ${fantasyTeamId}`);
+    console.log(`Deactivated DNF/DNS main rider ${dnfMain.rider_id} in slot ${dnfMain.slot_number} for team ${fantasyTeamId} and marked as out_of_race`);
   }
   
   return dnfOrMissingMainRiders.length;
@@ -1012,7 +1012,7 @@ async function activateReservesForTeam(client, fantasyTeamId, neededReserves, ac
 
   // Get ALL reserve riders for this team (not just active ones), ordered by slot_number
   const reserveRidersQuery = await client.query(
-    `SELECT id, rider_id, slot_number, active
+    `SELECT id, rider_id, slot_number, active, out_of_race
      FROM fantasy_team_riders
      WHERE fantasy_team_id = $1
        AND slot_type = 'reserve'
@@ -1020,9 +1020,13 @@ async function activateReservesForTeam(client, fantasyTeamId, neededReserves, ac
     [fantasyTeamId]
   );
   
-  // Filter out reserve riders that are DNF/DNS in this stage
-  // Only use reserves that are still active (not DNF/DNS)
+  // Filter out reserve riders that are DNF/DNS in this stage or marked as out_of_race
+  // Only use reserves that are still active (not DNF/DNS and not out_of_race)
   const availableReserves = reserveRidersQuery.rows.filter(reserve => {
+    // Skip if already marked as out_of_race
+    if (reserve.out_of_race === true) {
+      return false;
+    }
     const isDnf = dnfRiderIds.has(reserve.rider_id);
     const isMissing = !finishedRiderIds.has(reserve.rider_id); // DNS / no result line
     // Skip reserves that are DNF/DNS in this stage
@@ -1159,6 +1163,25 @@ async function activateReservesForDroppedRiders(client, stageId) {
     }
     teamMainRidersMap.get(rider.fantasy_team_id).push(rider);
   });
+  
+  // Mark all reserve riders as out_of_race if they are DNS/DNF
+  // This prevents them from being activated later
+  await client.query(`
+    UPDATE fantasy_team_riders ftr
+    SET out_of_race = true
+    WHERE ftr.slot_type = 'reserve'
+      AND (
+        ftr.rider_id = ANY($1::int[]) -- DNF riders
+        OR NOT EXISTS (
+          SELECT 1 FROM stage_results sr 
+          WHERE sr.rider_id = ftr.rider_id 
+            AND sr.stage_id = $2
+        ) -- DNS riders (no result in this stage)
+      )
+      AND EXISTS (
+        SELECT 1 FROM stage_results sr WHERE sr.stage_id = $2
+      ) -- Only if stage has results
+  `, [Array.from(dnfRiderIds), stageId]);
   
   // Track total reserves activated across all teams
   let totalReservesActivated = 0;

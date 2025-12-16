@@ -48,11 +48,17 @@ export function TeamOverviewPage() {
   const [jerseyAssignments, setJerseyAssignments] = useState({});
   const [saving, setSaving] = useState(false);
 
-  const mainRiders = useMemo(() => teamRiders.filter((r) => r.slot_type === 'main'), [teamRiders]);
-  const reserveRiders = useMemo(() => teamRiders.filter((r) => r.slot_type === 'reserve'), [teamRiders]);
-  const currentTypeRiders = useMemo(() => 
-    riderModalType === 'main' ? mainRiders : riderModalType === 'reserve' ? reserveRiders : []
-  , [riderModalType, mainRiders, reserveRiders]);
+  const mainRiders = useMemo(() => teamRiders.filter((r) => r.slot_type === 'main' && r.active === true), [teamRiders]);
+  const reserveRiders = useMemo(() => teamRiders.filter((r) => r.slot_type === 'reserve' && r.active === true), [teamRiders]);
+  const inactiveRiders = useMemo(() => teamRiders.filter((r) => r.active === false), [teamRiders]);
+  const currentTypeRiders = useMemo(() => {
+    if (riderModalType === 'main') {
+      return teamRiders.filter((r) => r.slot_type === 'main' && r.active === true);
+    } else if (riderModalType === 'reserve') {
+      return teamRiders.filter((r) => r.slot_type === 'reserve' && r.active === true);
+    }
+    return [];
+  }, [riderModalType, teamRiders]);
 
   const teamRiderIds = useMemo(() => new Set(teamRiders.map(r => r.id)), [teamRiders]);
   const currentTypeRiderIds = useMemo(() => new Set(currentTypeRiders.map(r => r.id)), [currentTypeRiders]);
@@ -525,6 +531,30 @@ export function TeamOverviewPage() {
               ))}
             </div>
           </Tile>
+
+          {/* Inactive Riders */}
+          {inactiveRiders.length > 0 && (
+            <Tile
+              title={`Niet-actieve renners (${inactiveRiders.length})`}
+              contentClassName="riders-list-container"
+            >
+              <div className="tile-list" id="inactive-riders-list-container">
+                {inactiveRiders.map((r) => (
+                  <ListItem
+                    key={r.id}
+                    avatarPhotoUrl={r.photo_url}
+                    avatarAlt={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
+                    avatarInitials={initialsFromRider(r.first_name, r.last_name)}
+                    title={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
+                    subtitle={r.team_name || undefined}
+                    avatarIsDnf={r.is_dnf || false}
+                    avatarIsActive={false}
+                    avatarHasBorder={true}
+                  />
+                ))}
+              </div>
+            </Tile>
+          )}
         </div>
       </div>
 

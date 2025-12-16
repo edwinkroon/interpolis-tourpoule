@@ -48,6 +48,34 @@ exports.handler = async function(event) {
       const results = [];
       let totalActivated = 0;
 
+      // Get latest stage with results for DNF/DNS checking
+      const latestStageQuery = await client.query(
+        `SELECT id FROM stages 
+         WHERE id IN (SELECT DISTINCT stage_id FROM stage_results)
+         ORDER BY stage_number DESC LIMIT 1`
+      );
+      
+      let stageId = null;
+      let dnfRiderIds = new Set();
+      let finishedRiderIds = new Set();
+      
+      if (latestStageQuery.rows.length > 0) {
+        stageId = latestStageQuery.rows[0].id;
+        const stageResultsQuery = await client.query(
+          `SELECT rider_id, time_seconds
+           FROM stage_results
+           WHERE stage_id = $1`,
+          [stageId]
+        );
+        
+        finishedRiderIds = new Set(stageResultsQuery.rows.map(r => r.rider_id));
+        dnfRiderIds = new Set(
+          stageResultsQuery.rows
+            .filter(r => r.time_seconds === null)
+            .map(r => r.rider_id)
+        );
+      }
+
       await client.query('BEGIN');
 
       try {
@@ -68,7 +96,10 @@ exports.handler = async function(event) {
               client,
               team.fantasy_team_id,
               neededReserves,
-              activeMainCount
+              activeMainCount,
+              stageId,
+              dnfRiderIds,
+              finishedRiderIds
             );
             
             if (activated > 0) {
@@ -156,11 +187,47 @@ exports.handler = async function(event) {
         };
       }
 
+      // Get latest stage with results for DNF/DNS checking
+      const latestStageQuery = await client.query(
+        `SELECT id FROM stages 
+         WHERE id IN (SELECT DISTINCT stage_id FROM stage_results)
+         ORDER BY stage_number DESC LIMIT 1`
+      );
+      
+      let stageId = null;
+      let dnfRiderIds = new Set();
+      let finishedRiderIds = new Set();
+      
+      if (latestStageQuery.rows.length > 0) {
+        stageId = latestStageQuery.rows[0].id;
+        const stageResultsQuery = await client.query(
+          `SELECT rider_id, time_seconds
+           FROM stage_results
+           WHERE stage_id = $1`,
+          [stageId]
+        );
+        
+        finishedRiderIds = new Set(stageResultsQuery.rows.map(r => r.rider_id));
+        dnfRiderIds = new Set(
+          stageResultsQuery.rows
+            .filter(r => r.time_seconds === null)
+            .map(r => r.rider_id)
+        );
+      }
+
       // Activate reserves
       await client.query('BEGIN');
       
       try {
-        const activated = await activateReservesForTeam(client, fantasyTeamId, neededReserves, activeMainCount);
+        const activated = await activateReservesForTeam(
+          client, 
+          fantasyTeamId, 
+          neededReserves, 
+          activeMainCount,
+          stageId,
+          dnfRiderIds,
+          finishedRiderIds
+        );
         
         await client.query('COMMIT');
         await client.end();

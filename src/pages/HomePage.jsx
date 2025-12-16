@@ -457,9 +457,9 @@ export function HomePage() {
               <div className="dashboard-column">
                 <Tile
                   className="standings-section"
-                  title="Stand"
+                  title="Totaalstand"
                   info={{
-                    title: 'Stand',
+                    title: 'Totaalstand',
                     text: 'Hier zie je de top van het klassement op basis van de totale punten.',
                   }}
                   actions={

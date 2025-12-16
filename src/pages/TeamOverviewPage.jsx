@@ -471,6 +471,8 @@ export function TeamOverviewPage() {
                   avatarInitials={initialsFromRider(r.first_name, r.last_name)}
                   title={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
                   subtitle={r.team_name || undefined}
+                  avatarIsDnf={r.is_dnf || false}
+                  avatarIsActive={r.active || false}
                 />
               ))}
             </div>
@@ -516,6 +518,9 @@ export function TeamOverviewPage() {
                   avatarInitials={initialsFromRider(r.first_name, r.last_name)}
                   title={`${r.first_name || ''} ${r.last_name || ''}`.trim()}
                   subtitle={r.team_name || undefined}
+                  avatarIsDnf={r.is_dnf || false}
+                  avatarIsActive={r.active || false}
+                  avatarHasBorder={!r.active || false}
                 />
               ))}
             </div>

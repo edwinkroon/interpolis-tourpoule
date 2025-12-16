@@ -8,6 +8,9 @@ export function RiderAvatar({
   imgClassName,
   placeholderClassName,
   placeholderInnerClassName,
+  isDnf = false,
+  isActive = false,
+  hasBorder = false,
 }) {
   const [imgError, setImgError] = useState(false);
 
@@ -18,18 +21,37 @@ export function RiderAvatar({
 
   const showImg = Boolean(photoUrl) && !imgError;
 
+  // Build additional classes based on state
+  const containerClasses = [containerClassName];
+  const imgClasses = [imgClassName];
+  const placeholderClasses = [placeholderClassName];
+
+  if (isDnf) {
+    containerClasses.push('rider-avatar-dnf');
+    imgClasses.push('rider-avatar-img-dnf');
+    placeholderClasses.push('rider-avatar-placeholder-dnf');
+  }
+  if (isActive) {
+    containerClasses.push('rider-avatar-active');
+    imgClasses.push('rider-avatar-img-active');
+    placeholderClasses.push('rider-avatar-placeholder-active');
+  }
+  if (hasBorder) {
+    containerClasses.push('rider-avatar-border');
+  }
+
   return (
-    <div className={containerClassName}>
+    <div className={containerClasses.join(' ')}>
       {showImg ? (
         <img
           src={photoUrl}
           alt={alt || ''}
-          className={imgClassName}
+          className={imgClasses.join(' ')}
           onError={() => setImgError(true)}
         />
       ) : null}
 
-      <div className={placeholderClassName} style={{ display: showImg ? 'none' : 'flex' }} aria-hidden={showImg ? 'true' : 'false'}>
+      <div className={placeholderClasses.join(' ')} style={{ display: showImg ? 'none' : 'flex' }} aria-hidden={showImg ? 'true' : 'false'}>
         {placeholderInnerClassName ? <span className={placeholderInnerClassName}>{safeInitials}</span> : safeInitials}
       </div>
     </div>

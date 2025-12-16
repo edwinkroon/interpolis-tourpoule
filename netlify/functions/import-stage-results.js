@@ -1000,29 +1000,43 @@ async function getAvailableMainSlots(client, fantasyTeamId) {
  * @param {number} fantasyTeamId - Fantasy team ID
  * @param {number} neededReserves - Number of reserves needed
  * @param {number} activeMainCount - Current number of active main riders
+ * @param {number} stageId - Stage ID to check for DNF/DNS
+ * @param {Set<number>} dnfRiderIds - Set of rider IDs that are DNF/DNS in this stage
+ * @param {Set<number>} finishedRiderIds - Set of rider IDs that finished the stage
  * @returns {Promise<number>} Number of reserves activated
  */
-async function activateReservesForTeam(client, fantasyTeamId, neededReserves, activeMainCount) {
+async function activateReservesForTeam(client, fantasyTeamId, neededReserves, activeMainCount, stageId, dnfRiderIds, finishedRiderIds) {
   if (neededReserves <= 0) {
     return 0;
   }
 
-  // Get available reserve riders for this team, ordered by slot_number
+  // Get ALL reserve riders for this team (not just active ones), ordered by slot_number
   const reserveRidersQuery = await client.query(
-    `SELECT id, rider_id, slot_number
+    `SELECT id, rider_id, slot_number, active
      FROM fantasy_team_riders
      WHERE fantasy_team_id = $1
        AND slot_type = 'reserve'
-       AND active = true
      ORDER BY slot_number ASC`,
     [fantasyTeamId]
   );
   
-  const availableReserves = reserveRidersQuery.rows;
+  // Filter out reserve riders that are DNF/DNS in this stage
+  // Only use reserves that are still active (not DNF/DNS)
+  const availableReserves = reserveRidersQuery.rows.filter(reserve => {
+    const isDnf = dnfRiderIds.has(reserve.rider_id);
+    const isMissing = !finishedRiderIds.has(reserve.rider_id); // DNS / no result line
+    // Skip reserves that are DNF/DNS in this stage
+    return !isDnf && !isMissing;
+  });
+  
   const reservesToActivate = Math.min(neededReserves, availableReserves.length);
   
   if (reservesToActivate === 0) {
-    console.log(`Team ${fantasyTeamId} needs ${neededReserves} reserves but none are available`);
+    if (availableReserves.length === 0) {
+      console.log(`Team ${fantasyTeamId} needs ${neededReserves} reserves but all reserves are DNF/DNS or unavailable`);
+    } else {
+      console.log(`Team ${fantasyTeamId} needs ${neededReserves} reserves but none are available`);
+    }
     return 0;
   }
 
@@ -1171,7 +1185,7 @@ async function activateReservesForDroppedRiders(client, stageId) {
     
     // STEP 4: Activate reserves if needed
     if (neededReserves > 0) {
-      const activated = await activateReservesForTeam(client, fantasyTeamId, neededReserves, activeMainCount);
+      const activated = await activateReservesForTeam(client, fantasyTeamId, neededReserves, activeMainCount, stageId, dnfRiderIds, finishedRiderIds);
       totalReservesActivated += activated;
     } else if (activeMainCount === 10) {
       console.log(`Team ${fantasyTeamId} already has 10 active main riders`);

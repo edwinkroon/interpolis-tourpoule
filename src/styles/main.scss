@@ -348,6 +348,55 @@
   text-align: center;
 }
 
+// Rider avatar states (DNS/DNF, active, border)
+.rider-avatar-dnf,
+.list-item-avatar-container.rider-avatar-dnf {
+  filter: grayscale(100%);
+  opacity: 0.6;
+  border-radius: 50%;
+}
+
+.rider-avatar-img-dnf,
+.list-item-avatar-img.rider-avatar-img-dnf {
+  filter: grayscale(100%);
+  opacity: 0.6;
+}
+
+.rider-avatar-placeholder-dnf,
+.list-item-avatar-container.rider-avatar-placeholder-dnf {
+  filter: grayscale(100%);
+  opacity: 0.6;
+  background: #e0e0e0;
+  border-radius: 50%;
+}
+
+.rider-avatar-active,
+.list-item-avatar-container.rider-avatar-active {
+  border: 2px solid #18AA2E;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(24, 170, 46, 0.2);
+}
+
+.rider-avatar-img-active,
+.list-item-avatar-img.rider-avatar-img-active {
+  // Image itself doesn't need special styling, border is on container
+}
+
+.rider-avatar-placeholder-active,
+.list-item-avatar-container.rider-avatar-placeholder-active {
+  border: 2px solid #18AA2E;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(24, 170, 46, 0.2);
+  background: #f0f9f2;
+}
+
+.rider-avatar-border,
+.list-item-avatar-container.rider-avatar-border {
+  border: 2px solid #cdd7dc;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(205, 215, 220, 0.3);
+}
+
 // Left value (in plaats van avatar, bijv. positie/rank)
 .list-item-left-value {
   font-size: 16px;

@@ -25,6 +25,8 @@ export function HomePage() {
   const [awards, setAwards] = useState([]);
   const [awardsLoading, setAwardsLoading] = useState(true);
   const [awardsError, setAwardsError] = useState(null);
+  const [teamStatus, setTeamStatus] = useState(null);
+  const [teamStatusLoading, setTeamStatusLoading] = useState(true);
 
   const top5 = useMemo(() => standings.slice(0, 5), [standings]);
   const myStanding = useMemo(() => {
@@ -49,12 +51,13 @@ export function HomePage() {
 
     (async () => {
       try {
-        const [adminRes, pointsRes, standingsRes, prikbordRes, dailyWinnersRes] = await Promise.all([
+        const [adminRes, pointsRes, standingsRes, prikbordRes, dailyWinnersRes, teamStatusRes] = await Promise.all([
           api.checkAdmin(userId),
           api.getMyPointsRiders(userId),
           api.getStandings(),
           api.getPrikbordMessages(),
           api.getDailyWinners(),
+          api.getTeamStatus(userId),
         ]);
 
         if (cancelled) return;
@@ -66,10 +69,22 @@ export function HomePage() {
             riders: pointsRes.riders || [],
             route: pointsRes.route || '',
           });
+        } else if (pointsRes?.error) {
+          console.error('Error loading points:', pointsRes.error);
+          setPoints({
+            totalPoints: 0,
+            riders: [],
+            route: '',
+          });
         }
         if (standingsRes?.ok && Array.isArray(standingsRes.standings)) setStandings(standingsRes.standings);
         if (prikbordRes?.ok && Array.isArray(prikbordRes.messages)) setPrikbord(prikbordRes.messages);
         if (dailyWinnersRes?.ok && Array.isArray(dailyWinnersRes.winners)) setDailyWinners(dailyWinnersRes.winners);
+        if (teamStatusRes?.ok) {
+          setTeamStatus(teamStatusRes);
+        }
+        setTeamStatusLoading(false);
+        
         try {
           const participantId = participant?.id ?? participant?.participantId ?? participant?.participant_id ?? null;
           const awardsRes = await api.getAwardsLatest(3, participantId);
@@ -167,11 +182,94 @@ export function HomePage() {
               </div>
             ) : null}
 
-            <div className="dashboard-grid">
-              <div className="dashboard-column">
-                <Tile
-                  className="daily-winners-section"
-                  title="Dagwinnaars"
+            {/* Team Status Tile - Only show if first stage doesn't exist or has no results */}
+            {teamStatus && (!teamStatus.firstStageExists || !teamStatus.firstStageHasResults) && (
+              <Tile
+                className="team-status-section"
+                title="Team Status"
+                info={{
+                  title: 'Team Status',
+                  text: 'Hier zie je of je team compleet is en wat je nog moet doen.',
+                }}
+                actions={
+                  <button
+                    className="button"
+                    type="button"
+                    onClick={() => navigate('/teamoverzicht.html')}
+                    aria-label="Bekijk mijn team"
+                  >
+                    <span>mijn team</span>
+                    <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+                  </button>
+                }
+              >
+                {teamStatusLoading ? (
+                  <div className="no-data">Bezig met laden...</div>
+                ) : teamStatus.teamStatus?.isComplete ? (
+                  <div className="team-status-complete">
+                    <div className="team-status-message" style={{ color: '#28a745', fontWeight: 'bold', marginBottom: '1rem' }}>
+                      ✓ Je team is compleet!
+                    </div>
+                    <div className="team-status-details">
+                      <div>• {teamStatus.teamStatus.mainRidersCount} van {teamStatus.teamStatus.requiredMainRiders} basisrenners</div>
+                      <div>• {teamStatus.teamStatus.reserveRidersCount} van {teamStatus.teamStatus.requiredReserveRiders} reserverenners</div>
+                      <div>• {teamStatus.teamStatus.jerseysAssignedCount} van {teamStatus.teamStatus.requiredJerseys} truien toegewezen</div>
+                    </div>
+                    {teamStatus.firstStageDate && (
+                      <div className="team-status-note" style={{ marginTop: '1rem', fontSize: '0.9rem', color: '#666' }}>
+                        Je kunt je team nog aanpassen tot {new Date(teamStatus.firstStageDate).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })} (start eerste etappe).
+                      </div>
+                    )}
+                    {teamStatus.registrationDeadline && (
+                      <div className="team-status-note" style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: '#666' }}>
+                        Of tot {new Date(teamStatus.registrationDeadline).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })} (deadline).
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="team-status-incomplete">
+                    <div className="team-status-message" style={{ color: '#ff6b6b', fontWeight: 'bold', marginBottom: '1rem' }}>
+                      Maak je team compleet!
+                    </div>
+                    <div className="team-status-todo">
+                      {!teamStatus.teamStatus?.hasAllMainRiders && (
+                        <div style={{ marginBottom: '0.5rem' }}>
+                          • Voeg {teamStatus.teamStatus?.requiredMainRiders - (teamStatus.teamStatus?.mainRidersCount || 0)} basisrenner{teamStatus.teamStatus?.requiredMainRiders - (teamStatus.teamStatus?.mainRidersCount || 0) !== 1 ? 's' : ''} toe ({teamStatus.teamStatus?.mainRidersCount || 0} van {teamStatus.teamStatus?.requiredMainRiders})
+                        </div>
+                      )}
+                      {!teamStatus.teamStatus?.hasAllReserveRiders && (
+                        <div style={{ marginBottom: '0.5rem' }}>
+                          • Voeg {teamStatus.teamStatus?.requiredReserveRiders - (teamStatus.teamStatus?.reserveRidersCount || 0)} reserverenner{teamStatus.teamStatus?.requiredReserveRiders - (teamStatus.teamStatus?.reserveRidersCount || 0) !== 1 ? 's' : ''} toe ({teamStatus.teamStatus?.reserveRidersCount || 0} van {teamStatus.teamStatus?.requiredReserveRiders})
+                        </div>
+                      )}
+                      {!teamStatus.teamStatus?.hasAllJerseys && (
+                        <div style={{ marginBottom: '0.5rem' }}>
+                          • Wijs {teamStatus.teamStatus?.requiredJerseys - (teamStatus.teamStatus?.jerseysAssignedCount || 0)} trui{teamStatus.teamStatus?.requiredJerseys - (teamStatus.teamStatus?.jerseysAssignedCount || 0) !== 1 ? 'en' : ''} toe aan renners ({teamStatus.teamStatus?.jerseysAssignedCount || 0} van {teamStatus.teamStatus?.requiredJerseys})
+                        </div>
+                      )}
+                    </div>
+                    {teamStatus.firstStageDate && (
+                      <div className="team-status-note" style={{ marginTop: '1rem', fontSize: '0.9rem', color: '#666' }}>
+                        Je kunt je team aanpassen tot {new Date(teamStatus.firstStageDate).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })} (start eerste etappe).
+                      </div>
+                    )}
+                    {teamStatus.registrationDeadline && (
+                      <div className="team-status-note" style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: '#666' }}>
+                        Of tot {new Date(teamStatus.registrationDeadline).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })} (deadline).
+                      </div>
+                    )}
+                  </div>
+                )}
+              </Tile>
+            )}
+
+            {/* Only show other tiles if first stage has results */}
+            {teamStatus && teamStatus.firstStageHasResults ? (
+              <div className="dashboard-grid">
+                <div className="dashboard-column">
+                  <Tile
+                    className="daily-winners-section"
+                    title="Dagwinnaars"
                   info={{
                     title: 'Dagwinnaars',
                     text: 'Hier zie je de top 3 teams van de laatste etappe met hun dagelijkse punten.',
@@ -464,6 +562,7 @@ export function HomePage() {
                 </Tile>
               </div>
             </div>
+            ) : null}
           </div>
         </div>
       </main>

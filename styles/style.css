@@ -244,7 +244,7 @@ h2 {
   border-radius: 0 0 20px 20px;
   overflow: visible;
   position: relative;
-  z-index: 100;
+  z-index: 1;
   padding-bottom: 3rem; /* Extra space for navigation bar overlay */
 }
 .header-content {
@@ -2751,7 +2751,6 @@ button[aria-busy="true"] {
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem 2rem;
-  border-bottom: 1px solid #cdd7dc;
   flex-shrink: 0;
 }
 .modal-title {
@@ -2790,7 +2789,6 @@ button[aria-busy="true"] {
   padding: 1.5rem 2rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
 }
 .modal-warning-message {
   padding: 1rem;
@@ -2848,6 +2846,7 @@ button[aria-busy="true"] {
   overflow-y: auto;
   flex: 1;
   min-height: 200px;
+  margin: 1rem 0;
 }
 .modal-rider-item {
   display: flex;
@@ -2868,6 +2867,22 @@ button[aria-busy="true"] {
 }
 .modal-rider-item.rider-disabled:hover {
   background: #f5f5f5;
+}
+.modal-rider-item.rider-in-team {
+  background: #e8f5e9;
+}
+.modal-rider-item.rider-selected {
+  background: #c8e6c9;
+}
+.modal-rider-item.rider-main-rider {
+  background: #f5f5f5;
+  color: #999;
+}
+.modal-rider-item.rider-main-rider .rider-name {
+  color: #999;
+}
+.modal-rider-item.rider-main-rider .rider-team {
+  color: #bbb;
 }
 .rider-status {
   font-size: 12px;
@@ -2928,7 +2943,6 @@ button[aria-busy="true"] {
 }
 .modal-footer {
   padding: 1.5rem 2rem;
-  border-top: 1px solid #cdd7dc;
   flex-shrink: 0;
 }
 .modal-add-button {
@@ -2975,6 +2989,7 @@ button[aria-busy="true"] {
   }
   .modal-content {
     padding: 1rem 1.5rem;
+    padding-bottom: 0;
   }
   .modal-footer {
     padding: 1rem 1.5rem;

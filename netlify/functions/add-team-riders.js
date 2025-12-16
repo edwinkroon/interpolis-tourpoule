@@ -32,6 +32,7 @@ exports.handler = async function(event) {
 
     const userId = body.userId;
     const riderIds = body.riderIds; // Array of rider IDs
+    const slotType = body.slotType; // Optional: 'main' or 'reserve'
 
     if (!userId || !Array.isArray(riderIds) || riderIds.length === 0) {
       return {
@@ -201,19 +202,42 @@ exports.handler = async function(event) {
         }
       }
 
-      // Add riders to available slots (prefer main slots, then reserves)
+      // Add riders to available slots
       let addedCount = 0;
       let slotIndex = 0;
 
-      for (const riderId of newRiderIds) {
-        let slotType, slotNumber;
+      // If slotType is specified, use only that type
+      const targetSlotType = slotType || null;
+      const useReserveSlots = targetSlotType === 'reserve';
+      const useMainSlots = targetSlotType === 'main' || !targetSlotType;
 
-        if (slotIndex < availableMainSlots.length) {
-          slotType = 'main';
-          slotNumber = availableMainSlots[slotIndex];
-        } else if (slotIndex - availableMainSlots.length < availableReserveSlots.length) {
-          slotType = 'reserve';
-          slotNumber = availableReserveSlots[slotIndex - availableMainSlots.length];
+      for (const riderId of newRiderIds) {
+        let finalSlotType, slotNumber;
+        let active = true;
+
+        if (useReserveSlots) {
+          // Adding as reserve: use reserve slots and set active = false
+          if (slotIndex < availableReserveSlots.length) {
+            finalSlotType = 'reserve';
+            slotNumber = availableReserveSlots[slotIndex];
+            active = false; // Reserves are inactive by default
+          } else {
+            // No more reserve slots available
+            break;
+          }
+        } else if (useMainSlots) {
+          // Adding as main: prefer main slots, then reserves if main is full
+          if (slotIndex < availableMainSlots.length) {
+            finalSlotType = 'main';
+            slotNumber = availableMainSlots[slotIndex];
+          } else if (slotIndex - availableMainSlots.length < availableReserveSlots.length) {
+            finalSlotType = 'reserve';
+            slotNumber = availableReserveSlots[slotIndex - availableMainSlots.length];
+            active = false; // Reserves are inactive by default
+          } else {
+            // No more slots available
+            break;
+          }
         } else {
           // No more slots available
           break;
@@ -222,12 +246,12 @@ exports.handler = async function(event) {
         // Insert rider
         const insertQuery = `
           INSERT INTO fantasy_team_riders (fantasy_team_id, rider_id, slot_type, slot_number, active)
-          VALUES ($1, $2, $3, $4, true)
+          VALUES ($1, $2, $3, $4, $5)
           ON CONFLICT (fantasy_team_id, rider_id) DO NOTHING
           RETURNING id
         `;
         
-        const insertResult = await client.query(insertQuery, [fantasyTeamId, riderId, slotType, slotNumber]);
+        const insertResult = await client.query(insertQuery, [fantasyTeamId, riderId, finalSlotType, slotNumber, active]);
         
         if (insertResult.rows.length > 0) {
           addedCount++;

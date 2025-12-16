@@ -28,8 +28,8 @@ async function calculateCumulativePoints(client, stageId) {
     FROM participants p
     LEFT JOIN fantasy_stage_points fsp ON fsp.participant_id = p.id
       AND fsp.stage_id IN (
-        SELECT id FROM stages WHERE stage_number <= $1
-      )
+      SELECT id FROM stages WHERE stage_number <= $1
+    )
     GROUP BY p.id
     ORDER BY total_points DESC, p.team_name ASC
   `;

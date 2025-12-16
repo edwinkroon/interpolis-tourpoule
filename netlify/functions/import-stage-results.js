@@ -1357,6 +1357,8 @@ exports.calculateComeback = calculateComeback;
 exports.calculateLuckyLoser = calculateLuckyLoser;
 exports.calculateTeamwork = calculateTeamwork;
 exports.activateReservesForDroppedRiders = activateReservesForDroppedRiders;
+exports.getAvailableMainSlots = getAvailableMainSlots;
+exports.activateReservesForTeam = activateReservesForTeam;
 
 exports.handler = async function(event) {
   if (event.httpMethod !== 'POST') {

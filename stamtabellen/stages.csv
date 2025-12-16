@@ -1,0 +1,24 @@
+stage_number,name,start_location,end_location,distance_km,date,type,is_neutralized,is_cancelled
+1,Stage 1 | Lille Métropole - Lille Métropole,Lille Métropole,Lille Métropole,184.9,2025-07-06,vlak,false,true
+2,Stage 2 | Lauwin-Planque - Boulogne-sur-Mer,Lauwin-Planque,Boulogne-sur-Mer,209.1,2025-07-07,vlak,false,false
+3,Stage 3 | Valenciennes - Dunkerque,Valenciennes,Dunkerque,178.3,2025-07-08,vlak,false,false
+4,Stage 4 | Amiens Métropole - Rouen,Amiens Métropole,Rouen,174.2,2025-07-09,vlak,false,false
+5,Stage 5 (ITT) | Caen - Caen,Caen,Caen,33.0,2025-07-10,ITT,false,false
+6,Stage 6 | Bayeux - Vire Normandie,Bayeux,Vire Normandie,201.5,2025-07-11,vlak,false,false
+7,Stage 7 | Saint-Malo - Mûr-de-Bretagne (Guerlédan),Saint-Malo,Mûr-de-Bretagne (Guerlédan),197.0,2025-07-12,heuvels,false,false
+8,Stage 8 | Saint-Méen-le-Grand - Laval (Espace Mayenne),Saint-Méen-le-Grand,Laval (Espace Mayenne),171.4,2025-07-13,vlak,false,false
+9,Stage 9 | Chinon - Châteauroux,Chinon,Châteauroux,174.1,2025-07-14,vlak,false,false
+10,Stage 10 | Ennezat - Le Mont-Dore Puy de Sancy,Ennezat,Le Mont-Dore Puy de Sancy,165.3,2025-07-15,berg,false,false
+11,Rest Day,"","","",2025-07-16,"",false,false
+12,Stage 11 | Toulouse - Toulouse,Toulouse,Toulouse,156.8,2025-07-17,vlak,false,false
+13,Stage 12 | Auch - Hautacam,Auch,Hautacam,180.6,2025-07-18,bergen,false,false
+14,Stage 13 (ITT) | Loudenvielle - Peyragudes,Loudenvielle,Peyragudes,10.9,2025-07-19,ITT,false,false
+15,Stage 14 | Pau - Luchon-Superbagnères,Pau,Luchon-Superbagnères,182.6,2025-07-20,bergen,false,false
+16,Stage 15 | Muret - Carcassonne,Muret,Carcassonne,169.3,2025-07-21,vlak,false,false
+17,Rest Day,"","","",2025-07-22,"",false,false
+18,Stage 16 | Montpellier - Mont Ventoux,Montpellier,Mont Ventoux,171.5,2025-07-23,berg,false,false
+19,Stage 17 | Bollène - Valence,Bollène,Valence,160.4,2025-07-24,vlak,false,false
+20,Stage 18 | Vif - Courchevel (Col de la Loze),Vif,Courchevel (Col de la Loze),171.5,2025-07-25,bergen,false,false
+21,Stage 19 | Albertville - La Plagne,Albertville,La Plagne,93.1,2025-07-26,bergen,false,false
+22,Stage 20 | Nantua - Pontarlier,Nantua,Pontarlier,184.2,2025-07-27,vlak,false,false
+23,Stage 21 | Mantes-la-Ville - Paris (Champs-Élysées),Mantes-la-Ville,Paris (Champs-Élysées),132.3,2025-07-28,vlak,false,false

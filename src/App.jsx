@@ -19,6 +19,7 @@ import { StagesOverviewPage } from './pages/StagesOverviewPage';
 import { AddStagePage } from './pages/AddStagePage';
 import { AdminPage } from './pages/AdminPage';
 import { DagUitslagPage } from './pages/DagUitslagPage';
+import { SelectRidersPage } from './pages/SelectRidersPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
 export function App() {
@@ -127,6 +128,15 @@ export function App() {
           element={
             <ProtectedRoute>
               <AdminPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/selecteer-renners.html"
+          element={
+            <ProtectedRoute>
+              <SelectRidersPage />
             </ProtectedRoute>
           }
         />

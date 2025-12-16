@@ -310,4 +310,7 @@ exports.handler = async function(event) {
   }
 };
 
+// Export for testing
+module.exports.calculateStagePoints = calculateStagePoints;
+module.exports.isFinalStage = isFinalStage;
 

@@ -119,10 +119,10 @@ export const api = {
     });
   },
 
-  async addStage({ userId, stageNumber, name, startLocation, endLocation, distanceKm, date }) {
+  async addStage({ userId, stageNumber, name, startLocation, endLocation, distanceKm, date, type }) {
     return await fetchJson(`/.netlify/functions/add-stage?userId=${encodeURIComponent(userId)}`, {
       method: 'POST',
-      body: JSON.stringify({ userId, stageNumber, name, startLocation, endLocation, distanceKm, date }),
+      body: JSON.stringify({ userId, stageNumber, name, startLocation, endLocation, distanceKm, date, type }),
     });
   },
 
@@ -214,6 +214,60 @@ export const api = {
   async resetAllStageData(userId) {
     return await fetchJson(`/.netlify/functions/reset-all-stage-data?userId=${encodeURIComponent(userId)}`, {
       method: 'POST',
+    });
+  },
+
+  async activateReserves(participantId = null, activateAll = false) {
+    return await fetchJson('/.netlify/functions/activate-reserves', {
+      method: 'POST',
+      body: JSON.stringify({ participantId, activateAll }),
+    });
+  },
+
+  async getMasterdata() {
+    return await fetchJson('/.netlify/functions/populate-masterdata');
+  },
+
+  async populateMasterdata(userId, tables) {
+    return await fetchJson(`/.netlify/functions/populate-masterdata?userId=${encodeURIComponent(userId)}`, {
+      method: 'POST',
+      body: JSON.stringify({ tables }),
+    });
+  },
+
+  async createDummyTeams(userId, teamCount) {
+    return await fetchJson(`/.netlify/functions/create-dummy-teams?userId=${encodeURIComponent(userId)}`, {
+      method: 'POST',
+      body: JSON.stringify({ teamCount }),
+    });
+  },
+
+  async getTeamStatus(userId) {
+    return await fetchJson(`/.netlify/functions/get-team-status?userId=${encodeURIComponent(userId)}`);
+  },
+
+  async getAllRiders() {
+    return await fetchJson('/.netlify/functions/get-all-riders');
+  },
+
+  async addTeamRiders(userId, riderIds, slotType = null) {
+    return await fetchJson('/.netlify/functions/add-team-riders', {
+      method: 'POST',
+      body: JSON.stringify({ userId, riderIds, slotType }),
+    });
+  },
+
+  async saveTeamJerseys(userId, assignments) {
+    return await fetchJson('/.netlify/functions/save-team-jerseys', {
+      method: 'POST',
+      body: JSON.stringify({ userId, assignments }),
+    });
+  },
+
+  async deleteTeamRiders(userId, riderIds) {
+    return await fetchJson('/.netlify/functions/delete-team-riders', {
+      method: 'POST',
+      body: JSON.stringify({ userId, riderIds }),
     });
   },
 };

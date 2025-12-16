@@ -39,6 +39,7 @@ model stages {
   end_location              String?                     @db.VarChar(150)
   distance_km               Decimal?                    @db.Decimal(5, 1)
   date                      DateTime                    @db.Date
+  type                      String?                     @db.VarChar(20)
   awards                    awards[]
   fantasy_cumulative_points fantasy_cumulative_points[] @relation("CumulativeAfterStage")
   fantasy_stage_points      fantasy_stage_points[]

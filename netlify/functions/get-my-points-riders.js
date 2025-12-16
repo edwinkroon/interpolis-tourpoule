@@ -79,7 +79,8 @@ exports.handler = async function(event) {
         body: JSON.stringify({ 
           ok: true, 
           riders: [],
-          totalPoints: 0
+          totalPoints: 0,
+          route: ''
         })
       };
     }
@@ -135,6 +136,7 @@ exports.handler = async function(event) {
     });
 
     // Get user's fantasy team riders for latest stage
+    // Only include active main riders (slot_type = 'main') as per business rules
     const teamRidersQuery = await client.query(
       `SELECT 
          r.id as rider_id,
@@ -151,6 +153,7 @@ exports.handler = async function(event) {
        LEFT JOIN stage_results sr ON sr.rider_id = r.id AND sr.stage_id = $1
        WHERE ft.participant_id = $2
          AND ftr.active = true
+         AND ftr.slot_type = 'main'
        ORDER BY r.last_name, r.first_name`,
       [latestStageId, participantId]
     );
@@ -254,6 +257,7 @@ exports.handler = async function(event) {
         );
 
         // Get user's team riders for this stage
+        // Only include active main riders (slot_type = 'main') as per business rules
         const stageTeamRiders = await client.query(
           `SELECT 
              r.id as rider_id,
@@ -267,6 +271,7 @@ exports.handler = async function(event) {
            LEFT JOIN teams_pro tp ON r.team_pro_id = tp.id
            WHERE ft.participant_id = $1
              AND ftr.active = true
+             AND ftr.slot_type = 'main'
              AND EXISTS (
                SELECT 1 FROM stage_results sr 
                WHERE sr.rider_id = r.id AND sr.stage_id = $2

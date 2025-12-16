@@ -302,11 +302,11 @@ export function StagesOverviewPage() {
                     </button>
                   }
                 >
-                  {loadingCards ? (
-                    <LoadingBlock />
-                  ) : top3Teams.length === 0 ? (
+                    {loadingCards ? (
+                      <LoadingBlock />
+                    ) : top3Teams.length === 0 ? (
                     <div className="no-data">Nog geen dagwinnaars beschikbaar</div>
-                  ) : (
+                    ) : (
                     <div className="daily-winners-podium">
                       <img src="/icons/podium.svg" alt="Podium" className="podium-svg" />
                       <div className="podium-winners">
@@ -351,7 +351,7 @@ export function StagesOverviewPage() {
                                     e.currentTarget.nextElementSibling.style.display = 'flex';
                                   }}
                                 />
-                              ) : null}
+                                  ) : null}
                               <div
                                 className="podium-avatar-placeholder"
                                 style={{ display: top3Teams[0].avatarUrl ? 'none' : 'flex' }}
@@ -361,7 +361,7 @@ export function StagesOverviewPage() {
                             </div>
                             <div className="podium-team-name">{top3Teams[0].teamName || top3Teams[0].team_name || '-'}</div>
                             <div className="podium-points podium-points-1st">{top3Teams[0].points || 0}</div>
-                          </div>
+                                </div>
                         ) : null}
                         
                         {/* 3rd place (right) */}
@@ -385,10 +385,10 @@ export function StagesOverviewPage() {
                               >
                                 {(top3Teams[2].teamName || top3Teams[2].team_name) ? (top3Teams[2].teamName || top3Teams[2].team_name).slice(0, 2).toUpperCase() : '?'}
                               </div>
-                            </div>
+                        </div>
                             <div className="podium-team-name">{top3Teams[2].teamName || top3Teams[2].team_name || '-'}</div>
                             <div className="podium-points podium-points-3rd">{top3Teams[2].points || 0}</div>
-                          </div>
+                        </div>
                         ) : null}
                       </div>
                     </div>

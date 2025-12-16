@@ -1,0 +1,4 @@
+id,key,value,description,updated_at,updated_by
+1,registration_deadline,2026-07-05 12:00:00,Deadline voor aanmeldingen (YYYY-MM-DD HH:MM:SS),"""2025-12-12T14:10:26.637Z""",1
+2,tour_start_date,2025-07-06,Startdatum van de Tour de France (YYYY-MM-DD),"""2025-12-12T14:10:26.637Z""",1
+3,tour_end_date,2025-07-27,Einddatum van de Tour de France (YYYY-MM-DD),"""2025-12-12T14:10:26.637Z""",1

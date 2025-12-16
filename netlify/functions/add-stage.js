@@ -17,7 +17,7 @@ exports.handler = async function(event) {
     }
 
     const body = JSON.parse(event.body || '{}');
-    const { userId, stageNumber, name, startLocation, endLocation, distanceKm, date } = body;
+    const { userId, stageNumber, name, startLocation, endLocation, distanceKm, date, type } = body;
 
     if (!userId) {
       return {
@@ -94,12 +94,13 @@ exports.handler = async function(event) {
 
     // Insert new stage
     const insertQuery = `
-      INSERT INTO stages (stage_number, name, start_location, end_location, distance_km, date)
-      VALUES ($1, $2, $3, $4, $5, $6)
-      RETURNING id, stage_number, name, start_location, end_location, distance_km, date, is_neutralized, is_cancelled
+      INSERT INTO stages (stage_number, name, start_location, end_location, distance_km, date, type)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING id, stage_number, name, start_location, end_location, distance_km, date, type, is_neutralized, is_cancelled
     `;
 
     const distanceValue = distanceKm && distanceKm.trim() !== '' ? parseFloat(distanceKm) : null;
+    const typeValue = type && type.trim() !== '' ? type.trim() : null;
     
     const result = await client.query(insertQuery, [
       parseInt(stageNumber),
@@ -107,7 +108,8 @@ exports.handler = async function(event) {
       startLocation && startLocation.trim() !== '' ? startLocation.trim() : null,
       endLocation && endLocation.trim() !== '' ? endLocation.trim() : null,
       distanceValue,
-      date.trim()
+      date.trim(),
+      typeValue
     ]);
 
     const newStage = result.rows[0];
@@ -154,6 +156,7 @@ exports.handler = async function(event) {
           end_location: newStage.end_location,
           distance_km: newStage.distance_km ? parseFloat(newStage.distance_km) : null,
           date: newStage.date,
+          type: newStage.type || null,
           is_neutralized: newStage.is_neutralized || false,
           is_cancelled: newStage.is_cancelled || false
         }

@@ -29,6 +29,9 @@ exports.handler = async function(event) {
     client = await getDbClient();
 
     // Get team riders for the participant
+    // Show active main riders and all reserves (active or inactive)
+    // Inactive main riders are DNF/DNS and shouldn't be shown
+    // Reserves can be active=false (newly added) or active=true (activated)
     const query = `
       SELECT 
         r.id,
@@ -37,13 +40,15 @@ exports.handler = async function(event) {
         r.photo_url,
         tp.name as team_name,
         ftr.slot_type,
-        ftr.slot_number
+        ftr.slot_number,
+        ftr.active
       FROM fantasy_team_riders ftr
       INNER JOIN fantasy_teams ft ON ftr.fantasy_team_id = ft.id
       INNER JOIN participants p ON ft.participant_id = p.id
       INNER JOIN riders r ON ftr.rider_id = r.id
       LEFT JOIN teams_pro tp ON r.team_pro_id = tp.id
       WHERE p.user_id = $1
+        AND (ftr.active = true OR ftr.slot_type = 'reserve')
       ORDER BY ftr.slot_type ASC, ftr.slot_number ASC
     `;
     

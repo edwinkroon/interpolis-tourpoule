@@ -74,21 +74,21 @@ exports.handler = async function(event) {
       for (const stage of stages) {
         // Always calculate cumulative points directly from fantasy_stage_points
         // This ensures consistency and that points always increase or stay the same
-        const stagePointsQuery = await client.query(`
+          const stagePointsQuery = await client.query(`
           SELECT 
             COALESCE(
               SUM(COALESCE(total_points, points_stage + points_jerseys + COALESCE(points_bonus, 0))),
               0
             ) as total_points
-          FROM fantasy_stage_points
-          WHERE participant_id = $1
-            AND stage_id IN (
+            FROM fantasy_stage_points
+            WHERE participant_id = $1
+              AND stage_id IN (
               SELECT id FROM stages 
               WHERE stage_number <= $2
                 AND EXISTS (SELECT 1 FROM stage_results sr WHERE sr.stage_id = stages.id)
-            )
-        `, [participant.id, stage.stage_number]);
-        
+              )
+          `, [participant.id, stage.stage_number]);
+          
         let totalPoints = stagePointsQuery.rows[0]?.total_points;
         totalPoints = totalPoints ? parseInt(totalPoints) : 0;
         

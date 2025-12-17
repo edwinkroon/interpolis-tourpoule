@@ -18,101 +18,101 @@ BEGIN
   -- BLITZ_START
   IF NOT EXISTS (SELECT 1 FROM awards WHERE code = 'BLITZ_START') THEN
     INSERT INTO awards (stage_id, code, title, description, icon)
-    VALUES (NULL, 'BLITZ_START', 'Bliksemstarter', 'Meeste punten in de openingsrit.', NULL);
+    VALUES (NULL, 'BLITZ_START', 'Bliksemstarter', 'Meeste punten in de openingsrit.', 'icons/Iconpng/BlitzStart.png');
   ELSE
     UPDATE awards
       SET title = 'Bliksemstarter',
           description = 'Meeste punten in de openingsrit.',
-          icon = NULL
+          icon = 'icons/Iconpng/BlitzStart.png'
     WHERE code = 'BLITZ_START';
   END IF;
 
   -- DIESEL
   IF NOT EXISTS (SELECT 1 FROM awards WHERE code = 'DIESEL') THEN
     INSERT INTO awards (stage_id, code, title, description, icon)
-    VALUES (NULL, 'DIESEL', 'De Diesel', 'Meeste consistente top-10 finishes zonder ritwinst.', NULL);
+    VALUES (NULL, 'DIESEL', 'De Diesel', 'Meeste consistente top-10 finishes zonder ritwinst.', 'icons/Iconpng/Diesel.png');
   ELSE
-    UPDATE awards SET title = 'De Diesel', description = 'Meeste consistente top-10 finishes zonder ritwinst.', icon = NULL WHERE code = 'DIESEL';
+    UPDATE awards SET title = 'De Diesel', description = 'Meeste consistente top-10 finishes zonder ritwinst.', icon = 'icons/Iconpng/Diesel.png' WHERE code = 'DIESEL';
   END IF;
 
   -- BERGGEIT
   IF NOT EXISTS (SELECT 1 FROM awards WHERE code = 'BERGGEIT') THEN
     INSERT INTO awards (stage_id, code, title, description, icon)
-    VALUES (NULL, 'BERGGEIT', 'Berggeit van de Lage Landen', 'Hoogste score in bergetappes.', NULL);
+    VALUES (NULL, 'BERGGEIT', 'Berggeit van de Lage Landen', 'Hoogste score in bergetappes.', 'icons/Iconpng/Berggeit.png');
   ELSE
-    UPDATE awards SET title = 'Berggeit van de Lage Landen', description = 'Hoogste score in bergetappes.', icon = NULL WHERE code = 'BERGGEIT';
+    UPDATE awards SET title = 'Berggeit van de Lage Landen', description = 'Hoogste score in bergetappes.', icon = 'icons/Iconpng/Berggeit.png' WHERE code = 'BERGGEIT';
   END IF;
 
   -- WAAIER
   IF NOT EXISTS (SELECT 1 FROM awards WHERE code = 'WAAIER') THEN
     INSERT INTO awards (stage_id, code, title, description, icon)
-    VALUES (NULL, 'WAAIER', 'Waaierspecialist', 'Hoogste score in ritten met waaiers/windalarm.', NULL);
+    VALUES (NULL, 'WAAIER', 'Waaierspecialist', 'Hoogste score in ritten met waaiers/windalarm.', 'icons/Iconpng/Waaier.png');
   ELSE
-    UPDATE awards SET title = 'Waaierspecialist', description = 'Hoogste score in ritten met waaiers/windalarm.', icon = NULL WHERE code = 'WAAIER';
+    UPDATE awards SET title = 'Waaierspecialist', description = 'Hoogste score in ritten met waaiers/windalarm.', icon = 'icons/Iconpng/Waaier.png' WHERE code = 'WAAIER';
   END IF;
 
   -- SPRINTER
   IF NOT EXISTS (SELECT 1 FROM awards WHERE code = 'SPRINTER') THEN
     INSERT INTO awards (stage_id, code, title, description, icon)
-    VALUES (NULL, 'SPRINTER', 'Sprintkanon', 'Meeste sprintpunten in vlakke ritten.', NULL);
+    VALUES (NULL, 'SPRINTER', 'Sprintkanon', 'Meeste sprintpunten in vlakke ritten.', 'icons/Iconpng/Sprinter.png');
   ELSE
-    UPDATE awards SET title = 'Sprintkanon', description = 'Meeste sprintpunten in vlakke ritten.', icon = NULL WHERE code = 'SPRINTER';
+    UPDATE awards SET title = 'Sprintkanon', description = 'Meeste sprintpunten in vlakke ritten.', icon = 'icons/Iconpng/Sprinter.png' WHERE code = 'SPRINTER';
   END IF;
 
   -- TT_KING
   IF NOT EXISTS (SELECT 1 FROM awards WHERE code = 'TT_KING') THEN
     INSERT INTO awards (stage_id, code, title, description, icon)
-    VALUES (NULL, 'TT_KING', 'Tijdrijkoning(in)', 'Beste score in tijdritten.', NULL);
+    VALUES (NULL, 'TT_KING', 'Tijdrijkoning(in)', 'Beste score in tijdritten.', 'icons/Iconpng/TT_King.png');
   ELSE
-    UPDATE awards SET title = 'Tijdrijkoning(in)', description = 'Beste score in tijdritten.', icon = NULL WHERE code = 'TT_KING';
+    UPDATE awards SET title = 'Tijdrijkoning(in)', description = 'Beste score in tijdritten.', icon = 'icons/Iconpng/TT_King.png' WHERE code = 'TT_KING';
   END IF;
 
   -- COMEBACK
   IF NOT EXISTS (SELECT 1 FROM awards WHERE code = 'COMEBACK') THEN
     INSERT INTO awards (stage_id, code, title, description, icon)
-    VALUES (NULL, 'COMEBACK', 'Comeback Kid', 'Grootste stijging in het klassement in één etappe.', NULL);
+    VALUES (NULL, 'COMEBACK', 'Comeback Kid', 'Grootste stijging in het klassement in één etappe.', 'icons/Iconpng/Comeback.png');
   ELSE
-    UPDATE awards SET title = 'Comeback Kid', description = 'Grootste stijging in het klassement in één etappe.', icon = NULL WHERE code = 'COMEBACK';
+    UPDATE awards SET title = 'Comeback Kid', description = 'Grootste stijging in het klassement in één etappe.', icon = 'icons/Iconpng/Comeback.png' WHERE code = 'COMEBACK';
   END IF;
 
   -- HOUDINI
   IF NOT EXISTS (SELECT 1 FROM awards WHERE code = 'HOUDINI') THEN
     INSERT INTO awards (stage_id, code, title, description, icon)
-    VALUES (NULL, 'HOUDINI', 'De Houdini', 'Vaakst in de top-20 zonder eruit te vallen.', NULL);
+    VALUES (NULL, 'HOUDINI', 'De Houdini', 'Vaakst in de top-20 zonder eruit te vallen.', 'icons/Iconpng/Houdini.png');
   ELSE
-    UPDATE awards SET title = 'De Houdini', description = 'Vaakst in de top-20 zonder eruit te vallen.', icon = NULL WHERE code = 'HOUDINI';
+    UPDATE awards SET title = 'De Houdini', description = 'Vaakst in de top-20 zonder eruit te vallen.', icon = 'icons/Iconpng/Houdini.png' WHERE code = 'HOUDINI';
   END IF;
 
   -- CONSISTENT
   IF NOT EXISTS (SELECT 1 FROM awards WHERE code = 'CONSISTENT') THEN
     INSERT INTO awards (stage_id, code, title, description, icon)
-    VALUES (NULL, 'CONSISTENT', 'Mr./Ms. Consistent', 'Langste aaneengesloten reeks binnen de top-10.', NULL);
+    VALUES (NULL, 'CONSISTENT', 'Mr./Ms. Consistent', 'Langste aaneengesloten reeks binnen de top-10.', 'icons/Iconpng/Consistent.png');
   ELSE
-    UPDATE awards SET title = 'Mr./Ms. Consistent', description = 'Langste aaneengesloten reeks binnen de top-10.', icon = NULL WHERE code = 'CONSISTENT';
+    UPDATE awards SET title = 'Mr./Ms. Consistent', description = 'Langste aaneengesloten reeks binnen de top-10.', icon = 'icons/Iconpng/Consistent.png' WHERE code = 'CONSISTENT';
   END IF;
 
   -- LUCKY_LOSER
   IF NOT EXISTS (SELECT 1 FROM awards WHERE code = 'LUCKY_LOSER') THEN
     INSERT INTO awards (stage_id, code, title, description, icon)
-    VALUES (NULL, 'LUCKY_LOSER', 'Lucky Loser', 'Beste etappescore met het kleinste aantal actieve renners.', NULL);
+    VALUES (NULL, 'LUCKY_LOSER', 'Lucky Loser', 'Beste etappescore met het kleinste aantal actieve renners.', 'icons/Iconpng/LuckyLoser.png');
   ELSE
-    UPDATE awards SET title = 'Lucky Loser', description = 'Beste etappescore met het kleinste aantal actieve renners.', icon = NULL WHERE code = 'LUCKY_LOSER';
+    UPDATE awards SET title = 'Lucky Loser', description = 'Beste etappescore met het kleinste aantal actieve renners.', icon = 'icons/Iconpng/LuckyLoser.png' WHERE code = 'LUCKY_LOSER';
   END IF;
 
   -- STOFFEERDER
   IF NOT EXISTS (SELECT 1 FROM awards WHERE code = 'STOFFEERDER') THEN
     INSERT INTO awards (stage_id, code, title, description, icon)
-    VALUES (NULL, 'STOFFEERDER', 'De Stoffeerder', 'Hoogste score met de laagst geprijsde selectie.', NULL);
+    VALUES (NULL, 'STOFFEERDER', 'De Stoffeerder', 'Hoogste score met de laagst geprijsde selectie.', 'icons/Iconpng/Stoffeerder.png');
   ELSE
-    UPDATE awards SET title = 'De Stoffeerder', description = 'Hoogste score met de laagst geprijsde selectie.', icon = NULL WHERE code = 'STOFFEERDER';
+    UPDATE awards SET title = 'De Stoffeerder', description = 'Hoogste score met de laagst geprijsde selectie.', icon = 'icons/Iconpng/Stoffeerder.png' WHERE code = 'STOFFEERDER';
   END IF;
 
   -- UNDERDOG
   IF NOT EXISTS (SELECT 1 FROM awards WHERE code = 'UNDERDOG') THEN
     INSERT INTO awards (stage_id, code, title, description, icon)
-    VALUES (NULL, 'UNDERDOG', 'Underdog Whisperer', 'Meeste punten van renners met lage populariteit.', NULL);
+    VALUES (NULL, 'UNDERDOG', 'Underdog Whisperer', 'Meeste punten van renners met lage populariteit.', 'icons/Iconpng/Underdog.png');
   ELSE
-    UPDATE awards SET title = 'Underdog Whisperer', description = 'Meeste punten van renners met lage populariteit.', icon = NULL WHERE code = 'UNDERDOG';
+    UPDATE awards SET title = 'Underdog Whisperer', description = 'Meeste punten van renners met lage populariteit.', icon = 'icons/Iconpng/Underdog.png' WHERE code = 'UNDERDOG';
   END IF;
 
   -- PUNTENVRETER
@@ -126,9 +126,9 @@ BEGIN
   -- DAGWINNERVRETER
   IF NOT EXISTS (SELECT 1 FROM awards WHERE code = 'DAGWINNERVRETER') THEN
     INSERT INTO awards (stage_id, code, title, description, icon)
-    VALUES (NULL, 'DAGWINNERVRETER', 'Dagwinnervreter', 'Meeste etappe-overwinningen (dagwinst).', NULL);
+    VALUES (NULL, 'DAGWINNERVRETER', 'Dagwinnervreter', 'Meeste etappe-overwinningen (dagwinst).', 'icons/Iconpng/DagWinnerVreter.png');
   ELSE
-    UPDATE awards SET title = 'Dagwinnervreter', description = 'Meeste etappe-overwinningen (dagwinst).', icon = NULL WHERE code = 'DAGWINNERVRETER';
+    UPDATE awards SET title = 'Dagwinnervreter', description = 'Meeste etappe-overwinningen (dagwinst).', icon = 'icons/Iconpng/DagWinnerVreter.png' WHERE code = 'DAGWINNERVRETER';
   END IF;
 
   -- TRUIEN
@@ -203,12 +203,12 @@ BEGIN
     UPDATE awards SET title = 'Tweede plaats', description = '2e plaats in een etappe (tweede etappepunten).', icon = 'icons/icoontweedeplaats.svg' WHERE code = 'PODIUM_2';
   END IF;
 
-  -- PODIUM_3 (nog geen icon)
+  -- PODIUM_3 (heeft icon)
   IF NOT EXISTS (SELECT 1 FROM awards WHERE code = 'PODIUM_3') THEN
     INSERT INTO awards (stage_id, code, title, description, icon)
-    VALUES (NULL, 'PODIUM_3', 'Derde plaats', '3e plaats in een etappe (derde etappepunten).', NULL);
+    VALUES (NULL, 'PODIUM_3', 'Derde plaats', '3e plaats in een etappe (derde etappepunten).', 'icons/icoonderdeplaats.svg');
   ELSE
-    UPDATE awards SET title = 'Derde plaats', description = '3e plaats in een etappe (derde etappepunten).', icon = NULL WHERE code = 'PODIUM_3';
+    UPDATE awards SET title = 'Derde plaats', description = '3e plaats in een etappe (derde etappepunten).', icon = 'icons/icoonderdeplaats.svg' WHERE code = 'PODIUM_3';
   END IF;
 END $$;
 

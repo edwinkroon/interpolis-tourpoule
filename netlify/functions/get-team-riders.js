@@ -41,6 +41,7 @@ exports.handler = async function(event) {
         ftr.slot_type,
         ftr.slot_number,
         ftr.active,
+        ftr.out_of_race,
         -- Check if rider is DNS/DNF in latest stage with results
         -- DNF: has result with time_seconds IS NULL
         -- DNS: no result in latest stage with results (but other riders have results)
@@ -97,6 +98,7 @@ exports.handler = async function(event) {
       slot_type: row.slot_type,
       slot_number: row.slot_number,
       active: row.active,
+      out_of_race: row.out_of_race || false,
       is_dnf: row.is_dnf || false
     }));
 

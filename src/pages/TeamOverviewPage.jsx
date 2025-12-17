@@ -49,13 +49,13 @@ export function TeamOverviewPage() {
   const [saving, setSaving] = useState(false);
 
   const mainRiders = useMemo(() => teamRiders.filter((r) => r.slot_type === 'main' && r.active === true), [teamRiders]);
-  const reserveRiders = useMemo(() => teamRiders.filter((r) => r.slot_type === 'reserve' && r.active === true), [teamRiders]);
-  const inactiveRiders = useMemo(() => teamRiders.filter((r) => r.active === false), [teamRiders]);
+  const reserveRiders = useMemo(() => teamRiders.filter((r) => r.slot_type === 'reserve' && r.active === false && r.out_of_race === false), [teamRiders]);
+  const inactiveRiders = useMemo(() => teamRiders.filter((r) => r.out_of_race === true), [teamRiders]);
   const currentTypeRiders = useMemo(() => {
     if (riderModalType === 'main') {
       return teamRiders.filter((r) => r.slot_type === 'main' && r.active === true);
     } else if (riderModalType === 'reserve') {
-      return teamRiders.filter((r) => r.slot_type === 'reserve' && r.active === true);
+      return teamRiders.filter((r) => r.slot_type === 'reserve' && r.active === false && r.out_of_race === false);
     }
     return [];
   }, [riderModalType, teamRiders]);
@@ -355,6 +355,10 @@ export function TeamOverviewPage() {
           {/* Team info */}
           <Tile
             title={participant?.team_name || 'Team'}
+            info={{
+              title: 'Mijn team',
+              text: 'Hier zie je de basisinformatie van jouw team, zoals je email en notificatie-instellingen. Je kunt ook je team vergelijken met andere teams.',
+            }}
             headerLeft={
               <div className="team-avatar-container">
                 {participant?.avatar_url ? (
@@ -386,6 +390,10 @@ export function TeamOverviewPage() {
           {/* Jerseys */}
           <Tile
             title="Truien"
+            info={{
+              title: 'Truien',
+              text: 'Hier zie je welke renners uit jouw team de verschillende truien dragen. Je kunt truien toewijzen aan renners uit jouw team.',
+            }}
             contentClassName="riders-list-container"
             actions={
               changesAllowed && (
@@ -438,7 +446,13 @@ export function TeamOverviewPage() {
         {/* Right column: Main and Reserve Riders */}
         <div className="dashboard-column">
           <Tile
-            title={`Basisrenners (${mainRiders.length})`}
+            title={changesAllowed ? `Basisrenners (${mainRiders.length})` : `Actieve renners (${mainRiders.length})`}
+            info={{
+              title: changesAllowed ? 'Basisrenners' : 'Actieve renners',
+              text: changesAllowed 
+                ? 'Dit zijn je 10 basisrenners die actief meedoen in de ronde. Deze renners kunnen punten halen. Je kunt renners toevoegen of verwijderen zolang wijzigingen zijn toegestaan.'
+                : 'Dit zijn je actieve renners die momenteel meedoen in de ronde. Deze renners kunnen punten halen.',
+            }}
             contentClassName="riders-list-container"
             actions={
               changesAllowed && (
@@ -486,6 +500,10 @@ export function TeamOverviewPage() {
 
           <Tile
             title={`Reserverenners (${reserveRiders.length})`}
+            info={{
+              title: 'Reserverenners',
+              text: 'Dit zijn je reserverenners die nog niet actief zijn, maar wel kunnen worden geactiveerd als een basisrenner uit de ronde gaat. Je kunt maximaal 5 reserverenners hebben.',
+            }}
             contentClassName="riders-list-container"
             actions={
               changesAllowed && (
@@ -535,7 +553,11 @@ export function TeamOverviewPage() {
           {/* Inactive Riders */}
           {inactiveRiders.length > 0 && (
             <Tile
-              title={`Niet-actieve renners (${inactiveRiders.length})`}
+              title={`Uit de ronde (${inactiveRiders.length})`}
+              info={{
+                title: 'Uit de ronde',
+                text: 'Dit zijn renners die definitief uit de ronde zijn. Deze renners kunnen geen punten meer halen.',
+              }}
               contentClassName="riders-list-container"
             >
               <div className="tile-list" id="inactive-riders-list-container">

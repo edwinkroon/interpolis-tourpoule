@@ -16,9 +16,6 @@ import { RiderAvatar } from './RiderAvatar';
  * @param {number|null} props.positionChange - Aantal plaatsen gestegen/gedaald (positief = gestegen, negatief = gedaald, null = geen wijziging)
  * @param {string} props.className - Optionele extra CSS classes
  * @param {function} props.onClick - Optionele click handler
- * @param {boolean} props.avatarIsDnf - Of de renner DNS/DNF is (grijze avatar)
- * @param {boolean} props.avatarIsActive - Of de renner actief is (groene avatar)
- * @param {boolean} props.avatarHasBorder - Of de avatar een border moet hebben
  */
 export function ListItem({
   avatarPhotoUrl,
@@ -32,9 +29,6 @@ export function ListItem({
   positionChange,
   className = '',
   onClick,
-  avatarIsDnf = false,
-  avatarIsActive = false,
-  avatarHasBorder = false,
 }) {
   const itemClasses = `list-item ${className}`.trim();
 
@@ -60,9 +54,6 @@ export function ListItem({
             imgClassName="list-item-avatar-img"
             placeholderClassName="list-item-avatar-container"
             placeholderInnerClassName="list-item-avatar-initials"
-            isDnf={avatarIsDnf}
-            isActive={avatarIsActive}
-            hasBorder={avatarHasBorder}
           />
         </div>
       ) : null}

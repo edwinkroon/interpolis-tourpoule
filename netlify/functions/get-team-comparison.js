@@ -70,7 +70,7 @@ exports.handler = async function(event) {
     const fantasyTeamResult = await client.query(fantasyTeamQuery, [participantId]);
     const fantasyTeamId = fantasyTeamResult.rows.length > 0 ? fantasyTeamResult.rows[0].id : null;
 
-    // Get team riders (both main and reserve, active and inactive)
+    // Get team riders (include all riders, including out_of_race)
     const ridersQuery = `
       SELECT 
         r.id,
@@ -80,7 +80,8 @@ exports.handler = async function(event) {
         tp.name as team_name,
         ftr.slot_type,
         ftr.slot_number,
-        ftr.active
+        ftr.active,
+        ftr.out_of_race
       FROM fantasy_team_riders ftr
       INNER JOIN fantasy_teams ft ON ftr.fantasy_team_id = ft.id
       INNER JOIN riders r ON ftr.rider_id = r.id
@@ -223,7 +224,8 @@ exports.handler = async function(event) {
       slotNumber: row.slot_number,
       jerseys: currentJerseyWearersMap.get(row.id) || [], // Only current jersey wearers
       totalPoints: riderPointsMap.get(row.id) || 0,
-      isActive: activeRiderIds.has(row.id) && row.active === true // Whether rider is still active AND marked as active in team
+      isActive: activeRiderIds.has(row.id) && row.active === true, // Whether rider is still active AND marked as active in team
+      outOfRace: row.out_of_race || false
     }));
 
     // Get latest standings to find rank and total points (reuse latestStageId from above)
@@ -288,8 +290,9 @@ exports.handler = async function(event) {
           participantId: participant.id,
           teamName: participant.team_name,
           avatarUrl: participant.avatar_url,
-          mainRiders: riders.filter(r => r.slotType === 'main'),
-          reserveRiders: riders.filter(r => r.slotType === 'reserve'),
+          mainRiders: riders.filter(r => r.slotType === 'main' && !r.outOfRace),
+          reserveRiders: riders.filter(r => r.slotType === 'reserve' && !r.outOfRace),
+          outOfRaceRiders: riders.filter(r => r.outOfRace === true),
           totalPoints: totalPoints,
           rank: rank
         }

@@ -175,6 +175,15 @@ export function HomePage() {
                 <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
               </button>
             ) : null}
+            <a
+              href="/logout.html"
+              className="action-button"
+              style={{ textDecoration: 'none', color: 'inherit' }}
+              aria-label="Uitloggen"
+            >
+              <span>Uitloggen</span>
+              <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+            </a>
           </div>
 
           <div className="dashboard-content col-9">

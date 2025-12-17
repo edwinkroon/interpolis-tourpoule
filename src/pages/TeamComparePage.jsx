@@ -47,7 +47,7 @@ export function TeamComparePage() {
   const [filters, setFilters] = useState({
     main: true,
     reserve: true,
-    inactive: true,
+    outOfRace: true,
     shared: true,
   });
 
@@ -129,6 +129,7 @@ export function TeamComparePage() {
     return [
       ...(myTeam.mainRiders || []).map((r) => ({ ...r, slotType: 'main' })),
       ...(myTeam.reserveRiders || []).map((r) => ({ ...r, slotType: 'reserve' })),
+      ...(myTeam.outOfRaceRiders || []).map((r) => ({ ...r, slotType: r.slotType || 'main' })),
     ];
   }, [myTeam]);
 
@@ -137,6 +138,7 @@ export function TeamComparePage() {
     return [
       ...(compareTeam.mainRiders || []).map((r) => ({ ...r, slotType: 'main' })),
       ...(compareTeam.reserveRiders || []).map((r) => ({ ...r, slotType: 'reserve' })),
+      ...(compareTeam.outOfRaceRiders || []).map((r) => ({ ...r, slotType: r.slotType || 'main' })),
     ];
   }, [compareTeam]);
 
@@ -148,11 +150,12 @@ export function TeamComparePage() {
     return sorted.filter((r) => {
       const slotType = r.slotType || r.slot_type || 'main';
       const isActive = r.isActive !== false;
+      const outOfRace = r.outOfRace === true;
       const isShared = markShared ? myRiderIdSet.has(r.id) : false;
 
-      if (slotType === 'main' && !filters.main) return false;
-      if (slotType === 'reserve' && !filters.reserve) return false;
-      if (!isActive && !filters.inactive) return false;
+      if (slotType === 'main' && !outOfRace && !filters.main) return false;
+      if (slotType === 'reserve' && !outOfRace && !filters.reserve) return false;
+      if (outOfRace && !filters.outOfRace) return false;
       if (isShared && !filters.shared) return false;
       return true;
     });
@@ -230,6 +233,15 @@ export function TeamComparePage() {
                   <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
                 </button>
               ) : null}
+              <a
+                href="/logout.html"
+                className="action-button"
+                style={{ textDecoration: 'none', color: 'inherit' }}
+                aria-label="Uitloggen"
+              >
+                <span>Uitloggen</span>
+                <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+              </a>
             </div>
           </div>
 
@@ -324,21 +336,21 @@ export function TeamComparePage() {
                     <input
                       type="checkbox"
                       className="team-compare-filter-checkbox"
-                      id="filter-inactive-riders"
-                      checked={filters.inactive}
-                      onChange={(e) => setFilters((f) => ({ ...f, inactive: e.target.checked }))}
-                    />
-                    <span>Heeft ronde verlaten</span>
-                  </label>
-                  <label className="team-compare-filter-label">
-                    <input
-                      type="checkbox"
-                      className="team-compare-filter-checkbox"
                       id="filter-shared-riders"
                       checked={filters.shared}
                       onChange={(e) => setFilters((f) => ({ ...f, shared: e.target.checked }))}
                     />
                     <span>Gedeelde renners</span>
+                  </label>
+                  <label className="team-compare-filter-label">
+                    <input
+                      type="checkbox"
+                      className="team-compare-filter-checkbox"
+                      id="filter-out-of-race-riders"
+                      checked={filters.outOfRace}
+                      onChange={(e) => setFilters((f) => ({ ...f, outOfRace: e.target.checked }))}
+                    />
+                    <span>Uit de ronde</span>
                   </label>
                 </div>
 
@@ -350,8 +362,8 @@ export function TeamComparePage() {
                       <span>Reserverenner</span>
                     </div>
                     <div className="team-compare-legend-item">
-                      <div className="team-compare-legend-color team-compare-legend-inactive" />
-                      <span>Heeft ronde verlaten</span>
+                      <div className="team-compare-legend-color team-compare-legend-out-of-race" />
+                      <span>Uit de ronde</span>
                     </div>
                     <div className="team-compare-legend-item">
                       <div className="team-compare-legend-color team-compare-legend-shared" />
@@ -416,9 +428,11 @@ export function TeamComparePage() {
                         myRidersFiltered.map((r) => {
                           const slotType = r.slotType || 'main';
                           const isActive = r.isActive !== false;
+                          const outOfRace = r.outOfRace === true;
                           const classes = ['team-compare-rider-item'];
                           if (slotType === 'reserve') classes.push('team-compare-rider-reserve');
-                          if (!isActive) classes.push('team-compare-rider-inactive');
+                          if (outOfRace) classes.push('team-compare-rider-out-of-race');
+                          if (!isActive && !outOfRace) classes.push('team-compare-rider-inactive');
 
                           const name = `${r.firstName || ''} ${r.lastName || ''}`.trim();
                           const initials = riderInitials(r.firstName, r.lastName);
@@ -530,10 +544,12 @@ export function TeamComparePage() {
                           const slotType = r.slotType || 'main';
                           const isActive = r.isActive !== false;
                           const isShared = myRiderIdSet.has(r.id);
+                          const outOfRace = r.outOfRace === true;
 
                           const classes = ['team-compare-rider-item'];
                           if (slotType === 'reserve') classes.push('team-compare-rider-reserve');
-                          if (!isActive) classes.push('team-compare-rider-inactive');
+                          if (outOfRace) classes.push('team-compare-rider-out-of-race');
+                          if (!isActive && !outOfRace) classes.push('team-compare-rider-inactive');
                           if (isShared) classes.push('team-compare-rider-shared');
 
                           const name = `${r.firstName || ''} ${r.lastName || ''}`.trim();

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getUserId } from '../utils/auth0';
 import { api } from '../utils/api';
@@ -35,11 +35,13 @@ export function TeamOverviewPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [changesAllowed, setChangesAllowed] = useState(true);
+  const [firstStageHasResults, setFirstStageHasResults] = useState(false);
 
   // Modal states
   const [addRidersModalOpen, setAddRidersModalOpen] = useState(false);
   const [removeRidersModalOpen, setRemoveRidersModalOpen] = useState(false);
   const [assignJerseysModalOpen, setAssignJerseysModalOpen] = useState(false);
+  const [editTeamModalOpen, setEditTeamModalOpen] = useState(false);
   const [riderModalType, setRiderModalType] = useState(null); // 'main' or 'reserve'
   
   // Selection states
@@ -47,6 +49,15 @@ export function TeamOverviewPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [jerseyAssignments, setJerseyAssignments] = useState({});
   const [saving, setSaving] = useState(false);
+
+  // Edit team form states
+  const [editTeamName, setEditTeamName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editNewsletter, setEditNewsletter] = useState(false);
+  const [editAvatarUrl, setEditAvatarUrl] = useState('');
+  const [editTeamNameError, setEditTeamNameError] = useState('');
+  const [editEmailError, setEditEmailError] = useState('');
+  const fileInputRef = useRef(null);
 
   const mainRiders = useMemo(() => teamRiders.filter((r) => r.slot_type === 'main' && r.active === true), [teamRiders]);
   const reserveRiders = useMemo(() => teamRiders.filter((r) => r.slot_type === 'reserve' && r.active === false && r.out_of_race === false), [teamRiders]);
@@ -73,21 +84,30 @@ export function TeamOverviewPage() {
         if (cancelled) return;
         setUserId(id);
 
-        const [userRes, ridersRes, jerseysRes, allRidersRes, changesAllowedRes] = await Promise.all([
+        const [userRes, ridersRes, jerseysRes, allRidersRes, changesAllowedRes, firstStageRes] = await Promise.all([
           api.getUser(id),
           api.getTeamRiders(id),
           api.getTeamJerseys(id),
           api.getAllRiders(),
           api.checkTeamChangesAllowed(),
+          api.checkFirstStageHasResults(),
         ]);
 
         if (cancelled) return;
 
-        if (userRes?.ok && userRes?.participant) setParticipant(userRes.participant);
+        if (userRes?.ok && userRes?.participant) {
+          setParticipant(userRes.participant);
+          // Pre-fill edit form with current values
+          setEditTeamName(userRes.participant.team_name || '');
+          setEditEmail(userRes.participant.email || '');
+          setEditNewsletter(userRes.participant.newsletter || false);
+          setEditAvatarUrl(userRes.participant.avatar_url || '');
+        }
         setTeamRiders(ridersRes?.ok && Array.isArray(ridersRes.riders) ? ridersRes.riders : []);
         setTeamJerseys(jerseysRes?.ok && Array.isArray(jerseysRes.jerseys) ? jerseysRes.jerseys : []);
         setAllRiders(allRidersRes?.ok && Array.isArray(allRidersRes.riders) ? allRidersRes.riders : []);
         setChangesAllowed(changesAllowedRes?.ok && changesAllowedRes?.changesAllowed === true);
+        setFirstStageHasResults(firstStageRes?.ok && firstStageRes?.hasResults === true);
 
         // Pre-fill jersey assignments
         if (jerseysRes?.ok && Array.isArray(jerseysRes.jerseys)) {
@@ -299,6 +319,71 @@ export function TeamOverviewPage() {
     }
   };
 
+  const handleOpenEditTeam = () => {
+    // Pre-fill form with current participant data
+    if (participant) {
+      setEditTeamName(participant.team_name || '');
+      setEditEmail(participant.email || '');
+      setEditNewsletter(participant.newsletter || false);
+      setEditAvatarUrl(participant.avatar_url || '');
+    }
+    setEditTeamNameError('');
+    setEditEmailError('');
+    setEditTeamModalOpen(true);
+  };
+
+  const handleSaveTeam = async () => {
+    if (!userId) return;
+
+    setEditTeamNameError('');
+    setEditEmailError('');
+
+    // Validation
+    let valid = true;
+    if (!editTeamName.trim()) {
+      setEditTeamNameError('Teamnaam is verplicht');
+      valid = false;
+    }
+    if (!editEmail.trim()) {
+      setEditEmailError('Email is verplicht');
+      valid = false;
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(editEmail.trim())) {
+        setEditEmailError('Vul een geldig emailadres in');
+        valid = false;
+      }
+    }
+
+    if (!valid) return;
+
+    setSaving(true);
+    try {
+      const result = await api.saveParticipant({
+        userId,
+        teamName: editTeamName.trim(),
+        email: editEmail.trim(),
+        avatarUrl: editAvatarUrl || null,
+        newsletter: editNewsletter,
+      });
+
+      if (result?.ok) {
+        // Refresh participant data
+        const userRes = await api.getUser(userId);
+        if (userRes?.ok && userRes?.participant) {
+          setParticipant(userRes.participant);
+        }
+        setEditTeamModalOpen(false);
+      } else {
+        alert(result?.error || 'Fout bij opslaan van team informatie');
+      }
+    } catch (e) {
+      alert(e?.message || 'Fout bij opslaan');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const maxSelections = riderModalType === 'main' ? 10 : riderModalType === 'reserve' ? 5 : null;
   const currentCount = currentTypeRiders.length;
   const newSelectedCount = Array.from(selectedRiders).filter(id => !currentTypeRiderIds.has(id)).length;
@@ -346,6 +431,26 @@ export function TeamOverviewPage() {
             <span>Statistieken</span>
             <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
           </button>
+          {firstStageHasResults ? (
+            <button
+              className="action-button"
+              type="button"
+              onClick={() => navigate('/teamvergelijken.html')}
+              aria-label="Vergelijk teams"
+            >
+              <span>Teams vergelijken</span>
+              <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+            </button>
+          ) : null}
+          <a
+            href="/logout.html"
+            className="action-button"
+            style={{ textDecoration: 'none', color: 'inherit' }}
+            aria-label="Uitloggen"
+          >
+            <span>Uitloggen</span>
+            <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+          </a>
         </>
       }
     >
@@ -369,8 +474,8 @@ export function TeamOverviewPage() {
               </div>
             }
             actions={
-              <button className="button" type="button" onClick={() => navigate('/teamvergelijken.html')}>
-                <span>Vergelijk teams</span>
+              <button className="button" type="button" onClick={handleOpenEditTeam}>
+                <span>aanpassen</span>
                 <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
               </button>
             }
@@ -805,9 +910,190 @@ export function TeamOverviewPage() {
         </div>
       </Modal>
 
-      <div style={{ marginTop: '1.5rem' }}>
-        <a href="/logout.html">Uitloggen</a>
-      </div>
+      {/* Edit Team Modal */}
+      <Modal
+        isOpen={editTeamModalOpen}
+        onClose={() => {
+          setEditTeamModalOpen(false);
+          setEditTeamNameError('');
+          setEditEmailError('');
+        }}
+        title="Team aanpassen"
+      >
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSaveTeam();
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div>
+              <label htmlFor="edit-teamname" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>
+                Teamnaam
+              </label>
+              <input
+                type="text"
+                id="edit-teamname"
+                value={editTeamName}
+                onChange={(e) => {
+                  setEditTeamName(e.target.value);
+                  if (editTeamNameError) setEditTeamNameError('');
+                }}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  fontSize: '16px',
+                  border: editTeamNameError ? '2px solid #dc3545' : '1px solid #cdd7dc',
+                  borderRadius: '8px',
+                  fontFamily: 'inherit',
+                }}
+                required
+              />
+              {editTeamNameError && (
+                <div style={{ color: '#dc3545', fontSize: '14px', marginTop: '0.25rem' }}>{editTeamNameError}</div>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="edit-email" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>
+                Emailadres
+              </label>
+              <input
+                type="email"
+                id="edit-email"
+                value={editEmail}
+                onChange={(e) => {
+                  setEditEmail(e.target.value);
+                  if (editEmailError) setEditEmailError('');
+                }}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  fontSize: '16px',
+                  border: editEmailError ? '2px solid #dc3545' : '1px solid #cdd7dc',
+                  borderRadius: '8px',
+                  fontFamily: 'inherit',
+                }}
+                required
+              />
+              {editEmailError && (
+                <div style={{ color: '#dc3545', fontSize: '14px', marginTop: '0.25rem' }}>{editEmailError}</div>
+              )}
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Avatar</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div
+                  style={{
+                    width: '80px',
+                    height: '80px',
+                    borderRadius: '50%',
+                    background: '#f0f3f5',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    overflow: 'hidden',
+                    cursor: 'pointer',
+                    border: '2px solid #cdd7dc',
+                  }}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  {editAvatarUrl ? (
+                    <img
+                      src={editAvatarUrl}
+                      alt="Avatar preview"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  ) : (
+                    <span style={{ fontSize: '24px', color: '#668494' }}>+</span>
+                  )}
+                </div>
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: '#00334e',
+                      textDecoration: 'underline',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                    }}
+                  >
+                    {editAvatarUrl ? 'Avatar aanpassen' : 'Avatar toevoegen'}
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      if (!file.type.startsWith('image/')) {
+                        alert('Selecteer een geldige afbeelding');
+                        return;
+                      }
+                      const maxSize = 5 * 1024 * 1024;
+                      if (file.size > maxSize) {
+                        alert('Afbeelding is te groot. Maximum grootte is 5MB.');
+                        return;
+                      }
+                      const reader = new FileReader();
+                      reader.onload = (ev) => {
+                        setEditAvatarUrl(ev.target.result);
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                  <p style={{ fontSize: '12px', color: '#668494', margin: '0.25rem 0 0 0' }}>
+                    Tip: Met een vierkante afbeelding heb je een beter resultaat
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={editNewsletter}
+                  onChange={(e) => setEditNewsletter(e.target.checked)}
+                  style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                />
+                <span>Ik wil updates ontvangen via email</span>
+              </label>
+            </div>
+          </div>
+
+          <div className="modal-footer" style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '2rem' }}>
+            <button
+              type="button"
+              onClick={() => {
+                setEditTeamModalOpen(false);
+                setEditTeamNameError('');
+                setEditEmailError('');
+              }}
+              className="button"
+              disabled={saving}
+            >
+              <span>annuleren</span>
+              <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="button"
+            >
+              <span>{saving ? 'opslaan...' : 'opslaan'}</span>
+              <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+            </button>
+          </div>
+        </form>
+      </Modal>
+
     </PageTemplate>
   );
 }

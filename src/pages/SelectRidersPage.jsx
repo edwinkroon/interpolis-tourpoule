@@ -209,6 +209,17 @@ export function SelectRidersPage() {
     <PageTemplate
       title={type === 'jerseys' ? 'Truien toewijzen' : type === 'main' ? 'Basisrenners selecteren' : 'Reserverenners selecteren'}
       backLink="/teamoverzicht.html"
+      sidebar={
+        <a
+          href="/logout.html"
+          className="action-button"
+          style={{ textDecoration: 'none', color: 'inherit' }}
+          aria-label="Uitloggen"
+        >
+          <span>Uitloggen</span>
+          <img src="/assets/arrow.svg" alt="" className="action-arrow" aria-hidden="true" />
+        </a>
+      }
     >
       {type === 'jerseys' ? (
         <div>

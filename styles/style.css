@@ -3856,6 +3856,10 @@ button[aria-busy="true"] {
   background: #f8d7da;
   border-color: #dc3545;
 }
+.team-compare-legend-out-of-race {
+  background: #f8d7da;
+  border-color: #dc3545;
+}
 .team-compare-legend-shared {
   background: #f0f9f4;
   border-color: #00cac6;
@@ -3913,8 +3917,9 @@ button[aria-busy="true"] {
 }
 .team-compare-rider-reserve {
   border-left: 3px solid #ffc107;
+  /* No background color - only yellow border */
 }
-.team-compare-rider-inactive {
+.team-compare-rider-out-of-race {
   background: #f8d7da;
   border-left: 3px solid #dc3545;
 }

@@ -355,6 +355,34 @@ exports.handler = async function(event) {
       }
     }
 
+    // Get total cumulative points for this participant
+    // First try to get from fantasy_cumulative_points (most accurate)
+    let totalCumulativePoints = 0;
+    if (latestStageId) {
+      const cumulativeQuery = await client.query(
+        `SELECT total_points 
+         FROM fantasy_cumulative_points 
+         WHERE participant_id = $1 AND after_stage_id = $2 
+         LIMIT 1`,
+        [participantId, latestStageId]
+      );
+      
+      if (cumulativeQuery.rows.length > 0) {
+        totalCumulativePoints = cumulativeQuery.rows[0].total_points || 0;
+      } else {
+        // Fallback: sum all stage points
+        const stagePointsQuery = await client.query(
+          `SELECT COALESCE(SUM(
+            COALESCE(total_points, points_stage + points_jerseys + COALESCE(points_bonus, 0))
+          ), 0) as total_points
+          FROM fantasy_stage_points
+          WHERE participant_id = $1`,
+          [participantId]
+        );
+        totalCumulativePoints = stagePointsQuery.rows[0]?.total_points || 0;
+      }
+    }
+
     // Format riders for response
     const formattedRiders = resultRiders.map(rider => ({
       id: rider.rider_id,
@@ -376,7 +404,8 @@ exports.handler = async function(event) {
       body: JSON.stringify({ 
         ok: true, 
         riders: formattedRiders,
-        totalPoints: totalPoints,
+        totalPoints: totalPoints, // Points from latest stage (for display in list)
+        totalCumulativePoints: totalCumulativePoints, // Total points across all stages
         route: routeText
       })
     };

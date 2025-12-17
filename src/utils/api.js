@@ -274,4 +274,11 @@ export const api = {
   async checkTeamChangesAllowed() {
     return await fetchJson('/.netlify/functions/check-team-changes-allowed');
   },
+
+  async getTeamPerformanceStats(participantId = null) {
+    const url = participantId 
+      ? `/.netlify/functions/get-team-performance-stats?participantId=${encodeURIComponent(participantId)}`
+      : `/.netlify/functions/get-team-performance-stats`;
+    return await fetchJson(url);
+  },
 };

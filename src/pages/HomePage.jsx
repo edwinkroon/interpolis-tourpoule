@@ -1,9 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useNotifications } from '../contexts/NotificationContext';
 import { api } from '../utils/api';
 import { Tile } from '../components/Tile';
 import { ListItem } from '../components/ListItem';
+import { NotificationBell } from '../components/NotificationBell';
 
 function initialsFromFullName(name) {
   if (!name) return '?';
@@ -15,6 +17,7 @@ function initialsFromFullName(name) {
 export function HomePage() {
   const navigate = useNavigate();
   const { userId, participant } = useAuth();
+  const { addNotification } = useNotifications();
   const [isAdmin, setIsAdmin] = useState(false);
   const [points, setPoints] = useState({ totalPoints: 0, totalCumulativePoints: 0, riders: [], route: '' });
   const [standings, setStandings] = useState([]);
@@ -27,6 +30,32 @@ export function HomePage() {
   const [awardsError, setAwardsError] = useState(null);
   const [teamStatus, setTeamStatus] = useState(null);
   const [teamStatusLoading, setTeamStatusLoading] = useState(true);
+  
+  // Track previous state for notifications
+  const prevTeamRidersRef = useRef([]);
+  
+  // Load seen notifications from localStorage
+  const getSeenDnfRiders = useCallback(() => {
+    try {
+      const stored = localStorage.getItem('seenDnfRiders');
+      return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+      return [];
+    }
+  }, []);
+  
+  const markDnfRiderAsSeen = useCallback((riderId) => {
+    try {
+      const seen = getSeenDnfRiders();
+      const riderIdStr = String(riderId);
+      if (!seen.includes(riderIdStr)) {
+        seen.push(riderIdStr);
+        localStorage.setItem('seenDnfRiders', JSON.stringify(seen));
+      }
+    } catch (e) {
+      console.error('Error saving seen DNF rider:', e);
+    }
+  }, [getSeenDnfRiders]);
 
   const top5 = useMemo(() => standings.slice(0, 5), [standings]);
   const myStanding = useMemo(() => {
@@ -89,8 +118,48 @@ export function HomePage() {
         
         try {
           const participantId = participant?.id ?? participant?.participantId ?? participant?.participant_id ?? null;
+          
+          // Get team riders to check for DNF/DNS (only if participant exists)
+          if (participantId) {
+            const teamRidersRes = await api.getTeamRiders(userId);
+            if (teamRidersRes?.ok && Array.isArray(teamRidersRes.riders)) {
+              const currentTeamRiders = teamRidersRes.riders;
+              const prevTeamRiders = prevTeamRidersRef.current;
+              const seenDnfRiders = getSeenDnfRiders();
+              
+              // Check for DNF/DNS riders
+              currentTeamRiders.forEach(rider => {
+                if (rider.is_dnf || rider.out_of_race) {
+                  const riderIdStr = String(rider.id);
+                  // Only show notification if we haven't seen this rider as DNF before
+                  if (!seenDnfRiders.includes(riderIdStr)) {
+                    addNotification({
+                      type: 'warning',
+                      title: `${rider.first_name || ''} ${rider.last_name || ''} is uit de ronde`,
+                      message: 'Deze renner heeft de finish niet gehaald (DNF/DNS) en kan geen punten meer halen.',
+                    });
+                    markDnfRiderAsSeen(rider.id);
+                  } else {
+                    // Check if this is a newly DNF rider (wasn't DNF before)
+                    const prevRider = prevTeamRiders.find(pr => pr.id === rider.id);
+                    if (prevRider && !prevRider.is_dnf && !prevRider.out_of_race) {
+                      // Rider just became DNF, show notification even if we've seen them before
+                      addNotification({
+                        type: 'warning',
+                        title: `${rider.first_name || ''} ${rider.last_name || ''} is uit de ronde`,
+                        message: 'Deze renner heeft de finish niet gehaald (DNF/DNS) en kan geen punten meer halen.',
+                      });
+                    }
+                  }
+                }
+              });
+              prevTeamRidersRef.current = currentTeamRiders;
+            }
+          }
+          
           const awardsRes = await api.getAwardsLatest(3, participantId);
           if (awardsRes?.ok && Array.isArray(awardsRes.awards)) {
+            // Awards are no longer shown as notifications
             setAwards(awardsRes.awards);
           } else {
             setAwards([]);
@@ -149,8 +218,11 @@ export function HomePage() {
                     {participant?.team_name || 'Welkom'}
                   </h1>
                 </div>
-                <div className="header-illustration">
-                  <img src="/assets/headerillustration.svg" alt="Fiets illustratie" className="illustration-svg" />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <NotificationBell />
+                  <div className="header-illustration">
+                    <img src="/assets/headerillustration.svg" alt="Fiets illustratie" className="illustration-svg" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -389,43 +461,6 @@ export function HomePage() {
                 </Tile>
 
                 <Tile
-                  title="Mijn prijzenkast"
-                  info={{
-                    title: 'Mijn prijzenkast',
-                    text: 'Laatste behaalde awards.',
-                  }}
-                  className="trophy-cabinet-section"
-                >
-                  <div className="tile-list">
-                    {awardsLoading ? (
-                      <div className="no-data">Bezig met laden...</div>
-                    ) : awardsError ? (
-                      <div className="no-data">Kon awards niet laden</div>
-                    ) : awards.length === 0 ? (
-                      <div className="no-data">Geen awards beschikbaar</div>
-                    ) : (
-                      awards.map((award) => {
-                        const stageLabel = award.stageNumber
-                          ? `Etappe ${award.stageNumber}${award.stageName ? ` – ${award.stageName}` : ''}`
-                          : 'Algemeen';
-                        const iconSrc = award.icon ? `/${String(award.icon).replace(/^\//, '')}` : undefined;
-                        return (
-                          <ListItem
-                            key={award.awardAssignmentId || `${award.awardCode}-${award.participantId}-${stageLabel}`}
-                            avatarPhotoUrl={iconSrc}
-                            avatarAlt={award.awardTitle}
-                            avatarInitials={!iconSrc ? (award.awardTitle || '?').slice(0, 2).toUpperCase() : undefined}
-                            title={award.awardTitle || 'Award'}
-                            subtitle={award.awardDescription || stageLabel}
-                            value={award.teamName || ''}
-                          />
-                        );
-                      })
-                    )}
-                  </div>
-                </Tile>
-
-                <Tile
                   className="points-section"
                   title={
                     <>
@@ -461,6 +496,43 @@ export function HomePage() {
                         value={r.points || 0}
                       />
                     ))}
+                  </div>
+                </Tile>
+
+                <Tile
+                  title="Mijn prijzenkast"
+                  info={{
+                    title: 'Mijn prijzenkast',
+                    text: 'Laatste behaalde awards.',
+                  }}
+                  className="trophy-cabinet-section"
+                >
+                  <div className="tile-list">
+                    {awardsLoading ? (
+                      <div className="no-data">Bezig met laden...</div>
+                    ) : awardsError ? (
+                      <div className="no-data">Kon awards niet laden</div>
+                    ) : awards.length === 0 ? (
+                      <div className="no-data">Geen awards beschikbaar</div>
+                    ) : (
+                      awards.map((award) => {
+                        const stageLabel = award.stageNumber
+                          ? `Etappe ${award.stageNumber}${award.stageName ? ` – ${award.stageName}` : ''}`
+                          : 'Algemeen';
+                        const iconSrc = award.icon ? `/${String(award.icon).replace(/^\//, '')}` : undefined;
+                        return (
+                          <ListItem
+                            key={award.awardAssignmentId || `${award.awardCode}-${award.participantId}-${stageLabel}`}
+                            avatarPhotoUrl={iconSrc}
+                            avatarAlt={award.awardTitle}
+                            avatarInitials={!iconSrc ? (award.awardTitle || '?').slice(0, 2).toUpperCase() : undefined}
+                            title={award.awardTitle || 'Award'}
+                            subtitle={award.awardDescription || stageLabel}
+                            value={award.teamName || ''}
+                          />
+                        );
+                      })
+                    )}
                   </div>
                 </Tile>
               </div>

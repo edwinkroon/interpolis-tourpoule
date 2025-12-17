@@ -7,6 +7,7 @@ import { Tile } from '../components/Tile';
 import { ListItem } from '../components/ListItem';
 import { Modal } from '../components/Modal';
 import { RiderAvatar } from '../components/RiderAvatar';
+import { TeamPerformanceChart } from '../components/TeamPerformanceChart';
 
 function initialsFromName(teamName) {
   if (!teamName) return 'U';
@@ -36,6 +37,7 @@ export function TeamOverviewPage() {
   const [error, setError] = useState(null);
   const [changesAllowed, setChangesAllowed] = useState(true);
   const [firstStageHasResults, setFirstStageHasResults] = useState(false);
+  const [performanceData, setPerformanceData] = useState(null);
 
   // Modal states
   const [addRidersModalOpen, setAddRidersModalOpen] = useState(false);
@@ -102,6 +104,19 @@ export function TeamOverviewPage() {
           setEditEmail(userRes.participant.email || '');
           setEditNewsletter(userRes.participant.newsletter || false);
           setEditAvatarUrl(userRes.participant.avatar_url || '');
+          
+          // Fetch performance data for the team
+          const participantId = userRes.participant.id || userRes.participant.participantId || userRes.participant.participant_id;
+          if (participantId) {
+            try {
+              const perfRes = await api.getTeamPerformanceStats(participantId);
+              if (perfRes?.ok) {
+                setPerformanceData(perfRes);
+              }
+            } catch (perfError) {
+              console.error('Error fetching performance data:', perfError);
+            }
+          }
         }
         setTeamRiders(ridersRes?.ok && Array.isArray(ridersRes.riders) ? ridersRes.riders : []);
         setTeamJerseys(jerseysRes?.ok && Array.isArray(jerseysRes.jerseys) ? jerseysRes.jerseys : []);
@@ -550,6 +565,22 @@ export function TeamOverviewPage() {
 
         {/* Right column: Main and Reserve Riders */}
         <div className="dashboard-column">
+          {/* Team Performance Chart */}
+          {firstStageHasResults && performanceData && (
+            <Tile
+              title="Team Performance"
+              info={{
+                title: 'Team Performance',
+                text: 'Hier zie je de ontwikkeling van je totale punten over de verschillende etappes.',
+              }}
+            >
+              <TeamPerformanceChart 
+                performanceData={performanceData} 
+                teamName={participant?.team_name || ''}
+              />
+            </Tile>
+          )}
+
           <Tile
             title={changesAllowed ? `Basisrenners (${mainRiders.length})` : `Actieve renners (${mainRiders.length})`}
             info={{

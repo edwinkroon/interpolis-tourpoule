@@ -15,10 +15,24 @@ async function fetchJson(url, options) {
   }
 
   if (!res.ok) {
-    const message = (data && (data.error || data.message)) || `HTTP ${res.status}`;
+    let message = (data && (data.error || data.message)) || `HTTP ${res.status}`;
+    
+    // Check for database-related errors
+    const errorMessage = String(message).toLowerCase();
+    if (
+      errorMessage.includes('database') ||
+      errorMessage.includes('database configuration missing') ||
+      errorMessage.includes('connection') ||
+      errorMessage.includes('connect econnrefused') ||
+      res.status === 500 && (errorMessage.includes('database') || !data)
+    ) {
+      message = 'De database is niet beschikbaar. Controleer of de database server draait en of de database configuratie correct is ingesteld.';
+    }
+    
     const err = new Error(message);
     err.status = res.status;
     err.data = data;
+    err.isDatabaseError = errorMessage.includes('database') || errorMessage.includes('connection') || (res.status === 500 && !data);
     throw err;
   }
 
@@ -273,12 +287,5 @@ export const api = {
 
   async checkTeamChangesAllowed() {
     return await fetchJson('/.netlify/functions/check-team-changes-allowed');
-  },
-
-  async getTeamPerformanceStats(participantId = null) {
-    const url = participantId 
-      ? `/.netlify/functions/get-team-performance-stats?participantId=${encodeURIComponent(participantId)}`
-      : `/.netlify/functions/get-team-performance-stats`;
-    return await fetchJson(url);
   },
 };

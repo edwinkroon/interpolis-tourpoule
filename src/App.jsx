@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import { NotificationProvider } from './contexts/NotificationContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 import { Welcome1Page } from './pages/Welcome1Page';
@@ -26,8 +25,7 @@ import { NotFoundPage } from './pages/NotFoundPage';
 export function App() {
   return (
     <AuthProvider>
-      <NotificationProvider>
-        <BrowserRouter
+      <BrowserRouter
         future={{
           v7_startTransition: true,
           v7_relativeSplatPath: true,
@@ -146,7 +144,6 @@ export function App() {
         <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>
-      </NotificationProvider>
     </AuthProvider>
   );
 }

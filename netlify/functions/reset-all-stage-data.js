@@ -61,21 +61,6 @@ exports.handler = async function(event) {
       // 5. Clear stage results (depends on stages and riders)
       await client.query('TRUNCATE TABLE stage_results RESTART IDENTITY CASCADE');
 
-      // 6. Reset rider status for all fantasy team riders
-      // - Reset out_of_race status: all riders are "in the race" again
-      // - Set main riders to active = true
-      // - Set reserve riders to active = false
-      await client.query(`
-        UPDATE fantasy_team_riders 
-        SET 
-          out_of_race = false,
-          active = CASE 
-            WHEN slot_type = 'main' THEN true 
-            WHEN slot_type = 'reserve' THEN false 
-            ELSE active 
-          END
-      `);
-
       await client.query('COMMIT');
 
       await client.end();

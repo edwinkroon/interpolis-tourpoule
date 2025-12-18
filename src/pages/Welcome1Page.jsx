@@ -99,7 +99,14 @@ export function Welcome1Page() {
               Je kan de teamnaam en samenstelling van je team nog aanpassen voor de tour begint.
             </p>
 
-            {error ? <div className="error-message" style={{ display: 'block' }}>{String(error?.message || error)}</div> : null}
+            {error ? (
+              <div className="error-message" style={{ display: 'block', padding: '1rem', marginBottom: '1rem', background: '#fff5f5', border: '2px solid #d32f2f', borderRadius: '8px' }}>
+                <strong style={{ display: 'block', marginBottom: '0.5rem', color: '#d32f2f' }}>
+                  {error?.isDatabaseError ? 'Database fout' : 'Fout'}
+                </strong>
+                <div>{String(error?.message || error)}</div>
+              </div>
+            ) : null}
 
             <div className="navigation-buttons">
               <button

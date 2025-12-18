@@ -6,7 +6,7 @@
 [dev]
   # Increase function timeout for local development
   # Some functions like validate-stage-results need more time
-  functionsPort = 9999
+  functionsPort = 9998
   targetPort = 5173
   port = 8888
   command = "vite"

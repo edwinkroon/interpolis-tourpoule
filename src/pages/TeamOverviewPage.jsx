@@ -7,7 +7,8 @@ import { Tile } from '../components/Tile';
 import { ListItem } from '../components/ListItem';
 import { Modal } from '../components/Modal';
 import { RiderAvatar } from '../components/RiderAvatar';
-import { TeamPerformanceChart } from '../components/TeamPerformanceChart';
+import { ensureChartsConfigured, createGradient } from '../utils/charts';
+import { useChart } from '../hooks/useChart';
 
 function initialsFromName(teamName) {
   if (!teamName) return 'U';
@@ -37,7 +38,7 @@ export function TeamOverviewPage() {
   const [error, setError] = useState(null);
   const [changesAllowed, setChangesAllowed] = useState(true);
   const [firstStageHasResults, setFirstStageHasResults] = useState(false);
-  const [performanceData, setPerformanceData] = useState(null);
+  const [teamPerformance, setTeamPerformance] = useState(null);
 
   // Modal states
   const [addRidersModalOpen, setAddRidersModalOpen] = useState(false);
@@ -60,6 +61,7 @@ export function TeamOverviewPage() {
   const [editTeamNameError, setEditTeamNameError] = useState('');
   const [editEmailError, setEditEmailError] = useState('');
   const fileInputRef = useRef(null);
+  const performanceChartRef = useRef(null);
 
   const mainRiders = useMemo(() => teamRiders.filter((r) => r.slot_type === 'main' && r.active === true), [teamRiders]);
   const reserveRiders = useMemo(() => teamRiders.filter((r) => r.slot_type === 'reserve' && r.active === false && r.out_of_race === false), [teamRiders]);
@@ -75,6 +77,102 @@ export function TeamOverviewPage() {
 
   const teamRiderIds = useMemo(() => new Set(teamRiders.map(r => r.id)), [teamRiders]);
   const currentTypeRiderIds = useMemo(() => new Set(currentTypeRiders.map(r => r.id)), [currentTypeRiders]);
+
+  useEffect(() => {
+    ensureChartsConfigured();
+  }, []);
+
+  // Chart configuration for performance per stage
+  const performanceChartConfig = useMemo(() => {
+    if (!teamPerformance || !teamPerformance.teams || !teamPerformance.stages) {
+      return null;
+    }
+
+    const myTeam = teamPerformance.teams.find(t => t.participantId === participant?.id);
+    if (!myTeam || !myTeam.points) {
+      return null;
+    }
+
+    // Calculate points per stage (not cumulative)
+    const stagePoints = [];
+    const labels = [];
+    
+    for (let i = 0; i < teamPerformance.stages.length; i++) {
+      const currentTotal = myTeam.points[i] !== undefined ? myTeam.points[i] : 0;
+      const previousTotal = i > 0 ? (myTeam.points[i - 1] !== undefined ? myTeam.points[i - 1] : 0) : 0;
+      const pointsThisStage = currentTotal - previousTotal;
+      
+      // Skip "Begin" stage (index 0) as it has 0 points
+      if (i > 0) {
+        labels.push(teamPerformance.stages[i]);
+        stagePoints.push(pointsThisStage);
+      }
+    }
+
+    if (labels.length === 0) {
+      return null;
+    }
+
+    return {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Punten',
+            data: stagePoints,
+            backgroundColor: (ctx) => {
+              const chart = ctx.chart;
+              const { ctx: chartCtx, chartArea } = chart;
+              if (!chartArea) {
+                return '#00cac6';
+              }
+              return createGradient(chartCtx, 'rgba(0, 202, 198, 0.8)', 'rgba(0, 202, 198, 0.2)');
+            },
+            borderColor: '#00cac6',
+            borderWidth: 2,
+            borderRadius: 8,
+            borderSkipped: false,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+          duration: 1200,
+          easing: 'easeOutQuart',
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(0, 51, 78, 0.9)',
+            padding: 12,
+            titleFont: { size: 14, weight: '600' },
+            bodyFont: { size: 13 },
+            cornerRadius: 8,
+            displayColors: false,
+            callbacks: {
+              label: (context) => `${context.parsed.y} punten`,
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: '#00334e', font: { size: 12, weight: '500' } },
+          },
+          y: {
+            beginAtZero: true,
+            grid: { color: 'rgba(205, 215, 220, 0.3)', drawBorder: false },
+            ticks: { color: '#668494', font: { size: 12 }, stepSize: 1 },
+          },
+        },
+      },
+    };
+  }, [teamPerformance, participant]);
+
+  useChart(performanceChartRef, performanceChartConfig, !!performanceChartConfig);
 
   useEffect(() => {
     let cancelled = false;
@@ -95,6 +193,12 @@ export function TeamOverviewPage() {
           api.checkFirstStageHasResults(),
         ]);
 
+        // Fetch team performance data if participant exists
+        let performanceRes = null;
+        if (userRes?.ok && userRes?.participant?.id) {
+          performanceRes = await api.getTeamPerformanceStats(userRes.participant.id);
+        }
+
         if (cancelled) return;
 
         if (userRes?.ok && userRes?.participant) {
@@ -104,25 +208,13 @@ export function TeamOverviewPage() {
           setEditEmail(userRes.participant.email || '');
           setEditNewsletter(userRes.participant.newsletter || false);
           setEditAvatarUrl(userRes.participant.avatar_url || '');
-          
-          // Fetch performance data for the team
-          const participantId = userRes.participant.id || userRes.participant.participantId || userRes.participant.participant_id;
-          if (participantId) {
-            try {
-              const perfRes = await api.getTeamPerformanceStats(participantId);
-              if (perfRes?.ok) {
-                setPerformanceData(perfRes);
-              }
-            } catch (perfError) {
-              console.error('Error fetching performance data:', perfError);
-            }
-          }
         }
         setTeamRiders(ridersRes?.ok && Array.isArray(ridersRes.riders) ? ridersRes.riders : []);
         setTeamJerseys(jerseysRes?.ok && Array.isArray(jerseysRes.jerseys) ? jerseysRes.jerseys : []);
         setAllRiders(allRidersRes?.ok && Array.isArray(allRidersRes.riders) ? allRidersRes.riders : []);
         setChangesAllowed(changesAllowedRes?.ok && changesAllowedRes?.changesAllowed === true);
         setFirstStageHasResults(firstStageRes?.ok && firstStageRes?.hasResults === true);
+        setTeamPerformance(performanceRes?.ok ? performanceRes : null);
 
         // Pre-fill jersey assignments
         if (jerseysRes?.ok && Array.isArray(jerseysRes.jerseys)) {
@@ -507,6 +599,21 @@ export function TeamOverviewPage() {
             </div>
           </Tile>
 
+          {/* Performance per stage tile */}
+          {teamPerformance && teamPerformance.teams && teamPerformance.teams.length > 0 && teamPerformance.stages && teamPerformance.stages.length > 1 && (
+            <Tile
+              title="Prestatie per etappe"
+              info={{
+                title: 'Prestatie per etappe',
+                text: 'Hier zie je hoeveel punten je team heeft behaald per etappe. De barchart toont de punten per etappe.',
+              }}
+            >
+              <div style={{ position: 'relative', height: '300px', width: '100%' }}>
+                <canvas ref={performanceChartRef} />
+              </div>
+            </Tile>
+          )}
+
           {/* Jerseys */}
           <Tile
             title="Truien"
@@ -565,22 +672,6 @@ export function TeamOverviewPage() {
 
         {/* Right column: Main and Reserve Riders */}
         <div className="dashboard-column">
-          {/* Team Performance Chart */}
-          {firstStageHasResults && performanceData && (
-            <Tile
-              title="Team Performance"
-              info={{
-                title: 'Team Performance',
-                text: 'Hier zie je de ontwikkeling van je totale punten over de verschillende etappes.',
-              }}
-            >
-              <TeamPerformanceChart 
-                performanceData={performanceData} 
-                teamName={participant?.team_name || ''}
-              />
-            </Tile>
-          )}
-
           <Tile
             title={changesAllowed ? `Basisrenners (${mainRiders.length})` : `Actieve renners (${mainRiders.length})`}
             info={{

@@ -10,7 +10,25 @@ import { ListItem } from '../components/ListItem';
 
 function makeStageLabel(stage) {
   if (!stage) return '';
-  return stage.name || `Etappe ${stage.stage_number}`;
+  // Remove pipe and route information from stage name if present
+  // Format might be: "Stage 1 | Lille - Lille (185km)" or similar
+  let label = stage.name || `Etappe ${stage.stage_number}`;
+  
+  // Remove pipe and everything after it (route info)
+  const pipeIndex = label.indexOf('|');
+  if (pipeIndex !== -1) {
+    label = label.substring(0, pipeIndex).trim();
+  }
+  
+  // Also remove "van - naar" pattern if present
+  label = label.replace(/\s*-\s*[^-]+$/, '').trim();
+  
+  // If empty after cleaning, fall back to stage number
+  if (!label) {
+    label = `Etappe ${stage.stage_number}`;
+  }
+  
+  return label;
 }
 
 function makeRouteText(stage) {

@@ -29,8 +29,10 @@ exports.handler = async function(event) {
     client = await getDbClient();
 
     // Get team riders for the participant
-    // Show ALL riders (including inactive main riders who are DNS/DNF)
-    // Determine DNS/DNF status by checking latest stage results
+    // Show active main riders, all reserves (active or inactive), and riders out of race
+    // Inactive main riders that are NOT out_of_race are DNF/DNS and shouldn't be shown
+    // Reserves can be active=false (newly added) or active=true (activated)
+    // Riders with out_of_race=true should always be shown regardless of active status
     const query = `
       SELECT 
         r.id,
@@ -41,49 +43,14 @@ exports.handler = async function(event) {
         ftr.slot_type,
         ftr.slot_number,
         ftr.active,
-        ftr.out_of_race,
-        -- Check if rider is DNS/DNF in latest stage with results
-        -- DNF: has result with time_seconds IS NULL
-        -- DNS: no result in latest stage with results (but other riders have results)
-        CASE 
-          WHEN EXISTS (
-            -- Check if rider has DNF result (time_seconds IS NULL) in latest stage where they have a result
-            SELECT 1 
-            FROM stage_results sr
-            INNER JOIN stages s ON sr.stage_id = s.id
-            WHERE sr.rider_id = r.id 
-              AND sr.time_seconds IS NULL
-              AND s.id = (
-                SELECT MAX(s2.id) 
-                FROM stages s2 
-                INNER JOIN stage_results sr2 ON s2.id = sr2.stage_id 
-                WHERE sr2.rider_id = r.id
-              )
-          ) THEN true
-          WHEN EXISTS (
-            -- Check if there's a latest stage with results, but this rider has no result (DNS)
-            SELECT 1
-            FROM stages s
-            WHERE EXISTS (
-              SELECT 1 FROM stage_results sr WHERE sr.stage_id = s.id
-            )
-            AND s.id = (
-              SELECT MAX(s2.id)
-              FROM stages s2
-              WHERE EXISTS (SELECT 1 FROM stage_results sr2 WHERE sr2.stage_id = s2.id)
-            )
-            AND NOT EXISTS (
-              SELECT 1 FROM stage_results sr WHERE sr.stage_id = s.id AND sr.rider_id = r.id
-            )
-          ) THEN true
-          ELSE false
-        END as is_dnf
+        ftr.out_of_race
       FROM fantasy_team_riders ftr
       INNER JOIN fantasy_teams ft ON ftr.fantasy_team_id = ft.id
       INNER JOIN participants p ON ft.participant_id = p.id
       INNER JOIN riders r ON ftr.rider_id = r.id
       LEFT JOIN teams_pro tp ON r.team_pro_id = tp.id
       WHERE p.user_id = $1
+        AND (ftr.active = true OR ftr.slot_type = 'reserve' OR ftr.out_of_race = true)
       ORDER BY ftr.slot_type ASC, ftr.slot_number ASC
     `;
     
@@ -97,9 +64,9 @@ exports.handler = async function(event) {
       team_name: row.team_name,
       slot_type: row.slot_type,
       slot_number: row.slot_number,
-      active: row.active,
-      out_of_race: row.out_of_race || false,
-      is_dnf: row.is_dnf || false
+      active: row.active === true || row.active === 'true' || row.active === 1, // Ensure boolean value
+      out_of_race: row.out_of_race === true || row.out_of_race === 'true' || row.out_of_race === 1, // Ensure boolean value
+      is_dnf: row.out_of_race === true || row.out_of_race === 'true' || row.out_of_race === 1 // is_dnf is effectively the same as out_of_race for team overview
     }));
 
     // Get total rider count and check if all slots are filled (15 total: 10 main + 5 reserve)

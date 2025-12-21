@@ -65,7 +65,15 @@ export function TeamOverviewPage() {
 
   const mainRiders = useMemo(() => teamRiders.filter((r) => r.slot_type === 'main' && r.active === true), [teamRiders]);
   const reserveRiders = useMemo(() => teamRiders.filter((r) => r.slot_type === 'reserve' && r.active === false && r.out_of_race === false), [teamRiders]);
-  const inactiveRiders = useMemo(() => teamRiders.filter((r) => r.out_of_race === true), [teamRiders]);
+  const inactiveRiders = useMemo(() => {
+    // Filter riders that are out of race
+    // PostgreSQL returns boolean as boolean, but check for various truthy values to be safe
+    return teamRiders.filter((r) => {
+      const outOfRace = r.out_of_race;
+      // Check for explicit true values (boolean true, string 'true', number 1)
+      return outOfRace === true || outOfRace === 'true' || outOfRace === 1 || (outOfRace && outOfRace !== false);
+    });
+  }, [teamRiders]);
   const currentTypeRiders = useMemo(() => {
     if (riderModalType === 'main') {
       return teamRiders.filter((r) => r.slot_type === 'main' && r.active === true);
@@ -650,19 +658,18 @@ export function TeamOverviewPage() {
                     ? '/icons/Truien/wittetrui.svg'
                     : '/icons/Truien/geletrui.svg';
 
+                const riderName = j.assigned ? `${j.assigned.first_name || ''} ${j.assigned.last_name || ''}`.trim() : 'Niet toegewezen';
+
                 return (
                   <ListItem
                     key={j.id}
-                    avatarPhotoUrl={j.assigned?.photo_url}
-                    avatarAlt={j.assigned ? `${j.assigned.first_name || ''} ${j.assigned.last_name || ''}`.trim() : undefined}
-                    avatarInitials={j.assigned ? initialsFromRider(j.assigned.first_name, j.assigned.last_name) : undefined}
-                    title={j.assigned ? `${j.assigned.first_name || ''} ${j.assigned.last_name || ''}`.trim() : 'Niet toegewezen'}
-                    subtitle={j.assigned?.team_name || (j.assigned ? undefined : 'Selecteer een renner')}
-                    rightIcon={
-                      <div className="jersey-icon" title={j.name || j.type}>
-                        <img src={jerseyIconSrc} alt={j.name || j.type} />
+                    leftIcon={
+                      <div className="list-item-avatar-container jersey-icon-container" title={j.name || j.type}>
+                        <img src={jerseyIconSrc} alt={j.name || j.type} className="jersey-icon-img" />
                       </div>
                     }
+                    title={riderName}
+                    subtitle={j.assigned?.team_name || (j.assigned ? undefined : 'Selecteer een renner')}
                   />
                 );
               })}

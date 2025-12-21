@@ -9,6 +9,7 @@ import { RiderAvatar } from './RiderAvatar';
  * @param {string} props.avatarAlt - Alt tekst voor de avatar
  * @param {string} props.avatarInitials - Initialen voor placeholder (bijv. "JD")
  * @param {string|number} props.leftValue - Getal links (in plaats van avatar, bijv. positie/rank)
+ * @param {React.ReactNode} props.leftIcon - Icoon links (in plaats van avatar, bijv. jersey icon)
  * @param {string} props.title - Titel/naam (wordt vet weergegeven)
  * @param {string} props.subtitle - Subtitel (kleinere font, optioneel)
  * @param {string|number} props.value - Getal rechts uitgelijnd
@@ -25,6 +26,7 @@ export function ListItem({
   avatarAlt,
   avatarInitials,
   leftValue,
+  leftIcon,
   title,
   subtitle,
   value,
@@ -38,9 +40,10 @@ export function ListItem({
 }) {
   const itemClasses = `list-item ${className}`.trim();
 
-  // Bepaal wat links wordt getoond: leftValue heeft voorrang, anders avatar
-  const showLeftValue = leftValue !== undefined && leftValue !== null;
-  const showAvatar = !showLeftValue && (avatarPhotoUrl !== undefined || avatarInitials);
+  // Bepaal wat links wordt getoond: leftIcon heeft voorrang, dan leftValue, anders avatar
+  const showLeftIcon = leftIcon !== undefined && leftIcon !== null;
+  const showLeftValue = !showLeftIcon && (leftValue !== undefined && leftValue !== null);
+  const showAvatar = !showLeftIcon && !showLeftValue && (avatarPhotoUrl !== undefined || avatarInitials);
 
   // Bepaal wat rechts wordt getoond: rightIcon heeft voorrang, anders value
   const showRightIcon = rightIcon !== undefined && rightIcon !== null;
@@ -48,7 +51,11 @@ export function ListItem({
 
   const content = (
     <>
-      {showLeftValue ? (
+      {showLeftIcon ? (
+        <div className="list-item-avatar">
+          {leftIcon}
+        </div>
+      ) : showLeftValue ? (
         <div className="list-item-left-value">{leftValue}</div>
       ) : showAvatar ? (
         <div className="list-item-avatar">

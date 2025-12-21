@@ -56,29 +56,18 @@ function clearAuth0Cache() {
 let processingCallback = false;
 
 export async function handleAuthCallback() {
-  console.log('handleAuthCallback called');
-  
   // Check if we're actually handling a callback (has code and state in URL)
   const urlParams = new URLSearchParams(window.location.search);
   const hasCallbackParams = urlParams.has('code') && urlParams.has('state');
   
-  console.log('Callback params check:', {
-    hasCode: urlParams.has('code'),
-    hasState: urlParams.has('state'),
-    hasCallbackParams
-  });
-  
   if (!hasCallbackParams) {
-    console.log('No callback params, checking if already authenticated');
     // No callback parameters, try to check if already authenticated
     try {
       const client = await getAuth0Client();
       const isAuthenticated = await client.isAuthenticated();
-      console.log('Is authenticated:', isAuthenticated);
       if (isAuthenticated) {
         const user = await client.getUser();
         const userId = user?.sub || null;
-        console.log('Found authenticated user:', userId);
         if (userId) {
           sessionStorage.setItem('auth0_user_id', userId);
         }
@@ -90,7 +79,6 @@ export async function handleAuthCallback() {
       clearAuth0Cache();
     }
     // Not authenticated and no callback params - return null so page can redirect
-    console.log('Not authenticated, returning null');
     return { userId: null, user: null };
   }
   
@@ -137,12 +125,6 @@ export async function handleAuthCallback() {
       return { userId: null, user: null };
     }
     
-    // Log the state parameter from URL for debugging
-    const stateFromUrl = currentUrlParams.get('state');
-    const codeFromUrl = currentUrlParams.get('code');
-    console.log('State parameter from URL:', stateFromUrl);
-    console.log('Code parameter from URL:', codeFromUrl ? 'present' : 'missing');
-    
     // Save the full URL with query params before processing (in case it gets cleaned up)
     const callbackUrl = window.location.href;
     
@@ -151,25 +133,20 @@ export async function handleAuthCallback() {
     
     // Call handleRedirectCallback with explicit URL to ensure params are available
     // This prevents issues if the URL gets modified between checks
-    console.log('Calling handleRedirectCallback with URL:', callbackUrl);
     let result;
     try {
       result = await client.handleRedirectCallback(callbackUrl);
-      console.log('Auth0 callback result:', result);
     } catch (urlError) {
       // If URL parameter doesn't work, try without it (fallback to default behavior)
       console.warn('handleRedirectCallback with URL failed, trying without:', urlError);
       result = await client.handleRedirectCallback();
-      console.log('Auth0 callback result (without URL):', result);
     }
     
     const user = await client.getUser();
-    console.log('Auth0 user after callback:', user);
     
     const userId = user?.sub || null;
     if (userId) {
       sessionStorage.setItem('auth0_user_id', userId);
-      console.log('Stored userId in sessionStorage:', userId);
     } else {
       console.warn('No userId found in user object:', user);
     }
@@ -202,21 +179,15 @@ export async function handleAuthCallback() {
         
         const client = await getAuth0Client();
         const isAuthenticated = await client.isAuthenticated();
-        console.log('After callback error, isAuthenticated:', isAuthenticated);
         
         if (isAuthenticated) {
-          console.log('User is authenticated despite callback error, getting user...');
           const user = await client.getUser();
           const userId = user?.sub || null;
-          console.log('Retrieved user after callback error:', { userId, user });
           
           if (userId) {
             sessionStorage.setItem('auth0_user_id', userId);
-            console.log('Successfully retrieved user despite callback error:', userId);
             return { userId, user };
           }
-        } else {
-          console.log('User is not authenticated after callback error');
         }
       } catch (e) {
         console.error('Error checking authentication after callback error:', e);
@@ -239,40 +210,31 @@ export async function getUserId() {
   try {
     const cached = sessionStorage.getItem('auth0_user_id');
     if (cached) {
-      console.log('getUserId: Found cached user ID');
       return cached;
     }
 
-    console.log('getUserId: No cache, checking Auth0 client...');
     const client = await getAuth0Client();
-    console.log('getUserId: Client initialized, checking authentication...');
     
     // Try multiple times with delays - Auth0 client may need time to initialize
     // and load state from localStorage
     for (let attempt = 0; attempt < 5; attempt++) {
       if (attempt > 0) {
-        console.log(`getUserId: Retry attempt ${attempt + 1}, waiting...`);
         await new Promise(resolve => setTimeout(resolve, 200 * attempt));
       }
       
       const isAuthenticated = await client.isAuthenticated();
-      console.log(`getUserId: Is authenticated (attempt ${attempt + 1}):`, isAuthenticated);
       
       if (isAuthenticated) {
-        console.log('getUserId: Getting user...');
         const user = await client.getUser();
-        console.log('getUserId: User retrieved:', user);
         
         const userId = user?.sub || null;
         if (userId) {
           sessionStorage.setItem('auth0_user_id', userId);
-          console.log('getUserId: Stored user ID in sessionStorage');
           return userId;
         }
       }
     }
     
-    console.log('getUserId: Not authenticated after retries, returning null');
     return null;
   } catch (error) {
     console.error('getUserId: Error occurred:', error);

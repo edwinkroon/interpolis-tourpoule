@@ -1,10 +1,66 @@
 // New SASS entrypoint.
-// We keep legacy CSS imported from src/main.jsx during migration.
 
+// Import variables and mixins first (all other partials can use them)
+@import 'variables';
+@import 'mixins';
+
+// Import partials (order matters - base first, then components, then specific sections)
+@import 'base';
+@import 'header';
+@import 'forms';
+@import 'components';
+@import 'admin';
+@import 'sections';
+@import 'pages';
+@import 'stages';
+@import 'stage-detail';
+@import 'modals';
+
+// CSS custom properties for JavaScript/theme usage
 :root {
-  --brand-teal: #00cac6;
-  --brand-navy: #00334e;
-  --text-muted: #668494;
+  --brand-teal: #{$color-brand-teal};
+  --brand-navy: #{$color-brand-navy};
+  --text-muted: #{$color-text-muted};
+  --max-width: #{$max-width};
+  --gutter: #{$gutter};
+}
+
+// ---------------------------------------------
+// Grid System (migrated from grid.css)
+// ---------------------------------------------
+
+.page {
+  max-width: $max-width;
+  margin: 40px auto 0;
+  padding: 0 $spacing-md;
+}
+
+// Stage navigation pages should not have top margin
+.stage-navigation .page {
+  margin-top: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: $gutter;
+}
+
+.col-3  { grid-column: span 3; }
+.col-4  { grid-column: span 4; }
+.col-6  { grid-column: span 6; }
+.col-8  { grid-column: span 8; }
+.col-9  { grid-column: span 9; }
+.col-12 { grid-column: span 12; }
+
+@media (max-width: 768px) {
+  .col-3,
+  .col-4,
+  .col-6,
+  .col-8,
+  .col-9 {
+    grid-column: span 12;
+  }
 }
 
 // ---------------------------------------------
@@ -14,17 +70,17 @@
 .button {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: $spacing-sm;
   background: transparent;
   border: none;
-  color: #00334e;
-  font-size: 16px;
-  font-family: 'Open Sans', system-ui, sans-serif;
-  font-weight: 400;
+  color: $color-text-primary;
+  font-size: $font-size-md;
+  font-family: $font-family;
+  font-weight: $font-weight-normal;
   cursor: pointer;
-  padding: 0.5rem 0;
+  padding: $spacing-sm 0;
   margin-top: auto;
-  transition: color 0.2s, gap 0.2s, text-decoration 0.2s;
+  transition: color $transition-base, gap $transition-base, text-decoration $transition-base;
   text-transform: lowercase;
   
   &:hover {
@@ -64,11 +120,11 @@
 
 // Base tile styling (migrated from .dashboard-section)
 .tile {
-  background: #fff;
-  border-radius: 20px;
-  padding: 2rem;
-  box-shadow: 0 8px 16px rgba(0, 51, 78, 0.16);
-  filter: drop-shadow(0 8px 16px rgba(0, 51, 78, 0.161));
+  background: $color-bg-primary;
+  border-radius: $radius-xl;
+  padding: $spacing-xl;
+  box-shadow: $shadow-tile;
+  // filter: drop-shadow(0 8px 16px rgba(0, 51, 78, 0.161));
   
   // Subtle fade-in and slide-up animation on page load
   animation: tileFadeIn 0.6s ease-out forwards;
@@ -124,8 +180,8 @@
 // Most tiles use larger, bold titles, so we default to that.
 .tile-title {
   font-size: 19px;
-  font-weight: 700;
-  color: #00334e;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
   margin: 0;
   text-transform: none;
   display: flex;
@@ -247,6 +303,8 @@
 .tile-content {
   // spacing is driven by legacy .dashboard-section padding;
   // this wrapper exists for consistent markup.
+  // Note: .tile already has padding, so content doesn't need additional padding by default
+  // However, when using custom contentClassName like riders-list-container, ensure proper spacing
 }
 
 // Lists inside a tile: subtle divider with 1rem spacing above/below divider.
@@ -364,8 +422,15 @@
   overflow: hidden;
   position: relative;
   border-radius: 50%;
-  background: #E5FAF9;
-}wwwi
+  // background: #FEF1D9;
+  background: #FFF8EC;
+  box-shadow: 0 2px 8px rgba(0, 51, 78, 0.16);
+}
+
+// .list-item-avatar-container img{
+// width: 80%;
+// height: 80%;
+// }
 
 .list-item-avatar-img {
   width: 100%;
@@ -432,29 +497,33 @@
   border-radius: 50%;
 }
 
+// Active rider avatar styling
 .rider-avatar-active,
-.list-item-avatar-container.rider-avatar-active {
+.rider-avatar-placeholder-active {
   border: 2px solid #18AA2E;
   border-radius: 50%;
   box-shadow: 0 0 0 1px rgba(24, 170, 46, 0.2);
+  background: rgba(24, 170, 46, 0.1) !important;
 }
 
-.rider-avatar-img-active,
-.list-item-avatar-img.rider-avatar-img-active {
-  // Image itself doesn't need special styling, border is on container
-}
-
-.rider-avatar-placeholder-active,
+// Active rider avatar styling for list items (team overview) - no border
+.list-item-avatar-container.rider-avatar-active,
 .list-item-avatar-container.rider-avatar-placeholder-active {
-  border: 2px solid #18AA2E;
+  border: none;
   border-radius: 50%;
   box-shadow: 0 0 0 1px rgba(24, 170, 46, 0.2);
-  background: #f0f9f2;
+  background: rgba(24, 170, 46, 0.1) !important;
 }
 
-.rider-avatar-border,
-.list-item-avatar-container.rider-avatar-border {
+.rider-avatar-border {
   border: 2px solid #cdd7dc;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(205, 215, 220, 0.3);
+}
+
+// No border for list-item avatars (team overview)
+.list-item-avatar-container.rider-avatar-border {
+  border: none;
   border-radius: 50%;
   box-shadow: 0 0 0 1px rgba(205, 215, 220, 0.3);
 }
@@ -480,7 +549,7 @@
 
 .list-item-title {
   font-size: 16px;
-  font-weight: 500;
+  // font-weight: 500;
   color: var(--brand-navy);
   line-height: 1.4;
 }
@@ -566,6 +635,19 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
+  }
+}
+
+// Jersey icon in avatar position (voor truien in team overview)
+.jersey-icon-container {
+  background: transparent !important;
+  box-shadow: none !important;
+  
+  .jersey-icon-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 8px; // Add padding so icon fits nicely within circle
   }
 }
 
@@ -662,14 +744,15 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: #f0f3f5;
+  background: #FFF8EC;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   flex-shrink: 0;
   margin-bottom: 0.5rem;
-  border: 2px solid #cdd7dc;
+  // border: 2px solid #cdd7dc;
+  box-shadow: 0 2px 6px rgba(0, 51, 78, 0.1);
 }
 
 .podium-avatar-img {
@@ -744,4 +827,162 @@
   bottom: -50%;
   left: 50%;
   transform: translateX(-50%);
+}
+
+// ---------------------------------------------
+// Statistics Page Styles
+// ---------------------------------------------
+
+.statistics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.stats-cards-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: rgba(0, 0, 0, 0.133) 0px 1.6px 3.6px 0px, rgba(0, 0, 0, 0.11) 0px 0.3px 0.9px 0px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #00cac6 0%, #00aa2e 100%);
+  }
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: rgba(0, 0, 0, 0.133) 0px 1.6px 3.6px 0px, rgba(0, 0, 0, 0.11) 0px 0.3px 0.9px 0px;
+  }
+}
+
+.stat-value {
+  font-size: 48px;
+  font-weight: 700;
+  color: #00334e;
+  margin-bottom: 0.5rem;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 14px;
+  font-weight: 400;
+  color: #668494;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+// Chart tile modifier (used as className on Tile component)
+.chart-tile {
+  display: flex;
+  flex-direction: column;
+  min-height: 400px;
+  
+  .tile-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #00334e;
+    margin-bottom: 1.5rem;
+    text-transform: none;
+  }
+}
+
+.chart-container {
+  flex: 1;
+  position: relative;
+  height: 300px;
+  min-height: 300px;
+  
+  canvas {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+  }
+}
+
+// Form Card Styles are now in _forms.scss
+
+// ---------------------------------------------
+// Standings Full Section modifier (used as className on Tile component)
+// ---------------------------------------------
+
+.standings-full-section {
+  // Uses base .tile styles, no additional overrides needed
+  // Tile title styling is already handled in section-specific overrides above
+}
+
+// ---------------------------------------------
+// Responsive Styles
+// ---------------------------------------------
+
+@media (max-width: 768px) {
+  .statistics-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .stats-cards-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  
+  .stat-card {
+    padding: 1.5rem;
+  }
+  
+  .stat-value {
+    font-size: 36px;
+  }
+  
+  .stat-label {
+    font-size: 13px;
+  }
+  
+  .chart-tile {
+    padding: 1.5rem;
+    min-height: 350px;
+  }
+  
+  .chart-container {
+    height: 250px;
+    min-height: 250px;
+  }
+  
+  .form-card {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-cards-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .chart-tile {
+    min-height: 300px;
+  }
+  
+  .chart-container {
+    height: 200px;
+    min-height: 200px;
+  }
+  
+  .form-card {
+    padding: 1rem;
+  }
 }

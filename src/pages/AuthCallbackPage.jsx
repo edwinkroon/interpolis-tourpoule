@@ -16,25 +16,21 @@ export function AuthCallbackPage() {
     (async () => {
       // Prevent multiple simultaneous callback processing (even across re-renders)
       if (globalCallbackProcessed) {
-        console.log('Callback already processed globally, checking user and navigating...');
         // Still try to check if user is authenticated and navigate appropriately
         try {
           const { getUserId } = await import('../utils/auth0');
           const userId = await getUserId();
           if (userId) {
-            console.log('Already processed: UserId found:', userId);
             // Check if participant exists
             let exists = false;
             try {
               const res = await api.getUser(userId);
               exists = Boolean(res?.ok && res?.exists);
-              console.log('Already processed: Participant exists check:', exists);
             } catch (apiError) {
               console.warn('Already processed: Error checking participant, defaulting to welcome flow:', apiError);
               exists = false;
             }
             const targetUrl = exists ? '/home.html' : '/index.html';
-            console.log('Already processed: Navigating to:', targetUrl);
             // Try React Router navigate first
             navigate(targetUrl, { replace: true });
             setTimeout(() => {
@@ -44,7 +40,6 @@ export function AuthCallbackPage() {
               }
             }, 500);
           } else {
-            console.log('Already processed: No userId, redirecting to login');
             window.location.href = '/login.html';
           }
         } catch (e) {
@@ -53,12 +48,10 @@ export function AuthCallbackPage() {
         }
         return;
       }
-      console.log('Starting callback processing');
       globalCallbackProcessed = true;
 
       try {
         const result = await handleAuthCallback();
-        console.log('handleAuthCallback result:', result);
         const { userId } = result;
 
         if (!userId) {
@@ -68,15 +61,12 @@ export function AuthCallbackPage() {
           return;
         }
 
-        console.log('UserId found:', userId);
-
         // Ensure userId is stored in sessionStorage and Auth0 client is ready
         // Wait a bit longer to ensure everything is properly initialized
         await new Promise(resolve => setTimeout(resolve, 200));
         
         // Verify userId is in sessionStorage
         const storedUserId = sessionStorage.getItem('auth0_user_id');
-        console.log('Verifying userId in sessionStorage:', storedUserId);
         if (!storedUserId && userId) {
           console.warn('UserId not in sessionStorage, storing it now');
           sessionStorage.setItem('auth0_user_id', userId);
@@ -90,13 +80,11 @@ export function AuthCallbackPage() {
             const { getAuth0Client } = await import('../utils/auth0');
             const client = await getAuth0Client();
             const isAuth = await client.isAuthenticated();
-            console.log(`Auth0 client authenticated status (attempt ${attempt + 1}):`, isAuth);
             if (isAuth) {
               authVerified = true;
               // Also verify we can get the user
               const user = await client.getUser();
               if (user?.sub) {
-                console.log('Auth0 client verified and user retrieved');
                 break;
               }
             }
@@ -124,10 +112,8 @@ export function AuthCallbackPage() {
         // Check if participant exists - no internal timeout, let outer timeout handle it
         const checkParticipant = async () => {
           try {
-            console.log('Checking if participant exists...');
             const res = await api.getUser(userId);
             const participantExists = Boolean(res?.ok && res?.exists);
-            console.log('Participant exists check completed:', participantExists, res);
             return participantExists;
           } catch (apiError) {
             console.warn('Error checking if participant exists:', apiError);
@@ -146,15 +132,12 @@ export function AuthCallbackPage() {
           const result = await Promise.race([participantCheckPromise, timeoutPromise]);
           
           if (result?.timeout) {
-            console.log('Participant check timed out after 8 seconds');
             // If timeout, go to welcome flow - it will check if user exists and redirect to home if needed
-            console.log('Navigating to welcome flow (will check if user exists there)');
             targetUrl = '/index.html';
             exists = false; // Unknown, welcome flow will check
           } else {
             exists = result;
             targetUrl = exists ? '/home.html' : '/index.html';
-            console.log('Participant check completed:', exists, 'Navigating to:', targetUrl);
           }
         } catch (e) {
           console.warn('Participant check failed, going to welcome flow:', e);
@@ -167,22 +150,17 @@ export function AuthCallbackPage() {
         // (the userId is valid and we need to redirect)
         // Default to welcome flow if check didn't complete
         // ProtectedRoute will handle redirecting if user doesn't exist
-        console.log('Navigating to:', targetUrl, 'exists:', exists);
         
         // Try React Router navigate first to preserve Auth0 client state
         // Use window.location as fallback if navigate doesn't work
-        console.log('Attempting navigation to:', targetUrl);
         try {
           navigate(targetUrl, { replace: true });
-          console.log('Navigate called, setting fallback timer');
           
           // Fallback: if we're still on callback page after 500ms, use window.location
           setTimeout(() => {
             if (window.location.pathname.includes('auth-callback')) {
               console.warn('Navigate did not work, using window.location as fallback');
               window.location.href = targetUrl;
-            } else {
-              console.log('Navigation successful via React Router');
             }
           }, 500);
         } catch (navError) {
@@ -197,7 +175,6 @@ export function AuthCallbackPage() {
           const { getUserId } = await import('../utils/auth0');
           const userId = await getUserId();
           if (userId) {
-            console.log('Found userId after error, navigating to welcome flow:', userId);
             // If we have a userId, navigate to welcome flow
             window.location.href = '/index.html';
             return;

@@ -227,12 +227,6 @@ export function AddStagePage() {
       });
 
       if (res?.ok) {
-        // Log detailed information to console for debugging
-        console.log('=== Import Stage Results Response ===');
-        console.log('Points calculated:', res.pointsCalculated);
-        console.log('Participants calculated:', res.participantsCalculated);
-        console.log('Awards calculated:', res.awardsCalculated);
-        console.log('Cumulative calculated:', res.cumulativeCalculated);
         if (res.pointsError) {
           console.error('Points calculation error:', res.pointsError);
         }
@@ -242,7 +236,6 @@ export function AddStagePage() {
         if (res.cumulativeError) {
           console.error('Cumulative calculation error:', res.cumulativeError);
         }
-        console.log('Full response:', res);
         
         let message = res.replacedExisting
           ? `Uitslag succesvol geïmporteerd! ${res.existingCount} bestaande resultaten zijn overschreven.`

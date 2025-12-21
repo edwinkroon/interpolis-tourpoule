@@ -41,9 +41,27 @@ export function RiderAvatar({
   })();
 
   // Bepaal welke classes te gebruiken
-  const containerClasses = containerClassName || 'rider-avatar';
+  let containerClasses = containerClassName || 'rider-avatar';
+  // Add active class if isActive is true
+  if (isActive) {
+    containerClasses += ' rider-avatar-active';
+  }
+  if (isDnf) {
+    containerClasses += ' rider-avatar-dnf';
+  }
+  // Add border class if hasBorder is true (but CSS will override for list-item avatars)
+  if (hasBorder && !isActive) {
+    containerClasses += ' rider-avatar-border';
+  }
   const imgClasses = imgClassName || 'rider-photo';
-  const placeholderClasses = placeholderClassName || 'rider-avatar-placeholder';
+  let placeholderClasses = placeholderClassName || 'rider-avatar-placeholder';
+  // Add active class to placeholder if isActive is true
+  if (isActive) {
+    placeholderClasses += ' rider-avatar-placeholder-active';
+  }
+  if (isDnf) {
+    placeholderClasses += ' rider-avatar-placeholder-dnf';
+  }
   const placeholderInnerClasses = placeholderInnerClassName || 'rider-avatar-initials';
 
   // Bepaal of we een foto hebben
@@ -59,12 +77,8 @@ export function RiderAvatar({
     containerStyle.filter = 'grayscale(100%)';
     containerStyle.opacity = 0.6;
   }
-  if (isActive) {
-    containerStyle.border = '2px solid #4caf50';
-  }
-  if (hasBorder && !isActive) {
-    containerStyle.border = '2px solid #cdd7dc';
-  }
+  // Border styling wordt nu via CSS classes afgehandeld
+  // Geen inline border styling meer - borders zijn verwijderd voor list-item avatars
 
   if (hasPhoto) {
     return (

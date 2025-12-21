@@ -1,0 +1,138 @@
+// Header Styles
+// Styles for the main header component
+
+.header {
+  background-color: #00cac6;
+  padding: 1rem 0 0;
+  border-radius: 0 0 20px 20px;
+  overflow: visible;
+  position: relative;
+  z-index: 1;
+  padding-bottom: 3rem; // Extra space for navigation bar overlay
+}
+
+.header-content {
+  position: relative;
+}
+
+.header-title {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: right;
+  margin-bottom: 1rem;
+}
+
+// Header Welcome Section
+.header-welcome-section {
+  position: relative;
+  padding-left: 1rem;
+  padding-bottom: 4.5rem; // Space for navigation bar overlay
+  min-height: 120px;
+}
+
+.header-user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+  z-index: 2;
+}
+
+.header-avatar-container {
+  flex-shrink: 0;
+}
+
+.header-avatar-img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 4px rgba(0, 51, 78, 0.2);
+}
+
+.welcome-heading {
+  font-size: 40px;
+  font-weight: bold;
+  color: #00334e;
+  position: relative;
+  z-index: 2;
+  margin: 0;
+}
+
+// Header Illustration
+.header-illustration {
+  position: absolute;
+  right: 0;
+  bottom: 0.5rem;
+  width: 460px;
+  height: 160px;
+  z-index: 101;
+  overflow: visible;
+}
+
+.illustration-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .header {
+    padding: 1rem 0 0;
+  }
+
+  .header-title {
+    text-align: center;
+    font-size: 20px;
+  }
+
+  .header-welcome-section {
+    padding-bottom: 2rem;
+    min-height: auto;
+  }
+
+  .header-user-info {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .header-avatar-img {
+    width: 80px;
+    height: 80px;
+  }
+
+  .welcome-heading {
+    font-size: 24px;
+  }
+
+  .header-illustration {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-welcome-section {
+    padding-bottom: 1.5rem;
+  }
+
+  .header-avatar-img {
+    width: 60px;
+    height: 60px;
+  }
+
+  .welcome-heading {
+    font-size: 20px;
+  }
+
+  .header-illustration {
+    margin-top: 0.5rem;
+  }
+}

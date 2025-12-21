@@ -58,12 +58,6 @@ async function calculateCumulativePoints(client, stageId) {
 
   const cumulativeResult = await client.query(cumulativeQuery, [stageNumber]);
 
-  // Debug: Log the results to see what we're getting
-  console.log(`Calculating cumulative points for stage ${stageNumber} (stageId: ${stageId})`);
-  console.log(`Found ${cumulativeResult.rows.length} participants`);
-  if (cumulativeResult.rows.length > 0) {
-    console.log(`Sample participant: participant_id=${cumulativeResult.rows[0].participant_id}, total_points=${cumulativeResult.rows[0].total_points} (type: ${typeof cumulativeResult.rows[0].total_points})`);
-  }
 
   // Assign ranks (handle ties - same points = same rank)
   let currentRank = 1;

@@ -527,16 +527,13 @@ export function StagesOverviewPage() {
                           return (
                             <ListItem
                               key={`${j.type}-${j.riderId || j.rider}`}
-                              avatarPhotoUrl={j.photoUrl}
-                              avatarAlt={j.rider}
-                              avatarInitials={initialsFromFullName(j.rider)}
-                              title={j.rider}
-                              subtitle={j.team || undefined}
-                              rightIcon={
-                                <div className="jersey-icon" title={j.jerseyName || j.type}>
-                                  <img src={jerseyIcon} alt={j.jerseyName || j.type} />
+                              leftIcon={
+                                <div className="list-item-avatar-container jersey-icon-container" title={j.jerseyName || j.type}>
+                                  <img src={jerseyIcon} alt={j.jerseyName || j.type} className="jersey-icon-img" />
                                 </div>
                               }
+                              title={j.rider}
+                              subtitle={j.team || undefined}
                             />
                           );
                         })

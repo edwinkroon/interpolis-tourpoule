@@ -1,0 +1,279 @@
+// Stages Page Styles
+// Styles for stages overview, stage tiles, and stage-related components
+
+// Stages Overview Page Styles
+.stages-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: 0;
+}
+
+.stage-tile {
+  background: #fff;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: rgba(0, 0, 0, 0.133) 0px 1.6px 3.6px 0px, rgba(0, 0, 0, 0.11) 0px 0.3px 0.9px 0px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+  min-height: 200px;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: rgba(0, 0, 0, 0.133) 0px 1.6px 3.6px 0px, rgba(0, 0, 0, 0.11) 0px 0.3px 0.9px 0px;
+  }
+}
+
+.stage-tile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.stage-tile-number {
+  font-size: 24px;
+  font-weight: 700;
+  color: #00334e;
+  line-height: 1.2;
+}
+
+.stage-tile-date {
+  font-size: 14px;
+  font-weight: 400;
+  color: #668494;
+  text-align: right;
+  line-height: 1.4;
+}
+
+.stage-tile-route {
+  font-size: 18px;
+  font-weight: 500;
+  color: #00334e;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.stage-tile-distance {
+  font-size: 15px;
+  font-weight: 400;
+  color: #668494;
+  margin-bottom: 1rem;
+}
+
+.stage-tile-winner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #cdd7dc;
+  margin-top: auto;
+}
+
+.stage-tile-winner-label {
+  font-size: 12px;
+  font-weight: 400;
+  color: #668494;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+}
+
+.stage-tile-winner-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: #00334e;
+  line-height: 1.4;
+}
+
+// Stage tile sections
+.stage-tile-section {
+  padding-top: 1rem;
+  border-top: 1px solid #cdd7dc;
+  margin-top: 0.5rem;
+
+  &:first-of-type {
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
+  }
+}
+
+.stage-tile-section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #00334e;
+  margin-bottom: 1rem;
+  text-transform: none;
+}
+
+.stage-tile-riders-list,
+.stage-tile-standings-list,
+.stage-tile-results-list,
+.stage-tile-jerseys-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 0.75rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.stage-tile-rider-item,
+.stage-tile-jersey-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid #cdd7dc;
+  position: relative;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.stage-tile-rider-name,
+.stage-tile-jersey-name {
+  font-size: 15px;
+  font-weight: 400;
+  color: #00334e;
+  line-height: 1.4;
+}
+
+.stage-tile-rider-team,
+.stage-tile-jersey-team {
+  font-size: 13px;
+  font-weight: 300;
+  color: #668494;
+  line-height: 1.4;
+}
+
+.stage-tile-standing-item,
+.stage-tile-result-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 14px;
+  padding: 1rem 0;
+  border-bottom: 1px solid #cdd7dc;
+  position: relative;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.stage-tile-standing-rank,
+.stage-tile-result-rank {
+  font-size: 14px;
+  font-weight: 400;
+  color: #00334e;
+  min-width: 25px;
+  flex-shrink: 0;
+}
+
+.stage-tile-standing-name,
+.stage-tile-result-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 400;
+  color: #00334e;
+  line-height: 1.4;
+}
+
+.stage-tile-standing-points,
+.stage-tile-result-time {
+  font-size: 14px;
+  font-weight: 400;
+  color: #00334e;
+  text-align: right;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.stage-tile-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  color: #00334e;
+  font-size: 14px;
+  font-family: 'Open Sans', system-ui, sans-serif;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  margin-top: 0.5rem;
+  transition: color 0.2s, gap 0.2s, text-decoration 0.2s;
+  text-transform: lowercase;
+
+  &:hover {
+    text-decoration: underline;
+    gap: 0.75rem;
+  }
+
+  .action-arrow {
+    width: 9px;
+    height: 12px;
+    display: block;
+    flex-shrink: 0;
+    transform: rotate(0deg);
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .stages-grid-container {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+
+  .stage-tile {
+    padding: 1.25rem;
+  }
+
+  .stage-tile-number {
+    font-size: 18px;
+  }
+
+  .stage-tile-route {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .stages-grid-container {
+    grid-template-columns: 1fr;
+  }
+
+  .stage-tile {
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  .stage-tile-riders-list,
+  .stage-tile-standings-list,
+  .stage-tile-results-list,
+  .stage-tile-jerseys-list {
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  .stage-tile-section-title {
+    font-size: 15px;
+  }
+
+  .stage-tile-rider-name,
+  .stage-tile-jersey-name {
+    font-size: 14px;
+  }
+
+  .stage-tile-standing-item,
+  .stage-tile-result-item {
+    font-size: 13px;
+  }
+}

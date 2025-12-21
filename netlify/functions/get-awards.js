@@ -4,20 +4,13 @@ exports.handler = async function(event) {
   if (event.httpMethod !== 'GET') {
     return {
       statusCode: 405,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      },
       body: JSON.stringify({ ok: false, error: 'Method Not Allowed' })
     };
   }
-
-  const limitParam = event.queryStringParameters?.limit
-    ? parseInt(event.queryStringParameters.limit, 10)
-    : null;
-  const stageNumberParam = event.queryStringParameters?.stage_number
-    ? parseInt(event.queryStringParameters.stage_number, 10)
-    : null;
-  const participantIdParam = event.queryStringParameters?.participant_id
-    ? parseInt(event.queryStringParameters.participant_id, 10)
-    : null;
 
   let client;
   try {
@@ -27,102 +20,94 @@ exports.handler = async function(event) {
 
     client = await getDbClient();
 
-    // Resolve stage_id when stage_number is provided
-    let stageFilter = null;
-    if (stageNumberParam && !Number.isNaN(stageNumberParam)) {
-      const stageRes = await client.query(
-        'SELECT id, stage_number, name FROM stages WHERE stage_number = $1 LIMIT 1',
-        [stageNumberParam]
-      );
-      stageFilter = stageRes.rows[0] || null;
-    }
+    const { limit, participant_id, stage_number } = event.queryStringParameters || {};
 
-    const params = [];
-    const whereConditions = [];
-    
-    if (stageFilter?.id) {
-      // Filter on both award.stage_id and awards_per_participant.stage_id
-      // Awards can be assigned to a stage either at the award level or at the assignment level
-      whereConditions.push(`(a.stage_id = $${params.length + 1} OR ap.stage_id = $${params.length + 1})`);
-      params.push(stageFilter.id);
-    }
-    
-    if (participantIdParam && !Number.isNaN(participantIdParam)) {
-      whereConditions.push(`ap.participant_id = $${params.length + 1}`);
-      params.push(participantIdParam);
-    }
-    
-    const whereClause = whereConditions.length > 0 
-      ? `WHERE ${whereConditions.join(' AND ')}`
-      : '';
-
-    // Default: latest 3 awards across all stages
-    const applyLimit = !stageFilter && limitParam && !Number.isNaN(limitParam);
-    let limitClause = applyLimit ? `LIMIT $${params.length + 1}` : '';
-    if (applyLimit) {
-      params.push(Math.max(1, limitParam));
-    } else if (!stageFilter) {
-      // hard default to 3 when no stage filter and no explicit limit
-      params.push(3);
-      whereClause = whereClause || '';
-      // use positional index for limit
-      const positional = params.length;
-      whereClause = whereClause; // no-op, clarity
-      limitClause = `LIMIT $${positional}`;
-    }
-
-    const query = `
-      SELECT
-        ap.id AS award_assignment_id,
-        a.id AS award_id,
+    let query = `
+      SELECT 
+        app.id,
+        app.participant_id,
+        app.stage_id,
+        a.id as award_id,
         a.code,
         a.title,
         a.description,
         a.icon,
-        COALESCE(ap.stage_id, a.stage_id) AS stage_id,
         s.stage_number,
-        s.name AS stage_name,
-        p.id AS participant_id,
-        p.team_name,
-        p.avatar_url
-      FROM awards_per_participant ap
-      INNER JOIN awards a ON a.id = ap.award_id
-      LEFT JOIN stages s ON s.id = COALESCE(ap.stage_id, a.stage_id)
-      INNER JOIN participants p ON p.id = ap.participant_id
-      ${whereClause}
-      ORDER BY ap.id DESC
-      ${limitClause}
+        s.name as stage_name,
+        s.start_location,
+        s.end_location,
+        s.date as stage_date
+      FROM awards_per_participant app
+      INNER JOIN awards a ON app.award_id = a.id
+      LEFT JOIN stages s ON app.stage_id = s.id
+      WHERE 1=1
     `;
 
+    const params = [];
+    let paramIndex = 1;
+
+    // Filter by participant_id if provided
+    if (participant_id) {
+      query += ` AND app.participant_id = $${paramIndex}`;
+      params.push(parseInt(participant_id));
+      paramIndex++;
+    }
+
+    // Filter by stage_number if provided
+    if (stage_number !== undefined && stage_number !== null && stage_number !== '') {
+      query += ` AND s.stage_number = $${paramIndex}`;
+      params.push(parseInt(stage_number));
+      paramIndex++;
+    }
+
+    // Order by stage date (newest first), then by award code
+    query += ` ORDER BY s.date DESC NULLS LAST, app.id DESC`;
+
+    // Apply limit if provided
+    if (limit) {
+      query += ` LIMIT $${paramIndex}`;
+      params.push(parseInt(limit));
+    }
+
     const result = await client.query(query, params);
+
+    const awards = result.rows.map((row) => ({
+      id: row.id,
+      participantId: row.participant_id,
+      stageId: row.stage_id,
+      award: {
+        id: row.award_id,
+        code: row.code,
+        title: row.title,
+        description: row.description,
+        icon: row.icon,
+      },
+      stage: row.stage_id
+        ? {
+            id: row.stage_id,
+            stageNumber: row.stage_number,
+            name: row.stage_name,
+            startLocation: row.start_location,
+            endLocation: row.end_location,
+            date: row.stage_date,
+          }
+        : null,
+    }));
 
     await client.end();
 
     return {
       statusCode: 200,
-      headers: {
+      headers: { 
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'
       },
       body: JSON.stringify({
         ok: true,
-        awards: result.rows.map((row) => ({
-          awardAssignmentId: row.award_assignment_id,
-          awardId: row.award_id,
-          awardCode: row.code,
-          awardTitle: row.title,
-          awardDescription: row.description,
-          icon: row.icon,
-          stageId: row.stage_id,
-          stageNumber: row.stage_number,
-          stageName: row.stage_name,
-          participantId: row.participant_id,
-          teamName: row.team_name,
-          avatarUrl: row.avatar_url
-        }))
-      })
+        awards,
+      }),
     };
   } catch (error) {
-    return handleDbError(error, client);
+    return await handleDbError(error, client);
   }
 };

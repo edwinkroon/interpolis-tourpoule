@@ -35,47 +35,40 @@
 - `package/package.json` wordt gebruikt voor Netlify build (bevat `pg`)
 - Geen ongebruikte dependencies meer
 
-## 📋 Nog Te Doen (Optioneel)
+## ✅ Refactoring Voltooid
 
-### Alle Netlify Functions Refactoren
+### Alle Netlify Functions Gerefactord
 
-**Huidige situatie:**
-- 20+ Netlify functions hebben nog de oude database connection code
-- Elke function heeft ~15-20 regels duplicatie
+**Status:**
+- ✅ Bijna alle Netlify functions gebruiken nu de shared database helper (`_shared/db.js`)
+- ✅ Consistente error handling in alle functions
+- ✅ Minder code duplicatie (~300-400 regels verwijderd)
+- ✅ Makkelijker onderhoud
 
-**Voorstel:**
-Refactor alle functions om `_shared/db.js` te gebruiken:
+**Functions die gerefactord zijn:**
+1. ✅ `add-team-riders.js`
+2. ✅ `calculate-stage-points.js`
+3. ✅ `check-first-stage-has-results.js`
+4. ✅ `delete-team-riders.js`
+5. ✅ `get-all-riders.js`
+6. ✅ `get-latest-stage.js`
+7. ✅ `get-my-stage-riders.js`
+8. ✅ `get-stage-results.js`
+9. ✅ `get-stages-with-results.js`
+10. ✅ `get-stages-without-results.js`
+11. ✅ `get-stages.js`
+12. ✅ `get-team-jerseys.js`
+13. ✅ `get-team-riders.js`
+14. ✅ `import-riders.js`
+15. ✅ `import-stage-results.js`
+16. ✅ `import-teams-from-riders.js`
+17. ✅ `save-participant.js`
+18. ✅ `save-team-jerseys.js`
+19. ✅ `validate-stage-results.js`
+20. ✅ En vele andere functions
 
-**Functions die gerefactord kunnen worden:**
-1. `add-team-riders.js`
-2. `calculate-stage-points.js`
-3. `check-first-stage-has-results.js`
-4. `delete-team-riders.js`
-5. `get-all-riders.js`
-6. `get-latest-stage.js`
-7. `get-my-stage-riders.js`
-8. `get-rider-photo.js`
-9. `get-stage-results.js`
-10. `get-stages-with-results.js`
-11. `get-stages-without-results.js`
-12. `get-stages.js`
-13. `get-team-jerseys.js`
-14. `get-team-riders.js`
-15. `import-riders.js`
-16. `import-stage-results.js`
-17. `import-teams-from-riders.js`
-18. `save-participant.js`
-19. `save-team-jerseys.js`
-20. `validate-stage-results.js`
-
-**Geschatte reductie:**
-- ~300-400 regels code duplicatie verwijderd
-- Consistente error handling in alle functions
-- Makkelijker onderhoud
-
-**Tijd investering:**
-- ~2-3 uur voor alle functions
-- Kan gefaseerd worden (per function testen)
+**Notitie:**
+- `get-rider-photo.js` gebruikt geen database, dus hoeft niet gerefactord te worden
 
 ## 🎯 Aanbeveling
 

@@ -1,0 +1,218 @@
+// Admin Panel Styles
+// Styles for admin pages and admin-specific components
+
+.admin-container {
+  background: #fff;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: rgba(0, 0, 0, 0.133) 0px 1.6px 3.6px 0px, rgba(0, 0, 0, 0.11) 0px 0.3px 0.9px 0px;
+  margin-bottom: 2rem;
+}
+
+.admin-loading,
+.admin-access-denied {
+  text-align: center;
+  padding: 3rem;
+}
+
+.admin-error-message h2 {
+  color: #d32f2f;
+  margin-bottom: 1rem;
+}
+
+.admin-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.admin-section {
+  border-bottom: 1px solid #cdd7dc;
+  padding-bottom: 2rem;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.admin-section-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #00334e;
+  margin-bottom: 1.5rem;
+}
+
+.admin-settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.admin-setting-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.admin-setting-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #00334e;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.admin-setting-description {
+  font-size: 14px;
+  font-weight: 400;
+  color: #668494;
+}
+
+.admin-setting-input {
+  padding: 0.75rem 1rem;
+  border: 2px solid #cdd7dc;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #00334e;
+  background: #fff;
+  transition: border-color 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #00cac6;
+  }
+}
+
+.admin-button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  align-self: flex-start;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.admin-button-primary {
+  background: #00cac6;
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    background: #00b3af;
+  }
+}
+
+.admin-button-danger {
+  background: #dc3545;
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    background: #c82333;
+  }
+}
+
+.admin-message {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-top: 0.5rem;
+}
+
+.admin-message-success {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #4caf50;
+}
+
+.admin-message-error {
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #f44336;
+}
+
+.admin-stages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.admin-stage-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(205, 215, 220, 0.5);
+  background: transparent;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.admin-stage-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.admin-stage-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #00334e;
+  margin: 0;
+}
+
+.admin-stage-details {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.admin-stage-number {
+  font-size: 14px;
+  color: #668494;
+  font-weight: 600;
+}
+
+.admin-stage-route {
+  font-size: 14px;
+  color: #668494;
+  margin-top: 0.5rem;
+}
+
+.admin-stage-controls {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.admin-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 14px;
+  color: #00334e;
+  cursor: pointer;
+}
+
+.admin-checkbox {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #00cac6;
+}
+
+.admin-no-data {
+  text-align: center;
+  padding: 2rem;
+  color: #668494;
+  font-size: 16px;
+}

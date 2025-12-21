@@ -1,0 +1,290 @@
+// Form Styles
+// Styles for form elements and form cards
+
+// Form Card (already partially in main.scss, but keeping base styles here)
+.form-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: rgba(0, 0, 0, 0.133) 0px 1.6px 3.6px 0px, rgba(0, 0, 0, 0.11) 0px 0.3px 0.9px 0px;
+  margin-bottom: 2rem;
+}
+
+.form-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #00334e;
+  margin-bottom: 1rem;
+}
+
+.form-description {
+  font-size: 16px;
+  color: #00334e;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+// Form Groups
+.form-group {
+  margin-bottom: 0;
+}
+
+.form-label {
+  display: block;
+  font-size: 12px;
+  color: #668494;
+  margin-bottom: 0.5rem;
+  font-weight: 400;
+}
+
+.form-input {
+  width: 100%;
+  padding: 1rem;
+  font-size: 14px;
+  color: #00334e;
+  background: #fff;
+  border: 1px solid #00334e;
+  border-radius: 10px;
+  font-family: 'Open Sans', system-ui, sans-serif;
+  transition: border-color 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #00cac6;
+  }
+
+  &::placeholder {
+    color: #00334e;
+  }
+
+  &.error {
+    border-color: #d32f2f;
+    background-color: #fff5f5;
+  }
+}
+
+.error-message {
+  display: none;
+  color: #d32f2f;
+  font-size: 12px;
+  margin-top: 0.5rem;
+  min-height: 1.5rem;
+}
+
+.success-message {
+  display: block;
+  color: #00aa2e;
+  font-size: 14px;
+  padding: 0.75rem 1rem;
+  background-color: #f0f9f4;
+  border: 1px solid #00aa2e;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+button:disabled,
+button[aria-busy="true"] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+// Form Select
+.form-select {
+  width: 100%;
+  padding: 1rem;
+  font-size: 14px;
+  color: #00334e;
+  background: #fff;
+  border: 1px solid #00334e;
+  border-radius: 10px;
+  font-family: 'Open Sans', system-ui, sans-serif;
+  cursor: pointer;
+  transition: border-color 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #00cac6;
+  }
+}
+
+// Form Textarea
+.form-textarea {
+  width: 100%;
+  padding: 1rem;
+  font-size: 14px;
+  color: #00334e;
+  background: #fff;
+  border: 1px solid #00334e;
+  border-radius: 10px;
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  resize: vertical;
+  min-height: 300px;
+  line-height: 1.6;
+  transition: border-color 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #00cac6;
+  }
+}
+
+.form-hint {
+  display: block;
+  font-size: 12px;
+  color: #668494;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+// Form Actions
+.form-actions {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.form-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 14px;
+  font-weight: 500;
+  color: #00334e;
+  background: #fff;
+  border: 1px solid #00334e;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Open Sans', system-ui, sans-serif;
+  text-transform: lowercase;
+
+  &:hover {
+    background: #f0f3f5;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 51, 78, 0.1);
+  }
+
+  .action-arrow {
+    width: 12px;
+    height: 12px;
+    transform: rotate(-90deg);
+    filter: brightness(0) invert(1);
+  }
+}
+
+.form-button-primary {
+  background: #00334e;
+  color: #fff;
+  border-color: #00334e;
+
+  &:hover {
+    background: #004d6d;
+    border-color: #004d6d;
+  }
+
+  .action-arrow {
+    filter: brightness(0) invert(1);
+  }
+}
+
+// Etappe Form Container
+.etappe-form-container {
+  margin-top: 1.5rem;
+}
+
+// Prikbord Form Styles
+.prikbord-form-field {
+  margin-bottom: 1.5rem;
+}
+
+.prikbord-form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #00334e;
+  margin-bottom: 0.5rem;
+}
+
+.prikbord-form-textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 14px;
+  color: #00334e;
+  background: #fff;
+  border: 1px solid #cdd7dc;
+  border-radius: 10px;
+  font-family: 'Open Sans', system-ui, sans-serif;
+  resize: vertical;
+  min-height: 120px;
+  transition: border-color 0.2s;
+  line-height: 1.5;
+
+  &:focus {
+    outline: none;
+    border-color: #00cac6;
+  }
+
+  &::placeholder {
+    color: #668494;
+  }
+}
+
+.prikbord-form-char-count {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+  font-size: 12px;
+  color: #668494;
+  font-weight: 400;
+}
+
+.etappe-form-description {
+  font-size: 14px;
+  color: #00334e;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+
+  a {
+    color: #00cac6;
+    text-decoration: underline;
+
+    &:hover {
+      color: #00a09d;
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .form-card {
+    padding: 1.5rem;
+  }
+
+  .form-title {
+    font-size: 20px;
+  }
+
+  .form-description {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-card {
+    padding: 1rem;
+  }
+
+  .form-title {
+    font-size: 20px;
+  }
+
+  .form-description {
+    font-size: 12px;
+  }
+
+  .form-input {
+    padding: 0.75rem;
+    font-size: 14px;
+  }
+}

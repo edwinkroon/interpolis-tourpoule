@@ -1,0 +1,1023 @@
+// Dashboard and Section Styles
+// Styles for dashboard layout and various content sections
+
+// Dashboard Styles
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.dashboard-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+// Legacy dashboard-section (being replaced by .tile, but kept for backwards compatibility)
+.dashboard-section {
+  background: #fff;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: rgba(0, 0, 0, 0.133) 0px 1.6px 3.6px 0px, rgba(0, 0, 0, 0.11) 0px 0.3px 0.9px 0px;
+}
+
+.dashboard-section-title {
+  font-size: 16px;
+  font-weight: 400;
+  color: #00334e;
+  margin-bottom: 1.5rem;
+  text-transform: lowercase;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .section-arrow {
+    flex-shrink: 0;
+    transform: rotate(90deg);
+    width: 10px;
+    height: 10px;
+  }
+
+  span {
+    display: inline-block;
+  }
+}
+
+// Points Section
+.points-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+
+  .team-card-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .dashboard-section-title {
+    font-size: 19px;
+    font-weight: 700;
+    color: #00334e;
+    margin: 0;
+    text-transform: none;
+    flex: 1;
+  }
+}
+
+.etappe-uitslag-section,
+.dag-uitslag-section {
+  .team-card-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .dashboard-section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #00334e;
+    margin: 0;
+    text-transform: none;
+  }
+}
+
+.points-value {
+  font-weight: 400;
+
+  &.bold {
+    font-weight: 700;
+  }
+}
+
+.points-riders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  flex: 1;
+}
+
+.points-rider-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid #cdd7dc;
+  position: relative;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.points-rider-avatar,
+.points-rider-avatar-img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid #707070;
+  flex-shrink: 0;
+  background-color: #cdd7dc;
+}
+
+.points-rider-avatar-img {
+  object-fit: cover;
+}
+
+.points-rider-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.points-rider-name {
+  font-size: 15px;
+  color: #00334e;
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+  font-weight: 400;
+}
+
+.points-rider-team,
+.points-rider-route {
+  font-size: 13px;
+  font-weight: 300;
+  color: #668494;
+  line-height: 1.4;
+}
+
+.points-rider-avatar-initials {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.points-rider-points {
+  font-size: 15px;
+  color: #00334e;
+  font-weight: 400;
+  text-align: right;
+  min-width: 50px;
+  padding-left: 0.5rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.points-team-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  color: #00334e;
+  font-size: 16px;
+  font-family: 'Open Sans', system-ui, sans-serif;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  margin-top: auto;
+  transition: color 0.2s, gap 0.2s, text-decoration 0.2s;
+  text-transform: lowercase;
+
+  &:hover {
+    text-decoration: underline;
+    gap: 0.75rem;
+  }
+
+  .action-arrow {
+    width: 9px;
+    height: 12px;
+    display: block;
+    flex-shrink: 0;
+    transform: rotate(0deg);
+  }
+}
+
+// Team Section
+.team-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.team-member {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid #cdd7dc;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.team-member-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.team-member-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.team-member-name {
+  font-size: 16px;
+  color: #00334e;
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+.team-member-team {
+  font-size: 14px;
+  color: #668494;
+  line-height: 1.4;
+}
+
+// Achievements Section
+.achievements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.achievement-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid #cdd7dc;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.achievement-icon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+}
+
+.achievement-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.achievement-name {
+  font-size: 16px;
+  color: #00334e;
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+.achievement-route {
+  font-size: 14px;
+  color: #668494;
+  line-height: 1.4;
+}
+
+// Standings Section
+.standings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  flex: 1;
+}
+
+// Prikbord Section
+.prikbord-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.prikbord-message {
+  padding: 1rem 0;
+  border-bottom: 1px solid #cdd7dc;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.prikbord-message-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.prikbord-message-author {
+  font-size: 14px;
+  font-weight: 600;
+  color: #00334e;
+}
+
+.prikbord-message-date {
+  font-size: 12px;
+  color: #668494;
+}
+
+.prikbord-message-text {
+  font-size: 14px;
+  color: #00334e;
+  line-height: 1.5;
+}
+
+// Stage Info Section
+.stage-info {
+  flex: 1;
+}
+
+.stage-name {
+  font-size: 14px;
+  font-weight: 300;
+  color: #00334e;
+}
+
+.stage-route {
+  font-size: 16px;
+  color: #00334e;
+  font-weight: 400;
+}
+
+.stage-meta {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.stage-date,
+.stage-distance,
+.stage-type {
+  font-size: 13px;
+  color: #668494;
+  font-weight: 300;
+}
+
+// Team List (used in Team Section)
+.team-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.team-member {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid #cdd7dc;
+  position: relative;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.team-member-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid #707070;
+  flex-shrink: 0;
+  background-color: #cdd7dc;
+}
+
+.team-member-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.team-member-name {
+  font-size: 15px;
+  color: #00334e;
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+  font-weight: 400;
+}
+
+.team-member-team {
+  font-size: 13px;
+  font-weight: 300;
+  color: #668494;
+  line-height: 1.4;
+}
+
+.trophy-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.team-points {
+  font-size: 15px;
+  color: #00334e;
+  font-weight: 400;
+  text-align: right;
+  min-width: 50px;
+  padding-right: 0.5rem;
+}
+
+// Standings Items (additional styles not yet migrated)
+.standings-full-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.standing-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid #cdd7dc;
+  position: relative;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.standing-rank {
+  font-size: 15px;
+  color: #00334e;
+  font-weight: 400;
+  min-width: 30px;
+  flex-shrink: 0;
+}
+
+.standing-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  color: #00334e;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.standing-points {
+  font-size: 15px;
+  color: #00334e;
+  font-weight: 400;
+  text-align: right;
+  width: 50px;
+  flex-shrink: 0;
+  display: block;
+  font-variant-numeric: tabular-nums;
+}
+
+.standing-change {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+  width: 50px;
+  justify-content: flex-end;
+}
+
+.standing-change-value {
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.standing-change-up .standing-change-value {
+  color: #18AA2E;
+}
+
+.standing-change-down .standing-change-value {
+  color: #ff0000;
+}
+
+.standing-change-neutral .standing-change-value {
+  color: #668494;
+}
+
+.standing-change-neutral .standing-change-arrow {
+  filter: brightness(0) saturate(100%) invert(45%) sepia(8%) saturate(800%) hue-rotate(170deg) brightness(95%) contrast(85%);
+}
+
+.standing-change-arrow {
+  flex-shrink: 0;
+  width: 9px;
+  height: 12px;
+  display: block;
+}
+
+.standing-change-arrow-up {
+  transform: rotate(-90deg);
+}
+
+.standing-change-arrow-down {
+  transform: rotate(90deg);
+}
+
+.standing-change-arrow-neutral {
+  transform: rotate(180deg);
+}
+
+.standings-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  color: #00334e;
+  font-size: 16px;
+  font-family: 'Open Sans', system-ui, sans-serif;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  margin-top: auto;
+  transition: color 0.2s, gap 0.2s, text-decoration 0.2s;
+  text-transform: lowercase;
+
+  &:hover {
+    text-decoration: underline;
+    gap: 0.75rem;
+  }
+
+  .action-arrow {
+    width: 9px;
+    height: 12px;
+    display: block;
+    flex-shrink: 0;
+    transform: rotate(0deg);
+  }
+}
+
+// Prikbord Section
+.prikbord-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+
+  .dashboard-section-title {
+    font-size: 20px;
+    font-weight: 700;
+    text-transform: none;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+
+.prikbord-dot {
+  display: inline-block;
+}
+
+.prikbord-dot-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #18AA2E;
+}
+
+.prikbord-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  flex: 1;
+  margin-bottom: 1rem;
+}
+
+.prikbord-item {
+  padding: 1rem 0;
+  border-bottom: 1px solid #cdd7dc;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.prikbord-reply {
+  padding-left: 2rem;
+}
+
+.prikbord-message {
+  font-size: 15px;
+  color: #00334e;
+  font-weight: 400;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.prikbord-meta {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 13px;
+  color: #668494;
+  font-weight: 300;
+}
+
+.prikbord-author,
+.prikbord-date {
+  color: #668494;
+}
+
+.prikbord-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  color: #00334e;
+  font-size: 16px;
+  font-family: 'Open Sans', system-ui, sans-serif;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  margin-top: auto;
+  transition: color 0.2s, gap 0.2s, text-decoration 0.2s;
+  text-transform: lowercase;
+
+  &:hover {
+    text-decoration: underline;
+    gap: 0.75rem;
+  }
+
+  .action-arrow {
+    width: 9px;
+    height: 12px;
+    display: block;
+    flex-shrink: 0;
+    transform: rotate(0deg);
+  }
+}
+
+// Achievement Content
+.achievement-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.achievement-stage {
+  font-size: 14px;
+  font-weight: 300;
+  color: #00334e;
+  line-height: 1.4;
+}
+
+.achievement-route {
+  font-size: 16px;
+  color: #00334e;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.achievement-type {
+  font-size: 14px;
+  font-weight: 300;
+  color: #00334e;
+  line-height: 1.4;
+  margin-top: 0.25rem;
+}
+
+// Stage Info Section
+.stage-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+
+  .dashboard-section-title {
+    font-size: 16px;
+    font-weight: 400;
+  }
+}
+
+.stage-info {
+  flex: 1;
+}
+
+.stage-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.stage-name {
+  font-size: 14px;
+  font-weight: 300;
+  color: #00334e;
+}
+
+.stage-route {
+  font-size: 16px;
+  color: #00334e;
+  font-weight: 400;
+}
+
+.stage-meta {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.stage-date,
+.stage-distance,
+.stage-type {
+  font-size: 13px;
+  color: #668494;
+  font-weight: 300;
+}
+
+.stage-info-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  color: #00334e;
+  font-size: 16px;
+  font-family: 'Open Sans', system-ui, sans-serif;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  margin-top: auto;
+  transition: color 0.2s, gap 0.2s, text-decoration 0.2s;
+  text-transform: lowercase;
+
+  &:hover {
+    text-decoration: underline;
+    gap: 0.75rem;
+  }
+
+  .button-arrow {
+    flex-shrink: 0;
+    transform: rotate(90deg);
+    width: 10px;
+    height: 10px;
+  }
+}
+
+// Choose Riders Section
+.choose-riders-section {
+  .dashboard-section-title {
+    font-size: 20px;
+    font-weight: 700;
+    text-transform: none;
+    margin-bottom: 1rem;
+  }
+}
+
+.choose-riders-text {
+  font-size: 16px;
+  font-weight: 400;
+  color: #00334e;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.choose-riders-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  color: #00334e;
+  font-size: 16px;
+  font-family: 'Open Sans', system-ui, sans-serif;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 0;
+  margin-top: auto;
+  transition: gap 0.2s, text-decoration 0.2s;
+
+  &:hover {
+    text-decoration: underline;
+    gap: 0.75rem;
+  }
+
+  .action-arrow {
+    width: 9px;
+    height: 12px;
+    display: block;
+    flex-shrink: 0;
+    transform: rotate(0deg);
+  }
+}
+
+// Day Winners Section
+.day-winners-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+
+  .team-card-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .dashboard-section-title {
+    font-size: 20px;
+    font-weight: 700;
+    text-transform: none;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.day-winners-header {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.day-winners-route {
+  font-size: 14px;
+  font-weight: 300;
+  font-style: italic;
+  color: #00334e;
+  text-align: left;
+}
+
+.day-winners-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  flex: 1;
+}
+
+.day-winners-podium {
+  width: 100%;
+  margin-bottom: 1rem;
+  position: relative;
+  overflow: visible; // Ensure all podium elements are visible
+}
+
+.day-winners-podium-structure {
+  display: flex;
+}
+
+.day-winner-podium-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  z-index: 2;
+}
+
+// 2nd place - left podium (middle height) - positioned on podium surface
+.day-winner-podium-2 {
+  margin-bottom: -120px;
+}
+
+// 1st place - center podium (highest) - positioned on podium surface
+.day-winner-podium-1 {
+  margin-bottom: -20px;
+}
+
+// 3rd place - right podium (lowest) - positioned on podium surface
+.day-winner-podium-3 {
+  margin-bottom: -210px;
+}
+
+.day-winner-podium-avatar {
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  border: 1px solid #707070;
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f3f5;
+  margin-bottom: 0.5rem;
+}
+
+.day-winner-podium-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.day-winner-podium-name {
+  font-size: 16px;
+  color: #00334e;
+  text-align: center;
+  line-height: 1.2;
+  font-weight: 400;
+  word-break: break-word;
+  max-width: 90px;
+}
+
+.day-winners-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  color: #00334e;
+  font-size: 16px;
+  font-family: 'Open Sans', system-ui, sans-serif;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  margin-top: auto;
+  transition: color 0.2s, gap 0.2s, text-decoration 0.2s;
+  text-transform: lowercase;
+
+  &:hover {
+    text-decoration: underline;
+    gap: 0.75rem;
+  }
+
+  .action-arrow {
+    width: 9px;
+    height: 12px;
+    display: block;
+    flex-shrink: 0;
+    transform: rotate(0deg);
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-section {
+    padding: 1.5rem;
+  }
+
+  .dashboard-section-title {
+    font-size: 14px;
+  }
+
+  .etappe-import-section .dashboard-section-title {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+  }
+
+  .points-display {
+    font-size: 18px;
+  }
+
+  .team-member-name {
+    font-size: 14px;
+  }
+
+  .team-member-team {
+    font-size: 12px;
+  }
+
+  .achievement-route {
+    font-size: 14px;
+  }
+
+  .stage-route {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-content {
+    gap: 1.5rem;
+  }
+
+  .dashboard-section {
+    padding: 1rem;
+  }
+
+  .points-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .team-member {
+    flex-wrap: wrap;
+  }
+
+  .stage-meta {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}

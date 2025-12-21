@@ -242,7 +242,6 @@ async function calculatePositionPoints(client, stageId, stageResults, isNeutrali
      WHERE rule_type = 'stage_position'`
   );
 
-  console.log(`  Found ${scoringRules.rows.length} scoring rules for stage positions`);
   if (scoringRules.rows.length === 0) {
     console.warn('  WARNING: No scoring rules found for stage positions! Points will be 0.');
   }
@@ -253,7 +252,6 @@ async function calculatePositionPoints(client, stageId, stageResults, isNeutrali
     const condition = rule.condition_json;
     if (condition && condition.position) {
       positionPointsMap.set(condition.position, rule.points);
-      console.log(`  Position ${condition.position} = ${rule.points} points`);
     }
   });
 
@@ -409,7 +407,6 @@ async function calculatePerStageAwards(client, stageId) {
   `, [stageId]);
 
   if (stagePointsQuery.rows.length === 0) {
-    console.log('No stage points found, skipping per-stage awards');
     return;
   }
 
@@ -477,7 +474,6 @@ async function calculatePerStageAwards(client, stageId) {
         }
       }
       
-      console.log(`Awarded ${award.code} to ${samePoints.length} participant(s) for stage ${stageId} (position ${currentPosition})`);
     }
     
     // Mark all participants in this group as processed
@@ -512,7 +508,6 @@ async function calculateStijgerVanDeDag(client, stageId) {
   `, [currentStageNumber]);
   
   if (previousStageQuery.rows.length === 0) {
-    console.log('No previous stage found, skipping STIJGER_VD_DAG');
     return; // First stage, no previous ranking
   }
   
@@ -538,7 +533,6 @@ async function calculateStijgerVanDeDag(client, stageId) {
   `, [previousStageId]);
   
   if (previousRankingsQuery.rows.length === 0) {
-    console.log('No previous rankings found, skipping STIJGER_VD_DAG');
     return;
   }
   
@@ -567,7 +561,6 @@ async function calculateStijgerVanDeDag(client, stageId) {
   }
   
   if (rankChanges.length === 0) {
-    console.log('No rank changes found, skipping STIJGER_VD_DAG');
     return;
   }
   
@@ -575,7 +568,6 @@ async function calculateStijgerVanDeDag(client, stageId) {
   const maxChange = Math.max(...rankChanges.map(r => r.change));
   
   if (maxChange <= 0) {
-    console.log('No positive rank changes found, skipping STIJGER_VD_DAG');
     return; // No one improved
   }
   
@@ -610,7 +602,6 @@ async function calculateStijgerVanDeDag(client, stageId) {
     }
   }
   
-  console.log(`Awarded STIJGER_VD_DAG to ${winners.length} participant(s) for stage ${stageId} (improvement: ${maxChange} positions)`);
 }
 
 /**
@@ -658,7 +649,6 @@ async function saveAwardsForWinners(client, awardCode, stageId, winners, logMess
   }
 
   const logSuffix = logMessage ? ` (${logMessage})` : '';
-  console.log(`Awarded ${awardCode} to ${winners.length} participant(s) for stage ${stageId}${logSuffix}`);
 }
 
 /**
@@ -888,7 +878,6 @@ async function calculateTeamwork(client, stageId) {
   `, [currentStageNumber]);
   
   if (simplifiedQuery.rows.length === 0) {
-    console.log('No participants found for TEAMWORK calculation');
     return;
   }
   
@@ -896,7 +885,6 @@ async function calculateTeamwork(client, stageId) {
   const maxStages = Math.max(...simplifiedQuery.rows.map(r => parseInt(r.stages_with_teamwork, 10)));
   
   if (maxStages === 0) {
-    console.log('No participants have ≥5 riders finishing in any stage, skipping TEAMWORK');
     return; // No one has ≥5 riders finishing in any stage
   }
   
@@ -938,7 +926,6 @@ async function deactivateDnfMainRiders(client, fantasyTeamId, mainRiders, dnfRid
       'UPDATE fantasy_team_riders SET active = false, out_of_race = true WHERE id = $1',
       [dnfMain.id]
     );
-    console.log(`Deactivated DNF/DNS main rider ${dnfMain.rider_id} in slot ${dnfMain.slot_number} for team ${fantasyTeamId} and marked as out_of_race`);
   }
   
   return dnfOrMissingMainRiders.length;
@@ -961,7 +948,6 @@ async function freeUpInactiveMainSlots(client, fantasyTeamId, mainRiders) {
         'UPDATE fantasy_team_riders SET slot_number = 900 + $1 WHERE id = $2',
         [inactiveMain.slot_number, inactiveMain.id]
       );
-      console.log(`Freed slot ${inactiveMain.slot_number} from inactive main rider ${inactiveMain.rider_id} for team ${fantasyTeamId}`);
     }
   }
 }
@@ -1036,11 +1022,6 @@ async function activateReservesForTeam(client, fantasyTeamId, neededReserves, ac
   const reservesToActivate = Math.min(neededReserves, availableReserves.length);
   
   if (reservesToActivate === 0) {
-    if (availableReserves.length === 0) {
-      console.log(`Team ${fantasyTeamId} needs ${neededReserves} reserves but all reserves are DNF/DNS or unavailable`);
-    } else {
-      console.log(`Team ${fantasyTeamId} needs ${neededReserves} reserves but none are available`);
-    }
     return 0;
   }
 
@@ -1079,7 +1060,6 @@ async function activateReservesForTeam(client, fantasyTeamId, neededReserves, ac
         continue;
       }
       
-      console.log(`Activated reserve rider ${reserveToActivate.rider_id} to slot ${targetSlot} for team ${fantasyTeamId} (filling up to 10 main riders)`);
       activatedCount++;
     } catch (updateError) {
       // If we get a unique constraint violation, log it and continue
@@ -1106,11 +1086,6 @@ async function activateReservesForTeam(client, fantasyTeamId, neededReserves, ac
     }
   }
   
-  if (activatedCount < neededReserves) {
-    console.log(`Team ${fantasyTeamId} has ${activeMainCount + activatedCount} active main riders (target: 10, but no more reserves available)`);
-  } else {
-    console.log(`Team ${fantasyTeamId} now has ${activeMainCount + activatedCount} active main riders (target: 10)`);
-  }
   
   return activatedCount;
 }
@@ -1210,8 +1185,6 @@ async function activateReservesForDroppedRiders(client, stageId) {
     if (neededReserves > 0) {
       const activated = await activateReservesForTeam(client, fantasyTeamId, neededReserves, activeMainCount, stageId, dnfRiderIds, finishedRiderIds);
       totalReservesActivated += activated;
-    } else if (activeMainCount === 10) {
-      console.log(`Team ${fantasyTeamId} already has 10 active main riders`);
     }
   }
   
@@ -1320,20 +1293,9 @@ async function calculateStagePoints(client, stageId) {
 
   // Step 3: Calculate points per rider type
   const isNeutralized = stageCheck.rows.length > 0 && stageCheck.rows[0].is_neutralized;
-  console.log(`  Stage ${stageId}: isNeutralized=${isNeutralized}, isFinal=${isFinal}`);
-  console.log(`  Found ${stageResults.length} stage results`);
-  console.log(`  Found ${fantasyTeams.length} fantasy team riders`);
-  
   const riderPositionPoints = await calculatePositionPoints(client, stageId, stageResults, isNeutralized);
   const riderJerseyPoints = await calculateJerseyPoints(client, stageId, isFinal);
   const riderBonusPoints = await calculateBonusPoints(client, stageId);
-  
-  console.log(`  Position points map size: ${riderPositionPoints.size}`);
-  console.log(`  Jersey points map size: ${riderJerseyPoints.size}`);
-  if (riderPositionPoints.size > 0) {
-    const samplePos = Array.from(riderPositionPoints.entries())[0];
-    console.log(`  Sample position points: rider_id=${samplePos[0]}, points=${samplePos[1]}`);
-  }
 
   // Step 4: Aggregate points per participant
   const participantPoints = aggregatePointsPerParticipant(
@@ -1343,11 +1305,6 @@ async function calculateStagePoints(client, stageId) {
     riderBonusPoints
   );
   
-  console.log(`  Calculated points for ${participantPoints.size} participants`);
-  if (participantPoints.size > 0) {
-    const samplePart = Array.from(participantPoints.entries())[0];
-    console.log(`  Sample participant: participant_id=${samplePart[0]}, points_stage=${samplePart[1].points_stage}, points_jerseys=${samplePart[1].points_jerseys}, points_bonus=${samplePart[1].points_bonus}`);
-  }
 
   // Step 6: Insert or update fantasy_stage_points
   // Calculate total_points explicitly to ensure it's set correctly
@@ -1515,7 +1472,6 @@ async function updateRiderTotalPoints(client, stageId = null) {
       `, [totalPoints, riderId]);
     }
     
-    console.log(`Updated total_points for ${allRiders.rows.length} riders`);
   } catch (err) {
     // If column doesn't exist or update fails, log but don't throw
     console.error('Error updating rider total_points:', err.message);
@@ -1643,11 +1599,9 @@ exports.handler = async function(event) {
       let cumulativeError = null;
       
       try {
-        console.log(`=== Starting points calculation for stage ${stageId} ===`);
         const pointsResult = await calculateStagePoints(client, stageId);
         pointsCalculated = true;
         participantsCalculated = pointsResult.participantsCalculated;
-        console.log(`=== Points calculation completed: ${participantsCalculated} participants ===`);
         
         // Verify that points were actually inserted
         const verifyQuery = await client.query(
@@ -1669,11 +1623,6 @@ exports.handler = async function(event) {
         );
         const pointsCheck = pointsCheckQuery.rows[0];
         
-        console.log(`  Verification: ${actualCount} entries created`);
-        console.log(`  Non-zero entries: ${pointsCheck.non_zero_count}`);
-        console.log(`  Total stage points: ${pointsCheck.total_stage_points || 0}`);
-        console.log(`  Total jersey points: ${pointsCheck.total_jersey_points || 0}`);
-        console.log(`  Total bonus points: ${pointsCheck.total_bonus_points || 0}`);
         
         if (actualCount === 0) {
           console.warn('WARNING: Points calculation reported success but no entries were created!');
@@ -1718,9 +1667,7 @@ exports.handler = async function(event) {
         try {
           const isFinal = await isFinalStage(client, stageId);
           if (isFinal) {
-            console.log('Final stage detected, calculating final classification and jersey points...');
             await calculateAllFinalPoints(client, stageId);
-            console.log('Final points calculated successfully');
           }
         } catch (finalPointsErr) {
           console.error('Error calculating final points:', finalPointsErr);
@@ -1760,37 +1707,6 @@ exports.handler = async function(event) {
         cumulativeError: cumulativeError ? cumulativeError.message : null
       };
 
-      // Log samenvatting
-      console.log('\n' + '═'.repeat(80));
-      console.log('📊 ETAPPE IMPORT SAMENVATTING');
-      console.log('═'.repeat(80));
-      console.log(`Etappe ID: ${summary.stageId}`);
-      console.log(`Resultaten geïmporteerd: ${summary.resultsImported}`);
-      console.log(`Truien geïmporteerd: ${summary.jerseysImported}`);
-      if (summary.replacedExisting) {
-        console.log(`⚠️  Bestaande resultaten vervangen (${summary.existingCount} records)`);
-      }
-      if (summary.reservesActivated > 0) {
-        console.log(`✅ ${summary.reservesActivated} reserve(s) geactiveerd`);
-      } else if (summary.reserveError) {
-        console.log(`⚠️  Reserve activatie gefaald: ${summary.reserveError}`);
-      }
-      if (summary.pointsCalculated) {
-        console.log(`✅ Punten berekend voor ${summary.participantsCalculated} participants`);
-      } else {
-        console.log(`❌ Punten berekening gefaald: ${summary.pointsError || 'Onbekende fout'}`);
-      }
-      if (summary.awardsCalculated) {
-        console.log(`✅ Awards berekend`);
-      } else if (summary.awardsError) {
-        console.log(`⚠️  Awards berekening gefaald: ${summary.awardsError}`);
-      }
-      if (summary.cumulativeCalculated) {
-        console.log(`✅ Cumulatieve punten en rankings bijgewerkt`);
-      } else if (summary.cumulativeError) {
-        console.log(`⚠️  Cumulatieve punten berekening gefaald: ${summary.cumulativeError}`);
-      }
-      console.log('═'.repeat(80) + '\n');
 
       await client.end();
 

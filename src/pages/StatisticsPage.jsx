@@ -356,60 +356,62 @@ export function StatisticsPage() {
                 </div>
               </div>
 
-              <div className="dashboard-column">
-                <Tile
-                  className="chart-tile"
-                  title="Top Renners"
-                  info={{
-                    title: 'Top Renners',
-                    text: 'Hier zie je de top 10 renners met de meeste punten. De punten worden berekend op basis van etappeposities en truien.',
-                  }}
-                >
-                  <div className="chart-container">
-                    <canvas ref={topRidersRef} width="400" height="300" />
-                  </div>
-                </Tile>
+              <div className="statistics-charts-container">
+                <div className="dashboard-column">
+                  <Tile
+                    className="chart-tile"
+                    title="Top Renners"
+                    info={{
+                      title: 'Top Renners',
+                      text: 'Hier zie je de top 10 renners met de meeste punten. De punten worden berekend op basis van etappeposities en truien.',
+                    }}
+                  >
+                    <div className="chart-container">
+                      <canvas ref={topRidersRef} width="400" height="300" />
+                    </div>
+                  </Tile>
 
-                <Tile
-                  className="chart-tile"
-                  title="Team Prestaties"
-                  info={{
-                    title: 'Team Prestaties',
-                    text: 'Hier zie je de ontwikkeling van je teampunten per etappe vergeleken met andere teams.',
-                  }}
-                >
-                  <div className="chart-container">
-                    <canvas ref={teamPerformanceRef} width="400" height="300" />
-                  </div>
-                </Tile>
-              </div>
+                  <Tile
+                    className="chart-tile"
+                    title="Team Prestaties"
+                    info={{
+                      title: 'Team Prestaties',
+                      text: 'Hier zie je de ontwikkeling van je teampunten per etappe vergeleken met andere teams.',
+                    }}
+                  >
+                    <div className="chart-container">
+                      <canvas ref={teamPerformanceRef} width="400" height="300" />
+                    </div>
+                  </Tile>
+                </div>
 
-              <div className="dashboard-column">
-                <Tile
-                  className="chart-tile"
-                  title="Meest Geselecteerde Renners"
-                  info={{
-                    title: 'Meest Geselecteerde Renners',
-                    text: 'Deze grafiek toont welke renners het populairst zijn en in de meeste teams zitten.',
-                  }}
-                >
-                  <div className="chart-container">
-                    <canvas ref={mostSelectedRef} width="400" height="300" />
-                  </div>
-                </Tile>
+                <div className="dashboard-column">
+                  <Tile
+                    className="chart-tile"
+                    title="Meest Geselecteerde Renners"
+                    info={{
+                      title: 'Meest Geselecteerde Renners',
+                      text: 'Deze grafiek toont welke renners het populairst zijn en in de meeste teams zitten.',
+                    }}
+                  >
+                    <div className="chart-container">
+                      <canvas ref={mostSelectedRef} width="400" height="300" />
+                    </div>
+                  </Tile>
 
-                <Tile
-                  className="chart-tile"
-                  title="Etappe Winnaars"
-                  info={{
-                    title: 'Etappe Winnaars',
-                    text: 'Deze grafiek toont per ploeg het aantal etappe-overwinningen.',
-                  }}
-                >
-                  <div className="chart-container">
-                    <canvas ref={stageWinnersRef} width="400" height="300" />
-                  </div>
-                </Tile>
+                  <Tile
+                    className="chart-tile"
+                    title="Etappe Winnaars"
+                    info={{
+                      title: 'Etappe Winnaars',
+                      text: 'Deze grafiek toont per ploeg het aantal etappe-overwinningen.',
+                    }}
+                  >
+                    <div className="chart-container">
+                      <canvas ref={stageWinnersRef} width="400" height="300" />
+                    </div>
+                  </Tile>
+                </div>
               </div>
             </div>
           </div>

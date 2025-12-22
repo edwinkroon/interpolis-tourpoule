@@ -589,6 +589,15 @@
 // ---------------------------------------------
 
 @include mobile {
+  .tile {
+    padding: 20px;
+  }
+
+  .tile-header {
+    margin-bottom: 0.75rem;
+    width: 100%;
+  }
+
   .form-card {
     padding: 1.5rem;
   }

@@ -438,19 +438,20 @@ export function StagesOverviewPage() {
                     ) : stageAwards.length === 0 ? (
                       <div className="no-data">Nog geen awards voor deze etappe</div>
                     ) : (
-                      stageAwards.map((award) => {
-                        const stageLabel = award.stageNumber
-                          ? `Etappe ${award.stageNumber}${award.stageName ? ` – ${award.stageName}` : ''}`
+                      stageAwards.map((award, index) => {
+                        const stageLabel = award.stage?.stageNumber
+                          ? `Etappe ${award.stage.stageNumber}${award.stage.name ? ` – ${award.stage.name}` : ''}`
                           : 'Algemeen';
-                        const iconSrc = award.icon ? `/${String(award.icon).replace(/^\//, '')}` : undefined;
+                        const iconSrc = award.award?.icon ? `/${String(award.award.icon).replace(/^\//, '')}` : undefined;
+                        const uniqueKey = award.id || `award-${index}-${award.award?.code || 'unknown'}-${award.participantId || 'unknown'}-${stageLabel}`;
                         return (
                           <ListItem
-                            key={award.awardAssignmentId || `${award.awardCode}-${award.participantId}-${stageLabel}`}
+                            key={uniqueKey}
                             avatarPhotoUrl={iconSrc}
-                            avatarAlt={award.awardTitle}
-                            avatarInitials={!iconSrc ? (award.awardTitle || '?').slice(0, 2).toUpperCase() : undefined}
-                            title={award.awardTitle || 'Award'}
-                            subtitle={award.awardDescription || stageLabel}
+                            avatarAlt={award.award?.title}
+                            avatarInitials={!iconSrc ? (award.award?.title || '?').slice(0, 2).toUpperCase() : undefined}
+                            title={award.award?.title || 'Award'}
+                            subtitle={award.award?.description || stageLabel}
                             value={award.teamName || ''}
                           />
                         );

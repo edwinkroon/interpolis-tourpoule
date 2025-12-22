@@ -5,6 +5,41 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+// Ensure parent col-12 doesn't interfere
+.col-12 > .statistics-grid {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+// Override col-12 within statistics-grid to span both columns instead of 12
+// Use !important to override the grid-column: span 12 from .col-12
+// Remove width and let grid-column handle the sizing
+.statistics-grid .dashboard-column.col-12 {
+  grid-column: 1 / -1 !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  overflow: hidden;
+}
+
+// Container for the two chart columns
+// On desktop: displays as grid with 2 columns (side by side)
+// On mobile: displays as flex column (stacked)
+.statistics-charts-container {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
 }
 
 .stats-cards-row {
@@ -87,7 +122,14 @@
 // Responsive styles
 @include mobile {
   .statistics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  // On mobile: stack the chart columns vertically
+  .statistics-charts-container {
     grid-template-columns: 1fr;
+    gap: 0.75rem;
   }
   
   .stats-cards-row {
@@ -120,7 +162,8 @@
 
 @include mobile-small {
   .stats-cards-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
   }
   
   .chart-tile {
@@ -131,5 +174,9 @@
     height: 200px;
     min-height: 200px;
   }
-}
 
+  .stat-value {
+    font-size: 24px;
+  }
+
+}

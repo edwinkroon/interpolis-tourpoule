@@ -36,10 +36,12 @@ exports.handler = async function(event) {
         s.name as stage_name,
         s.start_location,
         s.end_location,
-        s.date as stage_date
+        s.date as stage_date,
+        p.team_name
       FROM awards_per_participant app
       INNER JOIN awards a ON app.award_id = a.id
       LEFT JOIN stages s ON app.stage_id = s.id
+      LEFT JOIN participants p ON app.participant_id = p.id
       WHERE 1=1
     `;
 
@@ -75,6 +77,7 @@ exports.handler = async function(event) {
       id: row.id,
       participantId: row.participant_id,
       stageId: row.stage_id,
+      teamName: row.team_name || null,
       award: {
         id: row.award_id,
         code: row.code,

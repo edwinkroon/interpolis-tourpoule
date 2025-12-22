@@ -10,14 +10,40 @@ export function useChart(canvasRef, config, enabled = true) {
     if (!el) return;
     if (!config) return;
 
-    // Destroy previous instance
+    // Destroy previous instance first
     if (chartRef.current) {
-      chartRef.current.destroy();
+      try {
+        chartRef.current.destroy();
+      } catch (error) {
+        // Ignore errors during cleanup
+      }
       chartRef.current = null;
     }
 
+    // Check if canvas is already in use by another chart instance
+    // Chart.js stores chart instances on the canvas element
+    const existingChart = Chart.getChart(el);
+    if (existingChart) {
+      try {
+        existingChart.destroy();
+      } catch (error) {
+        // Ignore errors during cleanup
+      }
+    }
+
     // Use requestAnimationFrame to ensure DOM is ready
+    let rafId;
     const initChart = () => {
+      // Double check that canvas is still available
+      const existingChart = Chart.getChart(el);
+      if (existingChart) {
+        try {
+          existingChart.destroy();
+        } catch (error) {
+          // Ignore errors
+        }
+      }
+
       const ctx = el.getContext('2d');
       if (ctx) {
         try {
@@ -29,14 +55,34 @@ export function useChart(canvasRef, config, enabled = true) {
     };
 
     // Wait for next frame to ensure container has dimensions
-    requestAnimationFrame(() => {
+    rafId = requestAnimationFrame(() => {
       requestAnimationFrame(initChart);
     });
 
     return () => {
+      // Cancel any pending animation frame
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+      
+      // Destroy chart instance
       if (chartRef.current) {
-        chartRef.current.destroy();
+        try {
+          chartRef.current.destroy();
+        } catch (error) {
+          // Ignore errors during cleanup
+        }
         chartRef.current = null;
+      }
+
+      // Also check and destroy any chart on the canvas element
+      const existingChart = Chart.getChart(el);
+      if (existingChart) {
+        try {
+          existingChart.destroy();
+        } catch (error) {
+          // Ignore errors during cleanup
+        }
       }
     };
   }, [canvasRef, enabled, config]);

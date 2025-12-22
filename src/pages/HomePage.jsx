@@ -27,6 +27,7 @@ export function HomePage() {
   const [awardsError, setAwardsError] = useState(null);
   const [teamStatus, setTeamStatus] = useState(null);
   const [teamStatusLoading, setTeamStatusLoading] = useState(true);
+  const [avatarError, setAvatarError] = useState(false);
 
   const top5 = useMemo(() => standings.slice(0, 5), [standings]);
   const myStanding = useMemo(() => {
@@ -43,6 +44,13 @@ export function HomePage() {
   }, [participant?.id, participant?.participantId, participant?.participant_id, standings]);
   const myTotalPoints = myStanding?.totalPoints ?? 0;
   const myLatestStagePoints = points.totalPoints ?? 0;
+
+  const hasAvatar = Boolean(participant?.avatar_url) && !avatarError;
+
+  useEffect(() => {
+    // Reset avatar error state when the participant or avatar changes
+    setAvatarError(false);
+  }, [participant?.avatar_url, participant?.id, participant?.participantId, participant?.participant_id]);
 
   useEffect(() => {
     if (!userId) return;
@@ -134,17 +142,17 @@ export function HomePage() {
             <div className="col-12">
               <div className="header-welcome-section">
                 <div className="header-user-info">
-                  <div className="header-avatar-container" style={{ display: participant?.avatar_url ? 'block' : 'none' }}>
-                    {/* eslint-disable-next-line jsx-a11y/img-redundant-alt */}
-                    <img
-                      src={participant?.avatar_url || ''}
-                      alt="Avatar"
-                      className="header-avatar-img"
-                      onError={(e) => {
-                        e.currentTarget.parentElement.style.display = 'none';
-                      }}
-                    />
-                  </div>
+                    {hasAvatar ? (
+                      <div className="header-avatar-container">
+                        {/* eslint-disable-next-line jsx-a11y/img-redundant-alt */}
+                        <img
+                          src={participant?.avatar_url || ''}
+                          alt="Avatar"
+                          className="header-avatar-img"
+                          onError={() => setAvatarError(true)}
+                        />
+                      </div>
+                    ) : null}
                   <h1 className="welcome-heading" id="welcome-heading">
                     {participant?.team_name || 'Welkom'}
                   </h1>

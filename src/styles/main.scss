@@ -15,6 +15,9 @@
 @import 'stages';
 @import 'stage-detail';
 @import 'modals';
+@import 'daily-winners';
+@import 'statistics';
+@import 'team-tile';
 
 // CSS custom properties for JavaScript/theme usage
 :root {
@@ -53,7 +56,11 @@
 .col-9  { grid-column: span 9; }
 .col-12 { grid-column: span 12; }
 
-@media (max-width: 768px) {
+@include mobile {
+  .grid {
+    gap: 0.5rem;
+  }
+
   .col-3,
   .col-4,
   .col-6,
@@ -209,102 +216,14 @@
 }
 
 // ---------------------------------------------
-// Team Overview - team tile header exception
-// ---------------------------------------------
-
-.team-overview-team-tile .tile-header {
-  align-items: center;
-}
-
-.team-overview-team-tile .tile-title {
-  // Title is now centered between avatar and metrics
-  flex: 1;
-}
-
-.team-tile-avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: #f0f3f5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.team-tile-avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top;
-}
-
-.team-tile-avatar-placeholder {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text-muted);
-  text-align: center;
-}
-
-.team-tile-metrics {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  white-space: nowrap;
-}
-
-.team-tile-points {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--brand-navy);
-}
-
-.team-tile-trend {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.team-tile-trend--up {
-  color: #00aa2e;
-}
-
-.team-tile-trend--down {
-  color: #d32f2f;
-}
-
-.team-tile-trend--same {
-  color: var(--text-muted);
-}
-
-.team-tile-trend-arrow {
-  width: 14px;
-  height: 14px;
-  display: block;
-  flex-shrink: 0;
-  transform-origin: 50% 50%;
-}
-
-.team-tile-trend-arrow--up {
-  transform: rotate(-90deg);
-}
-
-.team-tile-trend-arrow--down {
-  transform: rotate(90deg);
-}
-
-.team-tile-trend-arrow--right {
-  transform: rotate(0deg);
-}
 
 .tile-content {
   // spacing is driven by legacy .dashboard-section padding;
   // this wrapper exists for consistent markup.
   // Note: .tile already has padding, so content doesn't need additional padding by default
   // However, when using custom contentClassName like riders-list-container, ensure proper spacing
+  // Placeholder to avoid empty ruleset warning
+  display: block;
 }
 
 // Lists inside a tile: subtle divider with 1rem spacing above/below divider.
@@ -651,270 +570,6 @@
   }
 }
 
-// ---------------------------------------------
-// Admin Page - Tiles
-// ---------------------------------------------
-
-.admin-settings-tile,
-.admin-stages-tile {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
-// Ensure admin buttons work within tile actions
-.admin-settings-tile .tile-actions .admin-button {
-  align-self: flex-start;
-}
-
-// ---------------------------------------------
-// Daily Winners Podium
-// ---------------------------------------------
-
-.daily-winners-section {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
-.daily-winners-podium {
-  position: relative;
-  width: 100%;
-  margin: 1rem 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 200px; // Ensure enough space for absolute positioning
-}
-
-.podium-svg {
-  width: 100%;
-  max-width: 400px;
-  height: auto;
-  display: block;
-  margin-top: 3rem;
-}
-
-.podium-winners {
-  position: absolute;
-  /* top: 0; */
-  left: 0;
-  right: 0;
-  bottom: 5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 1rem;
-  /* max-width: 400px; */
-  margin: 0 2rem;
-  width: 100%;
-}
-
-.podium-winner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: absolute;
-  bottom: 0;
-  width: 33%;
-}
-
-// 2nd place (left) - medium height
-// Podium SVG: left step starts at ~1px, center at ~103px, right at ~206px
-// Heights: left ~78px, center ~95px, right ~50px from bottom
-.podium-winner-2nd {
-  left: -30px;
-  bottom: 40px;
-}
-
-// 1st place (center) - tallest
-.podium-winner-1st {
-  left: 42%;
-  transform: translateX(-50%);
-  bottom: 91px;
-}
-
-// 3rd place (right) - shortest
-.podium-winner-3rd {
-  right: 8%;
-  bottom: -4px;
-}
-
-.podium-avatar-container {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: #FFF8EC;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  flex-shrink: 0;
-  margin-bottom: 0.5rem;
-  // border: 2px solid #cdd7dc;
-  box-shadow: 0 2px 6px rgba(0, 51, 78, 0.1);
-}
-
-.podium-avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top;
-}
-
-.podium-avatar-placeholder {
-  font-size: 20px;
-  font-weight: 700;
-  color: #668494;
-  text-align: center;
-  display: none;
-}
-
-.podium-team-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: #00334e;
-  text-align: center;
-  margin-bottom: 0.5rem;
-  max-width: 100px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-// Position avatars and names above the steps
-.podium-winner-2nd .podium-avatar-container,
-.podium-winner-2nd .podium-team-name {
-  margin-bottom: 0.75rem;
-}
-
-.podium-winner-1st .podium-avatar-container,
-.podium-winner-1st .podium-team-name {
-  margin-bottom: 1rem;
-}
-
-.podium-winner-3rd .podium-avatar-container,
-.podium-winner-3rd .podium-team-name {
-  margin-bottom: 0.5rem;
-}
-
-.podium-points {
-  font-size: 24px;
-  font-weight: 700;
-  color: #00334e;
-  text-align: center;
-  line-height: 1;
-  position: absolute;
-  z-index: 10;
-  width: 100%;
-}
-
-// Position points on the podium steps (on top of the steps)
-// Based on SVG: left step top at ~79px, center at ~38px, right at ~113px from top (viewBox height 162.8)
-.podium-points-2nd {
-  bottom: -50%;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.podium-points-1st {
-  bottom: -40%;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.podium-points-3rd {
-  bottom: -50%;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-// ---------------------------------------------
-// Statistics Page Styles
-// ---------------------------------------------
-
-.statistics-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
-}
-
-.stats-cards-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.stat-card {
-  background: #fff;
-  border-radius: 20px;
-  padding: 2rem;
-  text-align: center;
-  box-shadow: rgba(0, 0, 0, 0.133) 0px 1.6px 3.6px 0px, rgba(0, 0, 0, 0.11) 0px 0.3px 0.9px 0px;
-  transition: transform 0.2s, box-shadow 0.2s;
-  position: relative;
-  overflow: hidden;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #00cac6 0%, #00aa2e 100%);
-  }
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: rgba(0, 0, 0, 0.133) 0px 1.6px 3.6px 0px, rgba(0, 0, 0, 0.11) 0px 0.3px 0.9px 0px;
-  }
-}
-
-.stat-value {
-  font-size: 48px;
-  font-weight: 700;
-  color: #00334e;
-  margin-bottom: 0.5rem;
-  line-height: 1;
-}
-
-.stat-label {
-  font-size: 14px;
-  font-weight: 400;
-  color: #668494;
-  text-transform: none;
-  letter-spacing: 0;
-}
-
-// Chart tile modifier (used as className on Tile component)
-.chart-tile {
-  display: flex;
-  flex-direction: column;
-  min-height: 400px;
-  
-  .tile-title {
-    font-size: 20px;
-    font-weight: 700;
-    color: #00334e;
-    margin-bottom: 1.5rem;
-    text-transform: none;
-  }
-}
-
-.chart-container {
-  flex: 1;
-  position: relative;
-  height: 300px;
-  min-height: 300px;
-  
-  canvas {
-    width: 100% !important;
-    height: 100% !important;
-    display: block;
-  }
-}
 
 // Form Card Styles are now in _forms.scss
 
@@ -925,64 +580,105 @@
 .standings-full-section {
   // Uses base .tile styles, no additional overrides needed
   // Tile title styling is already handled in section-specific overrides above
+  // Placeholder to avoid empty ruleset warning
+  display: block;
 }
 
 // ---------------------------------------------
 // Responsive Styles
 // ---------------------------------------------
 
-@media (max-width: 768px) {
-  .statistics-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .stats-cards-row {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-  }
-  
-  .stat-card {
-    padding: 1.5rem;
-  }
-  
-  .stat-value {
-    font-size: 36px;
-  }
-  
-  .stat-label {
-    font-size: 13px;
-  }
-  
-  .chart-tile {
-    padding: 1.5rem;
-    min-height: 350px;
-  }
-  
-  .chart-container {
-    height: 250px;
-    min-height: 250px;
-  }
-  
+@include mobile {
   .form-card {
     padding: 1.5rem;
   }
 }
 
-@media (max-width: 480px) {
-  .stats-cards-row {
-    grid-template-columns: 1fr;
-  }
-  
-  .chart-tile {
-    min-height: 300px;
-  }
-  
-  .chart-container {
-    height: 200px;
-    min-height: 200px;
-  }
-  
+@include mobile-small {
   .form-card {
     padding: 1rem;
+  }
+}
+
+// ---------------------------------------------
+// Header Responsive Styles (moved to end for proper cascade)
+// ---------------------------------------------
+
+@include mobile {
+  .header {
+    padding: 1rem 0 0;
+  }
+
+  .header-content.page {
+    margin-top: 0;
+  }
+
+  .header-title {
+    text-align: center;
+    font-size: 20px;
+    margin-bottom: 0;
+  }
+
+  .header-welcome-section {
+    padding-bottom: 2rem;
+    min-height: auto;
+    padding-left: 0;
+    display: flex;
+    gap: 1rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .header-user-info {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+  }
+
+  .header-avatar-container {
+    display: none !important;
+  }
+
+  .header-avatar-img {
+    width: 80px;
+    height: 80px;
+  }
+
+  .welcome-heading {
+    font-size: 24px;
+    text-align: center;
+  }
+
+  .header-illustration {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+}
+
+@include mobile-small {
+  .header-welcome-section {
+    padding-bottom: 13rem;
+    padding-left: 0;
+  }
+
+  .header-avatar-img {
+    width: 60px;
+    height: 60px;
+  }
+
+  .welcome-heading {
+    font-size: 28px;
+    font-weight: 700;
+  }
+
+  .header-illustration {
+    position: absolute;
+    bottom: -.25rem;
+    margin-top: 0.5rem;
   }
 }

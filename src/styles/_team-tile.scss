@@ -1,0 +1,92 @@
+// Team Tile Styles
+// Styles for team overview tiles including avatar, metrics, and trends
+
+// Team Overview - team tile header exception
+.team-overview-team-tile .tile-header {
+  align-items: center;
+}
+
+.team-overview-team-tile .tile-title {
+  // Title is now centered between avatar and metrics
+  flex: 1;
+}
+
+.team-tile-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #f0f3f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.team-tile-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+.team-tile-avatar-placeholder {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.team-tile-metrics {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  white-space: nowrap;
+}
+
+.team-tile-points {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--brand-navy);
+}
+
+.team-tile-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.team-tile-trend--up {
+  color: #00aa2e;
+}
+
+.team-tile-trend--down {
+  color: #d32f2f;
+}
+
+.team-tile-trend--same {
+  color: var(--text-muted);
+}
+
+.team-tile-trend-arrow {
+  width: 14px;
+  height: 14px;
+  display: block;
+  flex-shrink: 0;
+  transform-origin: 50% 50%;
+}
+
+.team-tile-trend-arrow--up {
+  transform: rotate(-90deg);
+}
+
+.team-tile-trend-arrow--down {
+  transform: rotate(90deg);
+}
+
+.team-tile-trend-arrow--right {
+  transform: rotate(0deg);
+}
+

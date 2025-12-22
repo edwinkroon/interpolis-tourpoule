@@ -68,3 +68,32 @@
   overflow: hidden;
   position: relative;
 }
+
+// Responsive mixins
+// Mobile and tablet (max-width: 768px)
+@mixin mobile {
+  @media (max-width: $breakpoint-md) {
+    @content;
+  }
+}
+
+// Small mobile devices (max-width: 480px)
+@mixin mobile-small {
+  @media (max-width: $breakpoint-sm) {
+    @content;
+  }
+}
+
+// Mobile only (between 480px and 768px) - excludes small mobile
+@mixin mobile-only {
+  @media (min-width: $breakpoint-sm + 1px) and (max-width: $breakpoint-md) {
+    @content;
+  }
+}
+
+// Tablet and up (min-width: 768px)
+@mixin tablet-up {
+  @media (min-width: $breakpoint-md + 1px) {
+    @content;
+  }
+}

@@ -216,3 +216,16 @@
   color: #668494;
   font-size: 16px;
 }
+
+// Admin Page - Tiles
+.admin-settings-tile,
+.admin-stages-tile {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+// Ensure admin buttons work within tile actions
+.admin-settings-tile .tile-actions .admin-button {
+  align-self: flex-start;
+}

@@ -443,10 +443,9 @@ export function StagesOverviewPage() {
                           ? `Etappe ${award.stage.stageNumber}${award.stage.name ? ` – ${award.stage.name}` : ''}`
                           : 'Algemeen';
                         const iconSrc = award.award?.icon ? `/${String(award.award.icon).replace(/^\//, '')}` : undefined;
-                        const uniqueKey = award.id || `award-${index}-${award.award?.code || 'unknown'}-${award.participantId || 'unknown'}-${stageLabel}`;
                         return (
                           <ListItem
-                            key={uniqueKey}
+                            key={award.id || `${award.award?.code || 'award'}-${award.participantId || 'unknown'}-${stageLabel}-${index}`}
                             avatarPhotoUrl={iconSrc}
                             avatarAlt={award.award?.title}
                             avatarInitials={!iconSrc ? (award.award?.title || '?').slice(0, 2).toUpperCase() : undefined}
